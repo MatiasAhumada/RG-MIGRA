@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@common/*": ["src/common/*"],
+      "@config/*": ["src/config/*"],
+      "@constants/*": ["src/constants/*"],
+      "@exceptions/*": ["src/exceptions/*"],
+      "@filters/*": ["src/filters/*"],
+      "@guards/*": ["src/guards/*"],
+      "@interceptors/*": ["src/interceptors/*"],
+      "@interfaces/*": ["src/interfaces/*"],
+      "@modules/*": ["src/modules/*"],
+      "@utils/*": ["src/utils/*"],
+      "@prisma/*": ["prisma/*"]
+    }
+  },
+  "include": ["src/**/*", "prisma/**/*"],
+  "exclude": ["node_modules", "dist", "test"]
+}
