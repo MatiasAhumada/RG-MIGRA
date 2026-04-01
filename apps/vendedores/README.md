@@ -108,7 +108,7 @@ copy .env.example .env
 Edita `.env` con tus credenciales:
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/rg"
+DATABASE_URL="postgresql://user:password@localhost:5432/vendedores"
 NODE_ENV="development"
 NEXT_PUBLIC_API_URL=""
 ```
