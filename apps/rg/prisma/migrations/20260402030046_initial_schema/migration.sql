@@ -14,6 +14,7 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'CLIENT',
+    "empresaId" INTEGER,
     "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -72,7 +73,7 @@ CREATE TABLE "Producto" (
     "tipo" TEXT NOT NULL,
     "sku" TEXT NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
-    "imgUrl" TEXT NOT NULL,
+    "imgUrl" TEXT,
     "empresaId" INTEGER NOT NULL,
     "deletedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -124,6 +125,9 @@ CREATE UNIQUE INDEX "Cliente_userId_key" ON "Cliente"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Producto_sku_key" ON "Producto"("sku");
+
+-- AddForeignKey
+ALTER TABLE "User" ADD CONSTRAINT "User_empresaId_fkey" FOREIGN KEY ("empresaId") REFERENCES "Empresa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Cliente" ADD CONSTRAINT "Cliente_empresaId_fkey" FOREIGN KEY ("empresaId") REFERENCES "Empresa"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

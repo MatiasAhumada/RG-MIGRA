@@ -9,12 +9,15 @@ export interface CreateUserDto {
   password: string;
   name: string;
   role?: Role;
+  empresaId?: number;
 }
 
 export interface UpdateUserDto extends Partial<CreateUserDto> {}
 
-export interface UserWithCliente extends User {
+export interface UserWithRelations extends User {
+  empresa: Empresa | null;
   cliente: Cliente | null;
 }
 
 import { Cliente } from "./cliente.types";
+import { Empresa } from "./empresa.types";
