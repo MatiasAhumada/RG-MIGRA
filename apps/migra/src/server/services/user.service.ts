@@ -5,6 +5,7 @@ import httpStatus from "http-status";
 interface CreateUserDto {
   name: string;
   email: string;
+  password: string;
 }
 
 interface UpdateUserDto extends Partial<CreateUserDto> {}

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 interface CreateUserDto {
   name: string;
   email: string;
+  password: string;
 }
 
 interface UpdateUserDto extends Partial<CreateUserDto> {}
