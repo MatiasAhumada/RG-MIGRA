@@ -1,5 +1,4 @@
 import { AxiosError } from "axios";
-import { ExternalToast } from "sonner";
 import {
   toastSuccess,
   toastError,
@@ -13,7 +12,7 @@ interface HandlerOptions {
   showToast?: boolean;
   messagePrefix?: string;
   defaultMessage?: string;
-  toastOptions?: Partial<ExternalToast>;
+  toastOptions?: { description?: string; duration?: number };
 }
 
 function normalizeError(error: unknown): Error {
@@ -54,7 +53,7 @@ export function clientErrorHandler(
     messagePrefix = "",
     defaultMessage = "Error desconocido",
     toastOptions = {},
-  }: HandlerOptions = {}
+  }: HandlerOptions = {},
 ): void {
   const normalizedError = normalizeError(error);
 
@@ -75,7 +74,7 @@ export function clientSuccessHandler(
     showToast = true,
     messagePrefix = "",
     toastOptions = {},
-  }: Omit<HandlerOptions, "defaultMessage"> = {}
+  }: Omit<HandlerOptions, "defaultMessage"> = {},
 ): void {
   if (showToast) {
     toastSuccess(`${messagePrefix}${message}`, toastOptions);
@@ -92,7 +91,7 @@ export function clientWarningHandler(
     showToast = true,
     messagePrefix = "",
     toastOptions = {},
-  }: Omit<HandlerOptions, "defaultMessage"> = {}
+  }: Omit<HandlerOptions, "defaultMessage"> = {},
 ): void {
   if (logToConsole) console.warn(message);
   if (showToast) {
@@ -110,7 +109,7 @@ export function clientInfoHandler(
     showToast = true,
     messagePrefix = "",
     toastOptions = {},
-  }: Omit<HandlerOptions, "defaultMessage"> = {}
+  }: Omit<HandlerOptions, "defaultMessage"> = {},
 ): void {
   if (logToConsole) console.info(message);
   if (showToast) {

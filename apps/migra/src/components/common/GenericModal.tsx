@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Cancel01Icon } from "hugeicons-react";
 import { useReducedMotion } from "framer-motion";
@@ -43,7 +43,7 @@ export function GenericModal({
   const footerBgClass = isDark ? "bg-neutral-950" : "bg-neutral-900";
   const contentBgClass = isDark ? "bg-onyx" : "bg-neutral-950";
 
-  const modalVariants = {
+  const modalVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
     visible: {
       opacity: 1,
@@ -67,18 +67,16 @@ export function GenericModal({
     },
   };
 
-  const backdropVariants = {
-    hidden: { opacity: 0, backdropBlur: 0 },
+  const backdropVariants: Variants = {
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      backdropBlur: 4,
       transition: {
         duration: 0.2,
       },
     },
     exit: {
       opacity: 0,
-      backdropBlur: 0,
       transition: {
         duration: 0.2,
       },
@@ -111,9 +109,7 @@ export function GenericModal({
                 className={`flex items-center justify-between p-6 border-b border-neutral-800 ${headerBgClass}`}
               >
                 <div>
-                  <h2 className="text-lg font-semibold text-white">
-                    {title}
-                  </h2>
+                  <h2 className="text-lg font-semibold text-white">{title}</h2>
                   {description && (
                     <p className="text-sm text-neutral-400 mt-1">
                       {description}

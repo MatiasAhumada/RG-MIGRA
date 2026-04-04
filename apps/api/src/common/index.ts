@@ -1,5 +1,0 @@
-export * from './controllers'
-export * from './decorators'
-export * from './repositories'
-export * from './services'
-export * from './health.module'

@@ -1,12 +1,12 @@
 {
-  "name": "generic-next",
+  "name": "@rg-migra/migra",
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.20.0",
   "scripts": {
-    "dev": "next dev -p 3000 -H 0.0.0.0",
+    "dev": "next dev -p 3009 -H 0.0.0.0",
     "build": "next build",
-    "start": "next start -p 3000 -H 0.0.0.0",
+    "start": "next start -p 3009 -H 0.0.0.0",
     "lint": "eslint",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\" --ignore-path .prettierignore",
     "postinstall": "prisma generate",
@@ -19,9 +19,10 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1024.0",
     "@hugeicons/core-free-icons": "^4.0.0",
     "@hugeicons/react": "^1.1.6",
-    "@prisma/client": "^7.5.0",
+    "@prisma/client": "^6.0.0",
     "axios": "^1.13.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -34,6 +35,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "shadcn": "^4.0.8",
+    "sharp": "^0.34.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tailwindcss-animate": "^1.0.7",
@@ -48,7 +50,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.0",
     "prettier": "^3.8.1",
-    "prisma": "^7.5.0",
+    "prisma": "^6.0.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5"

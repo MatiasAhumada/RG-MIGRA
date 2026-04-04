@@ -1,0 +1,17 @@
+{
+  "apps": [
+    {
+      "name": "rg-migra",
+      "script": "pnpm",
+      "args": "start",
+      "cwd": "/root/RG-MIGRA/apps/migra",
+      "instances": 1,
+      "autorestart": true,
+      "watch": false,
+      "max_memory_restart": "1G",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum ClienteStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PedidoStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  password  String
+  name      String
+  role      Role           @default(CLIENT)
+  empresaId Int?
+  empresa   Empresa?       @relation(fields: [empresaId], references: [id])
+  cliente   Cliente?
+  deletedAt DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model Empresa {
+  id        Int        @id @default(autoincrement())
+  name      String
+  usuarios  User[]
+  clientes  Cliente[]
+  productos Producto[]
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cliente {
+  id           Int            @id @default(autoincrement())
+  razonSocial  String
+  titular      String
+  cuit         String         @unique
+  correo       String         @unique
+  telefono     String
+  status       ClienteStatus  @default(PENDING)
+  empresaId    Int
+  empresa      Empresa        @relation(fields: [empresaId], references: [id])
+  userId       String?        @unique
+  user         User?          @relation(fields: [userId], references: [id])
+  direcciones  Address[]
+  pedidos      Pedido[]
+  deletedAt    DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Address {
+  id         Int       @id @default(autoincrement())
+  provincia  String
+  localidad  String
+  direccion  String
+  codPostal  String
+  clienteId  Int
+  cliente    Cliente   @relation(fields: [clienteId], references: [id])
+  pedidos    Pedido[]
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Producto {
+  id             Int              @id @default(autoincrement())
+  name           String
+  tipo           String
+  sku            String           @unique
+  price          Float
+  imgUrl         String?
+  empresaId      Int
+  empresa        Empresa          @relation(fields: [empresaId], references: [id])
+  detallesPedido DetallePedido[]
+  deletedAt      DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model Pedido {
+  id            Int             @id @default(autoincrement())
+  fecha         DateTime        @default(now())
+  totalPedido   Float
+  status        PedidoStatus    @default(PENDING)
+  clienteId     Int
+  cliente       Cliente         @relation(fields: [clienteId], references: [id])
+  direccionId   Int
+  direccion     Address         @relation(fields: [direccionId], references: [id])
+  detalles      DetallePedido[]
+  deletedAt     DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model DetallePedido {
+  id         Int       @id @default(autoincrement())
+  cantidad   Int
+  total      Float
+  pedidoId   Int
+  pedido     Pedido    @relation(fields: [pedidoId], references: [id])
+  productoId Int
+  producto   Producto  @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("detalle_pedido")
+}
