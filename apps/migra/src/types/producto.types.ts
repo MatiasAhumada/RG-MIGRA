@@ -13,6 +13,10 @@ export interface CreateProductoDto {
 
 export interface UpdateProductoDto extends Partial<CreateProductoDto> {}
 
+export interface UpdateProductoImageDto {
+  imageBase64: string;
+}
+
 export interface ProductoWithEmpresa extends Producto {
   empresa: Empresa;
 }

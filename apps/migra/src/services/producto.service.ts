@@ -23,6 +23,22 @@ export const productoService = {
     return data;
   },
 
+  async updateImage(id: number, file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const { data } = await clientAxios.patch<Producto>(
+      `${API_ROUTES.PRODUCTOS}/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return data;
+  },
+
   async delete(id: number) {
     const { data } = await clientAxios.delete(`${API_ROUTES.PRODUCTOS}/${id}`);
     return data;

@@ -1,4 +1,5 @@
 import { productoRepository } from "@/server/repository/producto.repository";
+import { r2StorageService } from "@/server/services/r2-storage.service";
 import { ApiError } from "@/utils/handlers/apiError.handler";
 import { ERROR_MESSAGES } from "@/constants/error-messages.constant";
 import httpStatus from "http-status";
@@ -56,8 +57,32 @@ export const productoService = {
     return productoRepository.update(id, dto);
   },
 
+  async updateImage(id: number, imageBase64: string) {
+    const producto = await this.findById(id);
+
+    if (producto.imgUrl) {
+      const oldKey = r2StorageService.extractKeyFromUrl(producto.imgUrl);
+      if (oldKey) {
+        await r2StorageService.deleteImage(oldKey);
+      }
+    }
+
+    const buffer = Buffer.from(imageBase64, "base64");
+    const key = r2StorageService.generateProductKey(id, producto.sku);
+    const { url } = await r2StorageService.uploadImage(buffer, key);
+
+    return productoRepository.update(id, { imgUrl: url });
+  },
+
   async delete(id: number) {
-    await this.findById(id);
+    const producto = await this.findById(id);
+
+    if (producto.imgUrl) {
+      const key = r2StorageService.extractKeyFromUrl(producto.imgUrl);
+      if (key) {
+        await r2StorageService.deleteImage(key);
+      }
+    }
 
     return productoRepository.softDelete(id);
   },

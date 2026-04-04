@@ -24,8 +24,16 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const producto = await productoService.update(Number(id), body);
 
+    if (body.imageBase64) {
+      const producto = await productoService.updateImage(
+        Number(id),
+        body.imageBase64,
+      );
+      return NextResponse.json(producto, { status: httpStatus.OK });
+    }
+
+    const producto = await productoService.update(Number(id), body);
     return NextResponse.json(producto, { status: httpStatus.OK });
   } catch (error) {
     return apiErrorHandler({ error: error as ApiError, request });
