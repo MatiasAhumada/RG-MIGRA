@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { DashboardLayout } from "@/components/layout";
+import { AppLayout } from "@/components/layout";
 import { PageHeader, ProductCard } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,7 @@ export default function AdminProductosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <DashboardLayout variant="admin">
+    <AppLayout variant="admin">
       <PageHeader
         title="Productos"
         description="Gestión del catálogo de productos"
@@ -166,6 +166,6 @@ export default function AdminProductosPage() {
           </Button>
         </div>
       </GenericModal>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

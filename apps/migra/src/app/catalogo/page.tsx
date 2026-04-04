@@ -126,7 +126,7 @@ export default function CatalogPage() {
           transition={{ duration: 0.4 }}
           className="mb-12"
         >
-          <span className="text-label-sm text-secondary">
+          <span className="text-label-sm text-cerulean-500">
             Catálogo Completo
           </span>
           <h1 className="mt-2 text-headline-md text-on-surface">
@@ -163,7 +163,7 @@ export default function CatalogPage() {
               onClick={() => setActiveCategory(category)}
               className={`shrink-0 cursor-pointer rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] ${
                 activeCategory === category
-                  ? "gradient-primary text-white shadow-ambient"
+                  ? "bg-cerulean-500 text-white shadow-ambient hover:bg-cerulean-600"
                   : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
               }`}
             >

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { DashboardLayout } from "@/components/layout";
+import { AppLayout } from "@/components/layout";
 import { PageHeader } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import {
@@ -20,7 +20,7 @@ const stats = [
     change: "+12%",
     trend: "up" as const,
     icon: Package01Icon,
-    color: "bg-secondary-container text-secondary",
+    color: "bg-frosted-blue-500/20 text-cerulean-500",
   },
   {
     label: "Clientes Registrados",
@@ -28,7 +28,7 @@ const stats = [
     change: "+8%",
     trend: "up" as const,
     icon: Group01Icon,
-    color: "bg-honeydew-800/50 text-honeydew-200",
+    color: "bg-cerulean-500/15 text-cerulean-600",
   },
   {
     label: "Pedidos del Mes",
@@ -36,7 +36,7 @@ const stats = [
     change: "+23%",
     trend: "up" as const,
     icon: ShoppingCart01Icon,
-    color: "bg-frosted-blue-900/30 text-frosted-blue-200",
+    color: "bg-frosted-blue-500/20 text-cerulean-500",
   },
   {
     label: "Facturación",
@@ -44,7 +44,7 @@ const stats = [
     change: "-3%",
     trend: "down" as const,
     icon: Analytics01Icon,
-    color: "bg-punch-red-900/30 text-punch-red-400",
+    color: "bg-punch-red-900/20 text-punch-red-400",
   },
 ];
 
@@ -87,16 +87,16 @@ const recentOrders = [
 ];
 
 const statusStyles: Record<string, string> = {
-  Confirmado: "bg-honeydew-800/50 text-honeydew-200",
-  Pendiente: "bg-cerulean-900/30 text-cerulean-400",
-  Enviado: "bg-frosted-blue-900/30 text-frosted-blue-200",
-  Preparando: "bg-frosted-blue-900/30 text-frosted-blue-200",
-  Entregado: "bg-honeydew-800/50 text-honeydew-300",
+  Confirmado: "bg-honeydew-500/15 text-honeydew-200",
+  Pendiente: "bg-cerulean-500/15 text-cerulean-600",
+  Enviado: "bg-frosted-blue-500/20 text-frosted-blue-200",
+  Preparando: "bg-frosted-blue-500/20 text-frosted-blue-200",
+  Entregado: "bg-honeydew-500/15 text-honeydew-300",
 };
 
 export default function AdminPage() {
   return (
-    <DashboardLayout variant="admin">
+    <AppLayout variant="admin">
       <PageHeader
         title="Panel de Administración"
         description="Resumen general de la operación"
@@ -126,7 +126,7 @@ export default function AdminPage() {
                     <Icon className="size-6" />
                   </div>
                   <div
-                    className={`flex items-center gap-1 text-xs font-medium ${stat.trend === "up" ? "text-honeydew-200" : "text-punch-red-400"}`}
+                    className={`flex items-center gap-1 text-xs font-medium ${stat.trend === "up" ? "text-cerulean-500" : "text-punch-red-400"}`}
                   >
                     {stat.trend === "up" ? (
                       <ArrowUp01Icon className="size-3" />
@@ -172,7 +172,7 @@ export default function AdminPage() {
                 className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-surface-container/30"
               >
                 <div className="flex items-center gap-4">
-                  <span className="font-mono text-sm font-semibold text-secondary">
+                  <span className="font-mono text-sm font-semibold text-cerulean-500">
                     {order.id}
                   </span>
                   <div>
@@ -199,6 +199,6 @@ export default function AdminPage() {
           </div>
         </Card>
       </motion.div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

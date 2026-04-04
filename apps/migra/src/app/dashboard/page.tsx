@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { DashboardLayout } from "@/components/layout";
+import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,9 +40,9 @@ const recentOrders = [
 ];
 
 const statusStyles: Record<string, string> = {
-  PENDING: "bg-cerulean-900/30 text-cerulean-400",
-  CONFIRMED: "bg-honeydew-800/50 text-honeydew-200",
-  DELIVERED: "bg-honeydew-800/50 text-honeydew-300",
+  PENDING: "bg-cerulean-500/15 text-cerulean-600",
+  CONFIRMED: "bg-honeydew-500/15 text-honeydew-200",
+  DELIVERED: "bg-honeydew-500/15 text-honeydew-300",
 };
 
 const statusLabels: Record<string, string> = {
@@ -91,7 +91,7 @@ const orderSteps = [
 
 export default function DashboardPage() {
   return (
-    <DashboardLayout variant="client">
+    <AppLayout variant="client">
       <PageHeader title="Mi Panel" description="Bienvenido, Baby Store S.R.L" />
 
       <motion.div
@@ -105,13 +105,13 @@ export default function DashboardPage() {
             label: "Pedidos Activos",
             value: "2",
             icon: ShoppingCart01Icon,
-            color: "bg-secondary-container text-secondary",
+            color: "bg-frosted-blue-500/20 text-cerulean-500",
           },
           {
             label: "Pendientes",
             value: "1",
             icon: Clock01Icon,
-            color: "bg-cerulean-900/30 text-cerulean-400",
+            color: "bg-cerulean-500/15 text-cerulean-600",
           },
           {
             label: "Entregados",
@@ -199,7 +199,7 @@ export default function DashboardPage() {
               className="flex items-center justify-between border-b border-outline-variant/5 px-6 py-4 transition-colors hover:bg-surface-container/30 last:border-b-0"
             >
               <div className="flex items-center gap-4">
-                <span className="font-mono text-sm font-semibold text-secondary">
+                <span className="font-mono text-sm font-semibold text-cerulean-500">
                   {order.id}
                 </span>
                 <div>
@@ -248,6 +248,6 @@ export default function DashboardPage() {
           ))}
         </div>
       </motion.div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clienteService } from "@/server/services";
-import apiErrorHandler from "@/utils/handlers/apiError.handler";
-import { ApiError } from "@/utils/handlers/apiError.handler";
+import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
 import httpStatus from "http-status";
 
 export async function GET(request: NextRequest) {
@@ -31,10 +30,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(clientes, { status: httpStatus.OK });
   } catch (error) {
-    return apiErrorHandler({
-      error: error instanceof ApiError ? error : new ApiError({}),
-      request,
-    });
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }
 
@@ -45,9 +41,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(cliente, { status: httpStatus.CREATED });
   } catch (error) {
-    return apiErrorHandler({
-      error: error instanceof ApiError ? error : new ApiError({}),
-      request,
-    });
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }

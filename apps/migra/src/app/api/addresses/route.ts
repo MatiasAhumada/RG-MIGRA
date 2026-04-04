@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addressService } from "@/server/services";
-import { apiErrorHandler } from "@/utils/handlers/apiError.handler";
+import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
 import httpStatus from "http-status";
 
 export async function GET(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(addresses, { status: httpStatus.OK });
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }
 
@@ -30,6 +30,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(address, { status: httpStatus.CREATED });
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }

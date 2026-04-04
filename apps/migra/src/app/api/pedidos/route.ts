@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pedidoService } from "@/server/services";
-import { apiErrorHandler } from "@/utils/handlers/apiError.handler";
+import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
 import httpStatus from "http-status";
 
 export async function GET(request: NextRequest) {
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(pedidos, { status: httpStatus.OK });
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }
 
@@ -36,6 +36,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(pedido, { status: httpStatus.CREATED });
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }

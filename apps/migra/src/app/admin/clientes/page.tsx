@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { DashboardLayout } from "@/components/layout";
+import { AppLayout } from "@/components/layout";
 import { PageHeader } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,9 +63,9 @@ const sampleClients = [
 ];
 
 const statusStyles: Record<string, string> = {
-  APPROVED: "bg-honeydew-800/50 text-honeydew-200",
-  PENDING: "bg-cerulean-900/30 text-cerulean-400",
-  REJECTED: "bg-punch-red-900/30 text-punch-red-400",
+  APPROVED: "bg-honeydew-500/15 text-honeydew-200",
+  PENDING: "bg-cerulean-500/15 text-cerulean-600",
+  REJECTED: "bg-punch-red-500/15 text-punch-red-400",
 };
 
 const statusLabels: Record<string, string> = {
@@ -78,7 +78,7 @@ export default function AdminClientesPage() {
   const [search, setSearch] = useState("");
 
   return (
-    <DashboardLayout variant="admin">
+    <AppLayout variant="admin">
       <PageHeader
         title="Clientes"
         description="Gestión de clientes registrados"
@@ -159,14 +159,14 @@ export default function AdminClientesPage() {
                   <>
                     <Button
                       size="icon-xs"
-                      className="bg-honeydew-200 text-white hover:bg-honeydew-200/90"
+                      className="bg-cerulean-500 text-white hover:bg-cerulean-600"
                     >
                       <CheckmarkCircle01Icon className="size-3" />
                     </Button>
                     <Button
                       size="icon-xs"
                       variant="outline"
-                      className="text-destructive"
+                      className="text-punch-red-400"
                     >
                       <CancelCircleIcon className="size-3" />
                     </Button>
@@ -177,6 +177,6 @@ export default function AdminClientesPage() {
           ))}
         </Card>
       </motion.div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

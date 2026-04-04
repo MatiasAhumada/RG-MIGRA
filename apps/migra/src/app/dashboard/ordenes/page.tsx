@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { DashboardLayout } from "@/components/layout";
+import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -54,10 +54,10 @@ const allOrders = [
 ];
 
 const statusStyles: Record<string, string> = {
-  PENDING: "bg-cerulean-900/30 text-cerulean-400",
-  CONFIRMED: "bg-honeydew-800/50 text-honeydew-200",
-  DELIVERED: "bg-honeydew-800/50 text-honeydew-300",
-  CANCELLED: "bg-punch-red-900/30 text-punch-red-400",
+  PENDING: "bg-cerulean-500/15 text-cerulean-600",
+  CONFIRMED: "bg-honeydew-500/15 text-honeydew-200",
+  DELIVERED: "bg-honeydew-500/15 text-honeydew-300",
+  CANCELLED: "bg-punch-red-500/15 text-punch-red-400",
 };
 
 const statusLabels: Record<string, string> = {
@@ -77,7 +77,7 @@ const orderSteps = [
 
 export default function DashboardOrdenesPage() {
   return (
-    <DashboardLayout variant="client">
+    <AppLayout variant="client">
       <PageHeader
         title="Mis Pedidos"
         description="Historial completo de pedidos"
@@ -116,7 +116,7 @@ export default function DashboardOrdenesPage() {
               className="flex flex-col gap-3 border-b border-outline-variant/5 px-6 py-4 transition-colors hover:bg-surface-container/30 last:border-b-0 md:grid md:grid-cols-12 md:items-center md:gap-4"
             >
               <div className="col-span-2">
-                <span className="font-mono text-sm font-semibold text-secondary">
+                <span className="font-mono text-sm font-semibold text-cerulean-500">
                   {order.id}
                 </span>
               </div>
@@ -147,6 +147,6 @@ export default function DashboardOrdenesPage() {
           ))}
         </Card>
       </motion.div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }

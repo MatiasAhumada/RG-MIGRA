@@ -83,3 +83,5 @@ export default function apiErrorHandler({
   console.error({ ...errorResponse });
   return NextResponse.json({ error: errorResponse }, { status });
 }
+
+export { apiErrorHandler };

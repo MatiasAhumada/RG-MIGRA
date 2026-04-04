@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { DashboardLayout } from "@/components/layout";
+import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,7 @@ const orderSteps = [
 
 export default function DashboardPedidoPage() {
   return (
-    <DashboardLayout variant="client">
+    <AppLayout variant="client">
       <PageHeader
         title={`Pedido ${orderDetail.id}`}
         description={`Realizado el ${orderDetail.date}`}
@@ -157,6 +157,6 @@ export default function DashboardPedidoPage() {
           </Card>
         </div>
       </motion.div>
-    </DashboardLayout>
+    </AppLayout>
   );
 }
