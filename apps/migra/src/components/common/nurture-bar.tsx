@@ -22,14 +22,14 @@ export function NurtureBar({ steps, className }: NurtureBarProps) {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: index * 0.1, duration: 0.3 }}
-            className="flex flex-col items-center gap-2"
+            className="flex flex-col items-center gap-3 flex-1"
           >
             <div
               className={cn(
-                "flex size-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-300",
-                step.completed && "gradient-primary text-on-primary",
+                "flex size-12 items-center justify-center rounded-full text-sm font-bold transition-all duration-300",
+                step.completed && "gradient-primary text-white shadow-ambient",
                 step.current &&
-                  "bg-secondary-fixed text-on-surface ring-2 ring-secondary",
+                  "bg-secondary-fixed text-on-surface ring-2 ring-secondary shadow-ambient",
                 !step.completed &&
                   !step.current &&
                   "bg-surface-container-high text-on-surface-variant/50",
@@ -37,7 +37,7 @@ export function NurtureBar({ steps, className }: NurtureBarProps) {
             >
               {step.completed ? (
                 <svg
-                  className="size-5"
+                  className="size-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -57,7 +57,7 @@ export function NurtureBar({ steps, className }: NurtureBarProps) {
               className={cn(
                 "text-label-sm text-center",
                 step.completed && "text-on-surface",
-                step.current && "text-secondary",
+                step.current && "text-secondary font-semibold",
                 !step.completed &&
                   !step.current &&
                   "text-on-surface-variant/40",
@@ -68,7 +68,7 @@ export function NurtureBar({ steps, className }: NurtureBarProps) {
           </motion.div>
 
           {index < steps.length - 1 && (
-            <div className="mx-2 h-1 flex-1 rounded-full bg-surface-container-high">
+            <div className="mx-3 h-1 flex-1 rounded-full bg-surface-container-high overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{

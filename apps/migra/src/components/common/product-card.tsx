@@ -48,32 +48,34 @@ export function ProductCard({
           />
         </div>
 
-        <div className="flex flex-col gap-3 p-5">
+        <div className="flex flex-col gap-3 p-4">
           <div className="flex flex-col gap-1">
             <span className="text-label-sm text-on-surface-variant/70">
               {tipo}
             </span>
-            <h3 className="text-base font-semibold text-on-surface">{name}</h3>
-            <span className="text-xs text-on-surface-variant/60">
+            <h3 className="text-sm font-semibold leading-snug text-on-surface line-clamp-2">
+              {name}
+            </h3>
+            <span className="text-[11px] text-on-surface-variant/50">
               SKU: {sku}
             </span>
           </div>
 
           {showPrice ? (
             <div className="flex items-center justify-between">
-              <span className="text-xl font-bold text-primary">
+              <span className="text-base font-bold text-primary">
                 {formattedPrice}
               </span>
               <Button
-                size="icon-sm"
-                className="gradient-primary text-on-primary"
+                size="icon-xs"
+                className="gradient-primary text-white shadow-ambient"
               >
-                <ShoppingCart01Icon className="size-4" />
+                <ShoppingCart01Icon className="size-3.5" />
               </Button>
             </div>
           ) : (
             <Link href="/login">
-              <Button variant="outline" size="sm" className="w-full">
+              <Button variant="outline" size="sm" className="w-full text-xs">
                 Ver precio
               </Button>
             </Link>

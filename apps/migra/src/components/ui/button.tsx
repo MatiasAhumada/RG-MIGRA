@@ -5,19 +5,20 @@ import { Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-2xl text-sm font-semibold whitespace-nowrap transition-all duration-300 outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 cursor-pointer items-center justify-center rounded-2xl text-sm font-semibold whitespace-nowrap transition-all duration-300 outline-none select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "gradient-primary text-on-primary hover:opacity-90 active:opacity-85",
+          "gradient-primary text-white shadow-ambient hover:scale-[1.03] active:scale-[0.97]",
         outline:
-          "border border-outline-variant/40 bg-transparent text-on-surface hover:bg-surface-container/50",
+          "ghost-border bg-transparent text-on-surface hover:bg-surface-container/50 hover:scale-[1.03] active:scale-[0.97]",
         secondary:
-          "bg-secondary-container text-on-secondary-container hover:bg-secondary-container/80",
-        ghost: "text-on-surface hover:bg-surface-container/60",
+          "bg-secondary-container text-on-secondary-container hover:bg-secondary-container/80 hover:scale-[1.03] active:scale-[0.97]",
+        ghost:
+          "text-on-surface hover:bg-surface-container/60 hover:scale-[1.03] active:scale-[0.97]",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20",
+          "bg-destructive/10 text-destructive hover:bg-destructive/20 hover:scale-[1.03] active:scale-[0.97]",
         link: "text-secondary underline-offset-4 hover:underline",
       },
       size: {

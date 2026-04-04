@@ -88,10 +88,9 @@ export function DashboardSidebar({ variant = "admin" }: DashboardSidebarProps) {
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between px-6 py-6">
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-2xl gradient-primary">
-                <span className="text-xl font-bold text-white">Migra</span>
-              </div>
-              <span className="text-headline-md text-on-surface">MIGRA</span>
+              <span className="flex h-10 items-center rounded-2xl gradient-primary px-3 text-base font-bold text-white whitespace-nowrap">
+                M MIGRA
+              </span>
             </Link>
             <button
               onClick={() => setIsOpen(false)}

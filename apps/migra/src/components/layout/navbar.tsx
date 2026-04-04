@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import {
@@ -31,19 +30,18 @@ export function Navbar() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 glass-strong border-b border-outline-variant/10"
+      className="fixed top-0 left-0 right-0 z-50 glass-strong"
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12 lg:px-20">
-        <Link href={ROUTES.HOME} className="flex items-center gap-3">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-20 lg:px-32">
+        <Link href={ROUTES.HOME} className="flex items-center">
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2"
+            className="flex items-center"
           >
-            <div className="flex size-10 items-center justify-center rounded-2xl gradient-primary">
-              <span className="text-xl font-bold text-white">M</span>
-            </div>
-            <span className="text-headline-md text-on-surface">MIGRA</span>
+            <span className="flex h-11 items-center rounded-2xl gradient-primary px-4 shadow-ambient text-xl font-bold text-white whitespace-nowrap">
+              MIGRA
+            </span>
           </motion.div>
         </Link>
 

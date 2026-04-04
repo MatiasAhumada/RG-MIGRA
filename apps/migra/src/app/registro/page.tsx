@@ -48,19 +48,19 @@ export default function RegisterPage() {
 
   return (
     <PublicLayout>
-      <div className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-lg items-center justify-center px-6 py-16">
+      <div className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-lg items-center justify-center px-6 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="w-full max-w-lg"
         >
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-3xl gradient-primary">
-              <span className="text-2xl font-bold text-white">M</span>
-            </div>
+          <div className="mb-10 text-center">
+            <span className="mx-auto mb-6 flex h-16 items-center justify-center rounded-3xl gradient-primary px-6 shadow-ambient text-2xl font-bold text-white whitespace-nowrap">
+              M MIGRA
+            </span>
             <h1 className="text-headline-md text-on-surface">Crear cuenta</h1>
-            <p className="mt-2 text-sm text-on-surface-variant">
+            <p className="mt-3 text-sm text-on-surface-variant">
               Completá el formulario para solicitar acceso al catálogo
             </p>
           </div>

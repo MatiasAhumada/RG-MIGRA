@@ -19,27 +19,28 @@ import { ROUTES } from "@/constants/routes";
 const features = [
   {
     icon: Shield01Icon,
-    title: "Calidad Garantizada",
+    title: "Calidad Certificada",
     description:
-      "Productos seleccionados con los más altos estándares de calidad para tu negocio.",
+      "Productos de las marcas líderes en chupetes, mamaderas y accesorios infantiles con control de calidad garantizado.",
   },
   {
     icon: DeliveryTruck01Icon,
-    title: "Envíos a Todo el País",
+    title: "Distribución Puntual",
     description:
-      "Logística optimizada con cálculo de envío según tu ubicación.",
+      "Entregas programadas a todo el país con seguimiento en tiempo real de tus pedidos.",
   },
   {
     icon: Analytics01Icon,
     title: "Precios Mayoristas",
-    description: "Accedé a precios exclusivos para clientes registrados.",
+    description:
+      "Tarifas exclusivas para comercios registrados con descuentos por volumen.",
   },
 ];
 
 const sampleProducts = [
   {
     id: 1,
-    name: "Pack Pañales Premium Talle M",
+    name: "Pack Pañales Premium Talle M x50",
     tipo: "Pañales",
     sku: "PAN-PRE-M",
     price: 15800,
@@ -48,7 +49,7 @@ const sampleProducts = [
   },
   {
     id: 2,
-    name: "Toallitas Húmedas x100",
+    name: "Toallitas Húmedas Suaves x100",
     tipo: "Higiene",
     sku: "TOH-100",
     price: 4200,
@@ -57,7 +58,7 @@ const sampleProducts = [
   },
   {
     id: 3,
-    name: "Leche Infantil Fórmula 900g",
+    name: "Leche Infantil Fórmula Premium 900g",
     tipo: "Alimentación",
     sku: "LEI-FOR-900",
     price: 12500,
@@ -67,7 +68,7 @@ const sampleProducts = [
   {
     id: 4,
     name: "Biberón Anticólicos 270ml",
-    tipo: "Accesorios",
+    tipo: "Mamaderas",
     sku: "BIB-ANT-270",
     price: 6800,
     imgUrl:
@@ -84,8 +85,8 @@ const sampleProducts = [
   },
   {
     id: 6,
-    name: "Chupete Silicona 6-18m",
-    tipo: "Accesorios",
+    name: "Chupete Anatómico Silicona 6-18m",
+    tipo: "Chupetes",
     sku: "CHU-SIL-618",
     price: 3200,
     imgUrl:
@@ -114,29 +115,23 @@ export default function HomePage() {
   return (
     <PublicLayout>
       <section className="relative overflow-hidden">
-        <div className="w-full px-6 pt-20 md:px-12 lg:px-16 lg:pt-32">
+        <div className="w-full px-6 pt-32 pb-20 md:px-20 md:pt-40 lg:px-32 lg:pt-48">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mx-auto max-w-3xl text-center"
+            className="mx-auto max-w-4xl"
           >
-            <span className="text-label-sm text-secondary">
-              Distribuciones S.R.L
-            </span>
-            <h1 className="mt-4 text-display-lg font-extrabold text-on-surface">
-              Tu socio en productos
-              <span className="gradient-primary bg-clip-text text-transparent">
-                {" "}
-                infantiles
-              </span>
+            <h1 className="mt-6 text-display-lg font-extrabold leading-[1.1] text-on-surface">
+              Tu socio en{" "}
+              <span className="text-cerulean-500">productos infantiles</span>
             </h1>
-            <p className="mt-6 text-lg text-on-surface-variant">
-              Catálogo digital y automatización de pedidos para tu negocio.
-              Accedé a precios exclusivos y gestioná tus órdenes de forma
-              simple.
+            <p className="mt-8 max-w-2xl text-xl leading-relaxed text-on-surface-variant">
+              Distribución mayorista de chupetes, mamaderas, pañales y
+              accesorios para tu negocio. Accedé a precios exclusivos y gestioná
+              tus pedidos de forma simple.
             </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="mt-12 flex flex-col gap-4 sm:flex-row">
               <Link href={ROUTES.CATALOG}>
                 <Button size="lg" className="gap-2">
                   Ver Catálogo
@@ -153,11 +148,11 @@ export default function HomePage() {
           </motion.div>
         </div>
 
-        <div className="absolute top-20 right-0 -z-10 size-96 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-0 left-0 -z-10 size-80 rounded-full bg-secondary/5 blur-3xl" />
+        <div className="absolute top-20 right-0 -z-10 size-[600px] rounded-full bg-cerulean-500/10 blur-3xl" />
+        <div className="absolute bottom-0 left-0 -z-10 size-[500px] rounded-full bg-frosted-blue-500/10 blur-3xl" />
       </section>
 
-      <section className="w-full px-6 py-20 md:px-12 lg:px-16">
+      <section className="w-full px-6 py-24 md:px-20 lg:px-32">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -175,8 +170,8 @@ export default function HomePage() {
                 whileHover={{ y: -4 }}
                 className="rounded-[2rem] bg-surface-container-lowest p-8 shadow-[0_8px_40px_rgba(29,53,87,0.04)] transition-shadow hover:shadow-[0_12px_48px_rgba(29,53,87,0.08)]"
               >
-                <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-secondary-container">
-                  <Icon className="size-7 text-secondary" />
+                <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-frosted-blue-500/20">
+                  <Icon className="size-7 text-cerulean-500" />
                 </div>
                 <h3 className="text-lg font-bold text-on-surface">
                   {feature.title}
@@ -190,7 +185,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      <section className="w-full px-6 pb-20 md:px-12 lg:px-16">
+      <section className="w-full px-6 pb-24 md:px-20 lg:px-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -198,7 +193,7 @@ export default function HomePage() {
           className="mb-10 flex items-end justify-between"
         >
           <div>
-            <span className="text-label-sm text-secondary">
+            <span className="text-label-sm text-cerulean-500">
               Productos Destacados
             </span>
             <h2 className="mt-2 text-headline-md text-on-surface">
@@ -218,7 +213,7 @@ export default function HomePage() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
         >
           {sampleProducts.map((product) => (
             <ProductCard key={product.id} {...product} showPrice={false} />
@@ -226,27 +221,24 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      <section className="w-full px-6 pb-24 md:px-12 lg:px-16">
+      <section className="w-full px-6 pb-32 md:px-20 lg:px-32">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="rounded-[2rem] gradient-primary p-12 text-center md:p-16"
+          className="rounded-[2rem] bg-gradient-to-br from-cerulean-500 to-cerulean-700 p-12 text-center md:p-16"
         >
-          <h2 className="text-2xl font-bold text-on-primary md:text-3xl">
+          <h2 className="text-2xl font-bold text-white md:text-3xl">
             ¿Tenés un negocio? Accedé a precios mayoristas
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-on-primary/80">
+          <p className="mx-auto mt-4 max-w-xl text-cerulean-100/90">
             Registrate como cliente y obtené acceso completo al catálogo con
             precios, historial de pedidos y gestión de envíos.
           </p>
           <Link href={ROUTES.REGISTER}>
-            <Button
-              size="lg"
-              className="mt-8 bg-on-primary text-primary hover:bg-on-primary/90"
-            >
+            <Button size="lg" className="mt-8 gap-2">
               Crear mi cuenta
-              <Login01Icon className="ml-2 size-5" />
+              <Login01Icon className="size-5" />
             </Button>
           </Link>
         </motion.div>

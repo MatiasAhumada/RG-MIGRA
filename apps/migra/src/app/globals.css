@@ -287,7 +287,7 @@
   }
 
   .shadow-ambient {
-    box-shadow: 0 8px 40px color-mix(in srgb, #1d3557 6%, transparent);
+    box-shadow: 0 8px 40px color-mix(in srgb, #1d3557 8%, transparent);
   }
 
   .ghost-border {

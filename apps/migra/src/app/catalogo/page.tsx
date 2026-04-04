@@ -5,8 +5,7 @@ import { motion } from "framer-motion";
 import { PublicLayout } from "@/components/layout";
 import { ProductCard } from "@/components/common";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search01Icon, FilterIcon } from "hugeicons-react";
+import { Search01Icon } from "hugeicons-react";
 
 const sampleProducts = [
   {
@@ -120,12 +119,12 @@ export default function CatalogPage() {
 
   return (
     <PublicLayout>
-      <div className="w-full px-6 py-12 md:px-12 lg:px-16">
+      <div className="w-full px-6 py-16 md:px-20 lg:px-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-10"
+          className="mb-12"
         >
           <span className="text-label-sm text-secondary">
             Catálogo Completo
@@ -139,9 +138,9 @@ export default function CatalogPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.4 }}
-          className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+          className="mb-8"
         >
-          <div className="relative flex-1 md:max-w-sm">
+          <div className="relative max-w-md">
             <Search01Icon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
             <Input
               placeholder="Buscar producto, tipo o SKU..."
@@ -150,26 +149,22 @@ export default function CatalogPage() {
               className="pl-10"
             />
           </div>
-          <Button variant="outline" size="sm" className="gap-2 md:hidden">
-            <FilterIcon className="size-4" />
-            Filtros
-          </Button>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="mb-8 flex gap-2 overflow-x-auto pb-2"
+          className="mb-10 flex gap-3 overflow-x-auto pb-2"
         >
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ${
+              className={`shrink-0 cursor-pointer rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] ${
                 activeCategory === category
-                  ? "gradient-primary text-on-primary"
-                  : "bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container"
+                  ? "gradient-primary text-white shadow-ambient"
+                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
               }`}
             >
               {category}
@@ -177,7 +172,7 @@ export default function CatalogPage() {
           ))}
         </motion.div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {filteredProducts.map((product, index) => (
             <motion.div
               key={product.id}
