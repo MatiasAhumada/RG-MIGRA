@@ -50,7 +50,7 @@ export function GenericModal({
       scale: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 300,
         damping: 30,
       },
@@ -60,7 +60,7 @@ export function GenericModal({
       scale: 0.95,
       y: 20,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 300,
         damping: 30,
       },

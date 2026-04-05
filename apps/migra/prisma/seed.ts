@@ -5,14 +5,49 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
-  await prisma.user.upsert({
-    where: { email: "admin@example.com" },
+  const empresa = await prisma.empresa.upsert({
+    where: { id: 1 },
     update: {},
     create: {
-      email: "admin@example.com",
-      name: "Admin User",
+      name: "MIGRA Distribuciones S.R.L",
+    },
+  });
+
+  const adminUser = await prisma.user.upsert({
+    where: { email: "admin@migra.com" },
+    update: {},
+    create: {
+      email: "admin@migra.com",
+      name: "Admin MIGRA",
       password: "admin123",
       role: "ADMIN",
+      empresaId: empresa.id,
+    },
+  });
+
+  const clientUser = await prisma.user.upsert({
+    where: { email: "cliente@example.com" },
+    update: {},
+    create: {
+      email: "cliente@example.com",
+      name: "Cliente Test",
+      password: "cliente123",
+      role: "CLIENT",
+    },
+  });
+
+  await prisma.cliente.upsert({
+    where: { cuit: "20-12345678-9" },
+    update: {},
+    create: {
+      razonSocial: "Cliente Test S.A.",
+      titular: "Cliente Test",
+      cuit: "20-12345678-9",
+      correo: "cliente@example.com",
+      telefono: "1234567890",
+      status: "APPROVED",
+      empresaId: empresa.id,
+      userId: clientUser.id,
     },
   });
 

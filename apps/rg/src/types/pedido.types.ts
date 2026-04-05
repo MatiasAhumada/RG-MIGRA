@@ -1,4 +1,7 @@
-import { Pedido as PrismaPedido, PedidoStatus as PrismaPedidoStatus } from "@prisma/client";
+import {
+  Pedido as PrismaPedido,
+  PedidoStatus as PrismaPedidoStatus,
+} from "@prisma/client";
 
 export type Pedido = PrismaPedido;
 
