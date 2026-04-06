@@ -42,9 +42,6 @@ export default function LoginPage() {
           className="w-full max-w-md"
         >
           <div className="mb-10 text-center">
-            <span className="mx-auto mb-6 flex h-16 items-center justify-center rounded-3xl gradient-primary px-6 shadow-ambient text-2xl font-bold text-white whitespace-nowrap">
-              MIGRA
-            </span>
             <h1 className="text-headline-md text-on-surface">
               Bienvenido de vuelta
             </h1>

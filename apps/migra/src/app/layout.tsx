@@ -27,6 +27,8 @@ export const metadata: Metadata = {
     "Catálogo digital y automatización de pedidos - MIGRA Distribuciones S.R.L",
 };
 
+import { SearchProvider } from "@/context/search-context";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -42,8 +44,10 @@ export default function RootLayout({
           geistMono.variable,
         )}
       >
-        {children}
-        <Toaster />
+        <SearchProvider>
+          {children}
+          <Toaster />
+        </SearchProvider>
       </body>
     </html>
   );

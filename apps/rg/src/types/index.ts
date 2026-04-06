@@ -4,3 +4,6 @@ export * from "./cliente.types";
 export * from "./address.types";
 export * from "./producto.types";
 export * from "./pedido.types";
+export * from "./categoria.types";
+export * from "./subcategoria.types";
+export * from "./marca.types";

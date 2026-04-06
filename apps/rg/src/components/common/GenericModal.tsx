@@ -2,7 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Cancel01Icon } from "hugeicons-react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { useReducedMotion } from "framer-motion";
 
 interface GenericModalProps {
@@ -13,7 +14,6 @@ interface GenericModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "4xl";
-  variant?: "default" | "dark";
 }
 
 const SIZE_CLASSES = {
@@ -33,55 +33,42 @@ export function GenericModal({
   children,
   footer,
   size = "md",
-  variant = "default",
 }: GenericModalProps) {
-  const isDark = variant === "dark";
   const shouldReduceMotion = useReducedMotion();
 
-  const bgClass = isDark ? "bg-onyx" : "bg-neutral-950";
-  const headerBgClass = isDark ? "bg-neutral-950" : "bg-neutral-900";
-  const footerBgClass = isDark ? "bg-neutral-950" : "bg-neutral-900";
-  const contentBgClass = isDark ? "bg-onyx" : "bg-neutral-950";
-
   const modalVariants = {
-    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    hidden: { opacity: 0, scale: 0.96, y: 16 },
     visible: {
       opacity: 1,
       scale: 1,
       y: 0,
       transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 30,
+        type: "spring" as const,
+        stiffness: 350,
+        damping: 35,
       },
     },
     exit: {
       opacity: 0,
-      scale: 0.95,
-      y: 20,
+      scale: 0.96,
+      y: 16,
       transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 30,
+        type: "spring" as const,
+        stiffness: 350,
+        damping: 35,
       },
     },
   };
 
   const backdropVariants = {
-    hidden: { opacity: 0, backdropBlur: 0 },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      backdropBlur: 4,
-      transition: {
-        duration: 0.2,
-      },
+      transition: { duration: 0.2 },
     },
     exit: {
       opacity: 0,
-      backdropBlur: 0,
-      transition: {
-        duration: 0.2,
-      },
+      transition: { duration: 0.2 },
     },
   };
 
@@ -95,7 +82,7 @@ export function GenericModal({
             animate="visible"
             exit="exit"
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-on-surface/60 backdrop-blur-sm"
           />
           <motion.div
             variants={shouldReduceMotion ? undefined : modalVariants}
@@ -105,17 +92,15 @@ export function GenericModal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className={`${bgClass} border border-neutral-800 rounded-xl shadow-2xl ${SIZE_CLASSES[size]} w-full max-h-[90vh] overflow-y-auto pointer-events-auto`}
+              className={`bg-card rounded-2xl shadow-elevated ring-1 ring-border ${SIZE_CLASSES[size]} w-full max-h-[90vh] overflow-y-auto pointer-events-auto`}
             >
-              <div
-                className={`flex items-center justify-between p-6 border-b border-neutral-800 ${headerBgClass}`}
-              >
-                <div>
-                  <h2 className="text-lg font-semibold text-white">
+              <div className="flex items-center justify-between p-6">
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-lg font-semibold tracking-tight text-foreground [-0.02em]">
                     {title}
                   </h2>
                   {description && (
-                    <p className="text-sm text-neutral-400 mt-1">
+                    <p className="text-sm leading-relaxed text-muted-foreground">
                       {description}
                     </p>
                   )}
@@ -124,16 +109,14 @@ export function GenericModal({
                   variant="ghost"
                   size="icon"
                   onClick={() => onOpenChange(false)}
-                  className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+                  className="text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
-                  <Cancel01Icon size={20} />
+                  <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} />
                 </Button>
               </div>
-              <div className={`p-6 ${contentBgClass}`}>{children}</div>
+              <div className="px-6 pb-6">{children}</div>
               {footer && (
-                <div
-                  className={`flex justify-end gap-2 p-6 border-t border-neutral-800 ${footerBgClass}`}
-                >
+                <div className="flex justify-end gap-3 p-6 border-t border-border">
                   {footer}
                 </div>
               )}
@@ -191,13 +174,19 @@ export function ConfirmModal({
           <Button variant="outline" onClick={handleCancel} disabled={loading}>
             {cancelText}
           </Button>
-          <Button variant={variant} onClick={handleConfirm} disabled={loading}>
+          <Button
+            variant={variant === "destructive" ? "destructive" : "primary"}
+            onClick={handleConfirm}
+            disabled={loading}
+          >
             {loading ? "Procesando..." : confirmText}
           </Button>
         </>
       }
     >
-      <p className="text-sm text-neutral-400">{description}</p>
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        {description}
+      </p>
     </GenericModal>
   );
 }

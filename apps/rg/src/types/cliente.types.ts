@@ -1,4 +1,7 @@
-import { Cliente as PrismaCliente, ClienteStatus as PrismaClienteStatus } from "@prisma/client";
+import {
+  Cliente as PrismaCliente,
+  ClienteStatus as PrismaClienteStatus,
+} from "@prisma/client";
 
 export type Cliente = PrismaCliente;
 

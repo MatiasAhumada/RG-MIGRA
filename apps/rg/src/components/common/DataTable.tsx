@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search01Icon } from "hugeicons-react";
@@ -46,14 +46,14 @@ export function DataTable<T>({
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="lg:ml-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-wide">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground [-0.02em]">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-neutral-400 mt-1 text-sm sm:text-base">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {subtitle}
             </p>
           )}
@@ -63,32 +63,32 @@ export function DataTable<T>({
         )}
       </div>
 
-      <div className="border border-neutral-800 rounded-xl shadow-lg bg-neutral-950">
+      <div className="overflow-hidden rounded-2xl bg-vanilla-cream-700">
         {onSearch && (
-          <div className="p-5 border-b border-neutral-800">
+          <div className="bg-card p-5">
             <div className="relative flex-1 w-full sm:max-w-md">
               <Search01Icon
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50"
               />
               <Input
                 placeholder={searchPlaceholder}
                 onChange={(e) => onSearch(e.target.value)}
-                className="pl-10 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-400 focus:border-red-600 focus:ring-red-600 text-sm"
+                className="pl-10 bg-vanilla-cream-700 text-foreground placeholder:text-muted-foreground/50 focus:ring-primary text-sm"
               />
             </div>
           </div>
         )}
 
-        <div className="p-5 overflow-visible">
-          <div className="w-full overflow-x-auto overflow-y-visible">
+        <div className="p-5 bg-vanilla-cream-700">
+          <div className="w-full overflow-x-auto">
             <table className="w-full min-w-[800px]">
               <thead>
-                <tr className="border-b border-neutral-800 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                <tr className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {columns.map((column) => (
                     <th
                       key={column.key}
-                      className={`pb-3 font-semibold ${column.className || ""}`}
+                      className={`pb-4 font-semibold ${column.className || ""}`}
                     >
                       {column.label}
                     </th>
@@ -100,10 +100,10 @@ export function DataTable<T>({
                   <tr>
                     <td
                       colSpan={columns.length}
-                      className="py-8 text-center text-neutral-400 font-medium"
+                      className="py-12 text-center text-muted-foreground font-medium"
                     >
                       <div className="flex items-center justify-center gap-3">
-                        <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                         Cargando...
                       </div>
                     </td>
@@ -112,40 +112,41 @@ export function DataTable<T>({
                   <tr>
                     <td
                       colSpan={columns.length}
-                      className="py-8 text-center text-neutral-400 font-medium"
+                      className="py-12 text-center text-muted-foreground font-medium"
                     >
                       {emptyMessage}
                     </td>
                   </tr>
                 ) : (
                   data.map((item, index) => (
-                    <>
+                    <AnimatePresence key={keyExtractor(item)}>
                       <motion.tr
-                        key={keyExtractor(item)}
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{
-                          duration: 0.2,
-                          delay: shouldReduceMotion ? 0 : index * 0.03,
+                          duration: shouldReduceMotion ? 0 : 0.25,
+                          delay: shouldReduceMotion ? 0 : index * 0.04,
                         }}
                         onClick={() => onRowClick?.(item)}
-                        className={`border-b border-neutral-800 hover:bg-neutral-900/50 transition-colors ${
+                        className={`border-b border-border last:border-b-0 hover:bg-muted transition-colors ${
                           onRowClick ? "cursor-pointer" : ""
                         }`}
                       >
                         {columns.map((column) => (
                           <td
                             key={column.key}
-                            className="py-4 text-sm font-medium text-white"
+                            className="py-4 text-sm font-medium text-foreground"
                           >
                             {column.render
                               ? column.render(item)
-                              : (item as any)[column.key]}
+                              : ((item as Record<string, unknown>)[
+                                  column.key
+                                ] as React.ReactNode)}
                           </td>
                         ))}
                       </motion.tr>
                       {expandedContent?.(item)}
-                    </>
+                    </AnimatePresence>
                   ))
                 )}
               </tbody>
@@ -153,8 +154,8 @@ export function DataTable<T>({
           </div>
 
           {totalLabel && (
-            <div className="mt-4 pt-4 border-t border-neutral-800">
-              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+            <div className="mt-4 pt-4 border-t border-border">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 {totalLabel}
               </p>
             </div>
