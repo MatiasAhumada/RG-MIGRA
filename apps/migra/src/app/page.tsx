@@ -13,6 +13,7 @@ import {
   ArrowRight01Icon,
   GridIcon,
   Login01Icon,
+  CheckmarkCircle01Icon,
 } from "hugeicons-react";
 import { ROUTES } from "@/constants/routes";
 
@@ -226,21 +227,82 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="rounded-[2rem] bg-gradient-to-br from-cerulean-500 to-cerulean-700 p-12 text-center md:p-16"
+          className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-cerulean-500 to-cerulean-700 p-12 text-center md:p-20"
         >
-          <h2 className="text-2xl font-bold text-white md:text-3xl">
-            ¿Tenés un negocio? Accedé a precios mayoristas
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-cerulean-100/90">
-            Registrate como cliente y obtené acceso completo al catálogo con
-            precios, historial de pedidos y gestión de envíos.
-          </p>
-          <Link href={ROUTES.REGISTER}>
-            <Button size="lg" className="mt-8 gap-2">
-              Crear mi cuenta
-              <Login01Icon className="size-5" />
-            </Button>
-          </Link>
+          <motion.div
+            animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/10 blur-3xl"
+          />
+          <motion.div
+            animate={{ y: [0, 15, 0], scale: [1, 1.08, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full bg-white/5 blur-3xl"
+          />
+
+          <div className="relative z-10">
+            <motion.span
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="mb-4 inline-block rounded-full bg-white/15 px-5 py-2 text-xs font-bold uppercase tracking-[0.25em] text-white backdrop-blur-sm"
+            >
+              Exclusivo Mayoristas
+            </motion.span>
+
+            <h2 className="text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
+              Hacé crecer tu negocio
+              <br />
+              <span className="text-yellow-green-400">
+                con los mejores precios
+              </span>
+            </h2>
+
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/90 md:text-xl">
+              <strong className="font-semibold text-white">Venta mayorista, siempre.</strong>{" "}
+              Registrate como cliente verificado y accedé al catálogo completo con{" "}
+              <strong className="text-yellow-green-400">precios exclusivos</strong>, historial de pedidos,{" "}
+              seguimiento de envíos y gestión integral desde tu panel personalizado.
+            </p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm text-white/80"
+            >
+              <span className="flex items-center gap-2">
+                <CheckmarkCircle01Icon className="size-5 text-yellow-green-400" />
+                Precios mayoristas
+              </span>
+              <span className="flex items-center gap-2">
+                <CheckmarkCircle01Icon className="size-5 text-yellow-green-400" />
+                Historial de pedidos
+              </span>
+              <span className="flex items-center gap-2">
+                <CheckmarkCircle01Icon className="size-5 text-yellow-green-400" />
+                Seguimiento de envíos
+              </span>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <Link href={ROUTES.REGISTER}>
+                <Button
+                  size="lg"
+                  className="mt-8 gap-2 bg-yellow-green-500 text-white font-bold shadow-xl shadow-yellow-green-500/30 hover:bg-yellow-green-400 hover:shadow-2xl"
+                >
+                  Crear mi cuenta
+                  <Login01Icon className="size-5" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
         </motion.div>
       </section>
     </PublicLayout>
