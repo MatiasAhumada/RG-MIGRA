@@ -36,10 +36,10 @@ export function ProductCard({
     <motion.div
       whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={cn("group", className)}
+      className={cn("group flex h-full", className)}
     >
-      <Card className="relative overflow-hidden p-0 transition-all duration-300 hover:shadow-[0_12px_48px_rgba(29,53,87,0.12)]">
-        <div className="relative aspect-square w-full overflow-hidden bg-surface-container">
+      <Card className="relative flex h-full w-full flex-col overflow-hidden p-0 transition-all duration-300 hover:shadow-[0_12px_48px_rgba(29,53,87,0.12)]">
+        <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-br from-cerulean-400 to-cerulean-600">
           <Image
             src={imgUrl}
             alt={name}
@@ -48,7 +48,7 @@ export function ProductCard({
           />
         </div>
 
-        <div className="flex flex-col gap-3 p-4">
+        <div className="flex flex-1 flex-col gap-3 p-4">
           <div className="flex flex-col gap-1">
             <span className="text-label-sm text-on-surface-variant/70">
               {tipo}
@@ -61,25 +61,30 @@ export function ProductCard({
             </span>
           </div>
 
-          {showPrice ? (
-            <div className="flex items-center justify-between">
-              <span className="text-base font-bold text-primary">
-                {formattedPrice}
-              </span>
-              <Button
-                size="icon-xs"
-                className="gradient-primary text-white shadow-ambient"
-              >
-                <ShoppingCart01Icon className="size-3.5" />
-              </Button>
-            </div>
-          ) : (
-            <Link href="/login">
-              <Button variant="outline" size="sm" className="w-full text-xs">
-                Ver precio
-              </Button>
-            </Link>
-          )}
+          <div className="mt-auto">
+            {showPrice ? (
+              <div className="flex items-center justify-between">
+                <span className="text-base font-bold text-primary">
+                  {formattedPrice}
+                </span>
+                <Button
+                  size="icon-xs"
+                  className="gradient-primary text-white shadow-ambient"
+                >
+                  <ShoppingCart01Icon className="size-3.5" />
+                </Button>
+              </div>
+            ) : (
+              <Link href="/login">
+                <Button
+                  size="sm"
+                  className="w-full text-xs bg-cerulean-500 text-white hover:bg-cerulean-400 shadow-sm"
+                >
+                  Ver precio
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </Card>
     </motion.div>
