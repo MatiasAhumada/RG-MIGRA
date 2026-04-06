@@ -8,11 +8,29 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get("search") || undefined;
     const empresaId = searchParams.get("empresaId");
-    const tipo = searchParams.get("tipo");
+    const marcaId = searchParams.get("marcaId");
+    const categoriaId = searchParams.get("categoriaId");
+    const subcategoriaId = searchParams.get("subcategoriaId");
 
-    if (tipo && empresaId) {
-      const productos = await productoService.findByTipo(
-        tipo,
+    if (marcaId && empresaId) {
+      const productos = await productoService.findByMarca(
+        Number(marcaId),
+        Number(empresaId),
+      );
+      return NextResponse.json(productos, { status: httpStatus.OK });
+    }
+
+    if (categoriaId && empresaId) {
+      const productos = await productoService.findByCategoria(
+        Number(categoriaId),
+        Number(empresaId),
+      );
+      return NextResponse.json(productos, { status: httpStatus.OK });
+    }
+
+    if (subcategoriaId && empresaId) {
+      const productos = await productoService.findBySubcategoria(
+        Number(subcategoriaId),
         Number(empresaId),
       );
       return NextResponse.json(productos, { status: httpStatus.OK });
@@ -46,15 +64,24 @@ export async function POST(request: NextRequest) {
     if (bulk === "true" && contentType?.includes("multipart/form-data")) {
       const formData = await request.formData();
       const file = formData.get("file") as File;
-      const tipo = formData.get("tipo") as string;
       const defaultPrice = formData.get("defaultPrice") as string;
       const empresaId = formData.get("empresaId") as string;
+      const categoriaId = formData.get("categoriaId") as string;
+      const subcategoriaId = formData.get("subcategoriaId") as string;
+      const marcaId = formData.get("marcaId") as string;
 
-      if (!file || !tipo || !defaultPrice || !empresaId) {
+      if (
+        !file ||
+        !defaultPrice ||
+        !empresaId ||
+        !categoriaId ||
+        !subcategoriaId ||
+        !marcaId
+      ) {
         throw new ApiError({
           status: httpStatus.BAD_REQUEST,
           message:
-            "Faltan campos requeridos: file, tipo, defaultPrice, empresaId",
+            "Faltan campos requeridos: file, defaultPrice, empresaId, categoriaId, subcategoriaId, marcaId",
         });
       }
 
@@ -63,9 +90,11 @@ export async function POST(request: NextRequest) {
 
       const result = await productoService.bulkCreateFromPdf({
         pdfBuffer: buffer,
-        tipo,
         defaultPrice: Number(defaultPrice),
         empresaId: Number(empresaId),
+        categoriaId: Number(categoriaId),
+        subcategoriaId: Number(subcategoriaId),
+        marcaId: Number(marcaId),
       });
 
       return NextResponse.json(result, { status: httpStatus.CREATED });

@@ -6,24 +6,16 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
 import {
-  Home01Icon,
   Login01Icon,
   UserAdd01Icon,
-  GridIcon,
+  UserCircleIcon,
+  ShoppingCart01Icon,
 } from "hugeicons-react";
-
-const navLinks = [
-  { href: ROUTES.HOME, label: "Inicio", icon: Home01Icon },
-  { href: ROUTES.CATALOG, label: "Catálogo", icon: GridIcon },
-];
-
-const authLinks = [
-  { href: ROUTES.LOGIN, label: "Ingresar", icon: Login01Icon },
-  { href: ROUTES.REGISTER, label: "Registrarse", icon: UserAdd01Icon },
-];
 
 export function Navbar() {
   const pathname = usePathname();
+  const isAuthenticated =
+    pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
 
   return (
     <motion.header
@@ -33,67 +25,67 @@ export function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 glass-strong"
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-20 lg:px-32">
-        <Link href={ROUTES.HOME} className="flex items-center">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center"
+        <div className="flex w-32" />
+
+        <Link href={ROUTES.HOME} className="flex items-center justify-center">
+          <span
+            className="text-3xl font-bold italic tracking-tight text-blushed-brick"
+            style={{ fontFamily: "Calibri, Candara, Segoe, sans-serif" }}
           >
-            <span className="flex h-11 items-center rounded-2xl gradient-primary px-4 shadow-ambient text-xl font-bold text-white whitespace-nowrap">
-              MIGRA
-            </span>
-          </motion.div>
+            MIGRA
+          </span>
         </Link>
 
-        <div className="hidden items-center gap-2 md:flex">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href;
-
-            return (
-              <Link key={link.href} href={link.href}>
+        <div className="flex w-32 items-center justify-end gap-3">
+          {isAuthenticated ? (
+            <>
+              <Link href="/dashboard">
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button variant="ghost" size="icon-sm">
+                    <UserCircleIcon className="size-5" />
+                  </Button>
+                </motion.div>
+              </Link>
+              <Link href="/dashboard/pedido">
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button variant="ghost" size="icon-sm">
+                    <ShoppingCart01Icon className="size-5" />
+                  </Button>
+                </motion.div>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href={ROUTES.LOGIN}>
                 <motion.div
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <Button
-                    variant={isActive ? "default" : "ghost"}
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <Icon className="size-4" />
-                    {link.label}
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Login01Icon className="size-4" />
+                    <span className="hidden sm:inline">Iniciar Sesión</span>
                   </Button>
                 </motion.div>
               </Link>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-3">
-          {authLinks.map((link) => {
-            const Icon = link.icon;
-
-            return (
-              <Link key={link.href} href={link.href}>
+              <Link href={ROUTES.REGISTER}>
                 <motion.div
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <Button
-                    variant={
-                      link.href === ROUTES.REGISTER ? "default" : "outline"
-                    }
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <Icon className="size-4" />
-                    <span className="hidden sm:inline">{link.label}</span>
+                  <Button variant="default" size="sm" className="gap-2">
+                    <UserAdd01Icon className="size-4" />
+                    <span className="hidden sm:inline">Registrarse</span>
                   </Button>
                 </motion.div>
               </Link>
-            );
-          })}
+            </>
+          )}
         </div>
       </nav>
     </motion.header>

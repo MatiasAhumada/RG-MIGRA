@@ -41,8 +41,16 @@ export const productoService = {
     return productoRepository.findByEmpresaId(empresaId);
   },
 
-  async findByTipo(tipo: string, empresaId: number) {
-    return productoRepository.findByTipo(tipo, empresaId);
+  async findByMarca(marcaId: number, empresaId: number) {
+    return productoRepository.findByMarca(marcaId, empresaId);
+  },
+
+  async findByCategoria(categoriaId: number, empresaId: number) {
+    return productoRepository.findByCategoria(categoriaId, empresaId);
+  },
+
+  async findBySubcategoria(subcategoriaId: number, empresaId: number) {
+    return productoRepository.findBySubcategoria(subcategoriaId, empresaId);
   },
 
   async update(id: number, dto: UpdateProductoDto) {
@@ -119,9 +127,11 @@ export const productoService = {
         const producto = await productoRepository.create({
           sku: parsed.sku,
           name: parsed.name,
-          tipo: dto.tipo,
           price: dto.defaultPrice,
           empresaId: dto.empresaId,
+          categoriaId: dto.categoriaId,
+          subcategoriaId: dto.subcategoriaId,
+          marcaId: dto.marcaId,
         });
 
         created.push(producto);

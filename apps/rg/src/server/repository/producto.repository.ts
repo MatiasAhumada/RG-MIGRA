@@ -13,6 +13,9 @@ export const productoRepository = {
       where: { id },
       include: {
         empresa: true,
+        categoria: true,
+        subcategoria: true,
+        marca: true,
       },
     });
   },
@@ -30,9 +33,38 @@ export const productoRepository = {
     });
   },
 
-  async findByTipo(tipo: string, empresaId: number) {
+  async findByMarca(marcaId: number, empresaId: number) {
     return prisma.producto.findMany({
-      where: { tipo, empresaId, deletedAt: null },
+      where: { marcaId, empresaId, deletedAt: null },
+      include: {
+        categoria: true,
+        subcategoria: true,
+        marca: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  async findByCategoria(categoriaId: number, empresaId: number) {
+    return prisma.producto.findMany({
+      where: { categoriaId, empresaId, deletedAt: null },
+      include: {
+        categoria: true,
+        subcategoria: true,
+        marca: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  async findBySubcategoria(subcategoriaId: number, empresaId: number) {
+    return prisma.producto.findMany({
+      where: { subcategoriaId, empresaId, deletedAt: null },
+      include: {
+        categoria: true,
+        subcategoria: true,
+        marca: true,
+      },
       orderBy: { createdAt: "desc" },
     });
   },
@@ -58,7 +90,6 @@ export const productoRepository = {
       ...(search && {
         OR: [
           { name: { contains: search, mode: "insensitive" as const } },
-          { tipo: { contains: search, mode: "insensitive" as const } },
           { sku: { contains: search, mode: "insensitive" as const } },
         ],
       }),
@@ -66,6 +97,11 @@ export const productoRepository = {
 
     return prisma.producto.findMany({
       where,
+      include: {
+        categoria: true,
+        subcategoria: true,
+        marca: true,
+      },
       orderBy: { createdAt: "desc" },
     });
   },

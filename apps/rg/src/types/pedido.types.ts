@@ -12,9 +12,15 @@ export interface CreatePedidoDto {
   clienteId: number;
   direccionId: number;
   status?: PedidoStatus;
+  codSeguimiento?: string;
 }
 
 export interface UpdatePedidoDto extends Partial<CreatePedidoDto> {}
+
+export interface UpdatePedidoStatusDto {
+  status: PedidoStatus;
+  codSeguimiento?: string;
+}
 
 export interface PedidoWithRelations extends Pedido {
   cliente: Cliente;

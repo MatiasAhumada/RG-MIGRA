@@ -17,9 +17,11 @@ export interface UpdateProductoDto extends Partial<CreateProductoDto> {}
 
 export interface BulkCreateProductoDto {
   pdfBuffer: Buffer;
-  tipo: string;
   defaultPrice: number;
   empresaId: number;
+  categoriaId: number;
+  subcategoriaId: number;
+  marcaId: number;
 }
 
 export interface UpdateProductoImageDto {
