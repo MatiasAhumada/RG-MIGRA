@@ -4,11 +4,13 @@ export type Producto = PrismaProducto;
 
 export interface CreateProductoDto {
   name: string;
-  tipo: string;
   sku: string;
   price: number;
   imgUrl?: string;
   empresaId: number;
+  categoriaId: number;
+  subcategoriaId: number;
+  marcaId: number;
 }
 
 export interface UpdateProductoDto extends Partial<CreateProductoDto> {}

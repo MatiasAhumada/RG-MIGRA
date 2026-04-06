@@ -28,91 +28,135 @@ enum PedidoStatus {
 }
 
 model User {
-  id        String         @id @default(cuid())
-  email     String         @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   password  String
   name      String
-  role      Role           @default(CLIENT)
+  role      Role      @default(CLIENT)
   empresaId Int?
-  empresa   Empresa?       @relation(fields: [empresaId], references: [id])
+  empresa   Empresa?  @relation(fields: [empresaId], references: [id])
   cliente   Cliente?
   deletedAt DateTime?
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Empresa {
-  id        Int        @id @default(autoincrement())
-  name      String
-  usuarios  User[]
-  clientes  Cliente[]
-  productos Producto[]
-  deletedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  name          String
+  usuarios      User[]
+  clientes      Cliente[]
+  productos     Producto[]
+  categorias    Categoria[]
+  subcategorias Subcategoria[]
+  marcas        Marca[]
+  deletedAt     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Cliente {
-  id           Int            @id @default(autoincrement())
-  razonSocial  String
-  titular      String
-  cuit         String         @unique
-  correo       String         @unique
-  telefono     String
-  status       ClienteStatus  @default(PENDING)
-  empresaId    Int
-  empresa      Empresa        @relation(fields: [empresaId], references: [id])
-  userId       String?        @unique
-  user         User?          @relation(fields: [userId], references: [id])
-  direcciones  Address[]
-  pedidos      Pedido[]
-  deletedAt    DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id          Int           @id @default(autoincrement())
+  razonSocial String
+  titular     String
+  cuit        String        @unique
+  correo      String        @unique
+  telefono    String
+  status      ClienteStatus @default(PENDING)
+  empresaId   Int
+  empresa     Empresa       @relation(fields: [empresaId], references: [id])
+  userId      String?       @unique
+  user        User?         @relation(fields: [userId], references: [id])
+  direcciones Address[]
+  pedidos     Pedido[]
+  deletedAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Address {
-  id         Int       @id @default(autoincrement())
-  provincia  String
-  localidad  String
-  direccion  String
-  codPostal  String
-  clienteId  Int
-  cliente    Cliente   @relation(fields: [clienteId], references: [id])
-  pedidos    Pedido[]
-  deletedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id        Int       @id @default(autoincrement())
+  provincia String
+  localidad String
+  direccion String
+  codPostal String
+  clienteId Int
+  cliente   Cliente   @relation(fields: [clienteId], references: [id])
+  pedidos   Pedido[]
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Categoria {
+  id            Int            @id @default(autoincrement())
+  name          String
+  empresaId     Int
+  empresa       Empresa        @relation(fields: [empresaId], references: [id])
+  subcategorias Subcategoria[]
+  productos     Producto[]
+  deletedAt     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Subcategoria {
+  id          Int        @id @default(autoincrement())
+  name        String
+  categoriaId Int
+  categoria   Categoria  @relation(fields: [categoriaId], references: [id])
+  empresaId   Int
+  empresa     Empresa    @relation(fields: [empresaId], references: [id])
+  productos   Producto[]
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Marca {
+  id        Int        @id @default(autoincrement())
+  name      String
+  empresaId Int
+  empresa   Empresa    @relation(fields: [empresaId], references: [id])
+  productos Producto[]
+  deletedAt DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Producto {
-  id             Int              @id @default(autoincrement())
+  id             Int             @id @default(autoincrement())
   name           String
-  tipo           String
-  sku            String           @unique
+  sku            String          @unique
   price          Float
   imgUrl         String?
   empresaId      Int
-  empresa        Empresa          @relation(fields: [empresaId], references: [id])
+  empresa        Empresa         @relation(fields: [empresaId], references: [id])
+  categoriaId    Int
+  categoria      Categoria       @relation(fields: [categoriaId], references: [id])
+  subcategoriaId Int
+  subcategoria   Subcategoria    @relation(fields: [subcategoriaId], references: [id])
+  marcaId        Int
+  marca          Marca           @relation(fields: [marcaId], references: [id])
   detallesPedido DetallePedido[]
   deletedAt      DateTime?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Pedido {
-  id            Int             @id @default(autoincrement())
-  fecha         DateTime        @default(now())
-  totalPedido   Float
-  status        PedidoStatus    @default(PENDING)
-  clienteId     Int
-  cliente       Cliente         @relation(fields: [clienteId], references: [id])
-  direccionId   Int
-  direccion     Address         @relation(fields: [direccionId], references: [id])
-  detalles      DetallePedido[]
-  deletedAt     DateTime?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id          Int             @id @default(autoincrement())
+  fecha       DateTime        @default(now())
+  totalPedido Float
+  status      PedidoStatus    @default(PENDING)
+  clienteId   Int
+  cliente     Cliente         @relation(fields: [clienteId], references: [id])
+  direccionId Int
+  direccion   Address         @relation(fields: [direccionId], references: [id])
+  detalles    DetallePedido[]
+  deletedAt   DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 }
 
 model DetallePedido {
