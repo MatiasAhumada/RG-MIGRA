@@ -27,15 +27,15 @@ export function Navbar() {
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="fixed top-0 left-0 right-0 z-50 glass-strong"
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-8 lg:px-16">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 md:px-8 lg:px-16">
         <div className="flex flex-1 items-center gap-3">
           <div className="relative hidden sm:block">
-            <Search01Icon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground/60" />
+            <Search01Icon className="absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground/60" />
             <Input
               placeholder="Buscar producto..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="h-10 w-56 rounded-full bg-muted/50 pl-9 pr-4 text-sm ring-0 focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-12 w-64 rounded-full bg-muted/50 pl-10 pr-4 text-base ring-0 focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
         </div>
@@ -60,8 +60,8 @@ export function Navbar() {
                   whileHover={{ scale: 1.15 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button variant="ghost" size="icon-sm">
-                    <UserCircleIcon className="size-6" />
+                  <Button variant="ghost" size="icon-lg">
+                    <UserCircleIcon className="size-7" />
                   </Button>
                 </motion.div>
               </Link>
@@ -70,8 +70,8 @@ export function Navbar() {
                   whileHover={{ scale: 1.15 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Button variant="ghost" size="icon-sm">
-                    <ShoppingCart01Icon className="size-6" />
+                  <Button variant="ghost" size="icon-lg">
+                    <ShoppingCart01Icon className="size-7" />
                   </Button>
                 </motion.div>
               </Link>
@@ -82,8 +82,8 @@ export function Navbar() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
               >
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <Login01Icon className="size-4" />
+                <Button variant="ghost" size="lg" className="gap-2 text-base">
+                  <Login01Icon className="size-5" />
                   Iniciar Sesión
                 </Button>
               </motion.div>
