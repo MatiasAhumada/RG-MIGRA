@@ -48,15 +48,15 @@ export function ProductCard({
           />
         </div>
 
-        <div className="flex flex-1 flex-col gap-3 p-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-label-sm text-on-surface-variant/70">
+        <div className="flex flex-1 flex-col gap-4 p-5">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-base font-medium text-on-surface-variant/70">
               {tipo}
             </span>
-            <h3 className="text-sm font-semibold leading-snug text-on-surface line-clamp-2">
+            <h3 className="text-lg font-semibold leading-snug text-on-surface line-clamp-2">
               {name}
             </h3>
-            <span className="text-[11px] text-on-surface-variant/50">
+            <span className="text-sm text-on-surface-variant/50">
               SKU: {sku}
             </span>
           </div>
@@ -64,21 +64,21 @@ export function ProductCard({
           <div className="mt-auto">
             {showPrice ? (
               <div className="flex items-center justify-between">
-                <span className="text-base font-bold text-primary">
+                <span className="text-xl font-bold text-primary">
                   {formattedPrice}
                 </span>
                 <Button
-                  size="icon-xs"
+                  size="icon-sm"
                   className="gradient-primary text-white shadow-ambient"
                 >
-                  <ShoppingCart01Icon className="size-3.5" />
+                  <ShoppingCart01Icon className="size-5" />
                 </Button>
               </div>
             ) : (
               <Link href="/login">
                 <Button
-                  size="sm"
-                  className="w-full text-xs bg-cerulean-500 text-white hover:bg-cerulean-400 shadow-sm"
+                  size="lg"
+                  className="w-full bg-cerulean-500 text-base font-bold text-white hover:bg-cerulean-400 shadow-sm"
                 >
                   Ver precio
                 </Button>
