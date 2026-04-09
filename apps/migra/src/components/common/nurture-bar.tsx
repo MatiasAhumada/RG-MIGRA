@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface NurtureBarStep {
+export interface NurtureBarStep {
   key: string;
   label: string;
   completed: boolean;
