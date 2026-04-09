@@ -10,9 +10,9 @@ export function Footer() {
           <div className="flex flex-col items-center gap-3 text-center md:items-start md:text-left">
             <Link href={ROUTES.HOME} className="flex items-center">
               <span
-                className="text-5xl font-black italic tracking-tighter"
+                className="text-4xl font-bold italic tracking-tight"
                 style={{
-                  fontFamily: "Calibri, Candara, Segoe, sans-serif",
+                  fontFamily: "Calibri, Candara, Segoe, 'Segoe UI', sans-serif",
                   color: "#c0392b",
                 }}
               >

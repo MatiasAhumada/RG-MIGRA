@@ -174,11 +174,11 @@ export default function HomePage() {
               </motion.span>
 
               <h2
-                className="text-4xl font-extrabold leading-[1.05] tracking-tight text-white md:text-6xl lg:text-[5.5rem]"
+                className="text-4xl font-extrabold leading-[1.15] text-white md:text-6xl lg:text-[5.5rem]"
                 style={{
                   fontFamily:
                     "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
-                  letterSpacing: "-0.02em",
+                  wordSpacing: "0.15em",
                 }}
               >
                 Hacé crecer tu negocio
