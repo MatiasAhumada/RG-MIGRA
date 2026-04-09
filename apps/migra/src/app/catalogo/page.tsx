@@ -126,11 +126,14 @@ export default function CatalogPage() {
           transition={{ duration: 0.4 }}
           className="mb-12"
         >
-          <span className="text-label-sm text-cerulean-500">
+          <h1
+            className="text-[1.75rem] font-extrabold text-[#161d16] md:text-[2.25rem]"
+            style={{
+              fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+              letterSpacing: "-0.02em",
+            }}
+          >
             Catálogo Completo
-          </span>
-          <h1 className="mt-2 text-headline-md text-on-surface">
-            Todos los productos
           </h1>
         </motion.div>
 
@@ -141,12 +144,12 @@ export default function CatalogPage() {
           className="mb-8"
         >
           <div className="relative max-w-md">
-            <Search01Icon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
+            <Search01Icon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
             <Input
               placeholder="Buscar producto, tipo o SKU..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
+              className="h-12 pl-12 text-base"
             />
           </div>
         </motion.div>
@@ -163,9 +166,12 @@ export default function CatalogPage() {
               onClick={() => setActiveCategory(category)}
               className={`shrink-0 cursor-pointer rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] ${
                 activeCategory === category
-                  ? "bg-cerulean-500 text-white shadow-ambient hover:bg-cerulean-600"
-                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                  ? "bg-[#2b6485] text-white shadow-lg"
+                  : "bg-[#f3fcf0]/60 text-[#3d4a3d] hover:bg-[#f3fcf0]"
               }`}
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
             >
               {category}
             </button>
@@ -191,7 +197,12 @@ export default function CatalogPage() {
             animate={{ opacity: 1 }}
             className="py-20 text-center"
           >
-            <p className="text-lg text-on-surface-variant">
+            <p
+              className="text-lg text-[#3d4a3d]"
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
+            >
               No se encontraron productos con esos criterios.
             </p>
           </motion.div>

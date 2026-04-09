@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
 import { PageHeader } from "@/components/common";
+import { DataTable } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import {
   Package01Icon,
@@ -20,7 +21,7 @@ const stats = [
     change: "+12%",
     trend: "up" as const,
     icon: Package01Icon,
-    color: "bg-frosted-blue-500/20 text-cerulean-500",
+    color: "bg-[#336366]/20 text-[#4c7c7f]",
   },
   {
     label: "Clientes Registrados",
@@ -28,7 +29,7 @@ const stats = [
     change: "+8%",
     trend: "up" as const,
     icon: Group01Icon,
-    color: "bg-cerulean-500/15 text-cerulean-600",
+    color: "bg-[#2b6485]/15 text-[#2b6485]",
   },
   {
     label: "Pedidos del Mes",
@@ -36,7 +37,7 @@ const stats = [
     change: "+23%",
     trend: "up" as const,
     icon: ShoppingCart01Icon,
-    color: "bg-frosted-blue-500/20 text-cerulean-500",
+    color: "bg-[#336366]/20 text-[#4c7c7f]",
   },
   {
     label: "Facturación",
@@ -44,54 +45,68 @@ const stats = [
     change: "-3%",
     trend: "down" as const,
     icon: Analytics01Icon,
-    color: "bg-punch-red-900/20 text-punch-red-400",
+    color: "bg-[#b7102a]/15 text-[#b7102a]",
   },
 ];
 
-const recentOrders = [
+interface Pedido {
+  id: string;
+  cliente: string;
+  total: string;
+  status: "PENDING" | "CONFIRMED" | "DOWNLOADED" | "SHIPPED";
+  date: string;
+}
+
+const recentOrders: Pedido[] = [
   {
     id: "PED-001",
     cliente: "Baby Store S.R.L",
     total: "$45.200",
-    status: "Confirmado",
+    status: "CONFIRMED",
     date: "03/04/2026",
   },
   {
     id: "PED-002",
     cliente: "Mundo Bebé",
     total: "$32.800",
-    status: "Pendiente",
+    status: "PENDING",
     date: "03/04/2026",
   },
   {
     id: "PED-003",
     cliente: "Pequeños Pasos",
     total: "$67.500",
-    status: "Enviado",
+    status: "SHIPPED",
     date: "02/04/2026",
   },
   {
     id: "PED-004",
     cliente: "La Casita del Bebé",
     total: "$28.900",
-    status: "Preparando",
+    status: "CONFIRMED",
     date: "02/04/2026",
   },
   {
     id: "PED-005",
     cliente: "Baby Store S.R.L",
     total: "$51.300",
-    status: "Entregado",
+    status: "DOWNLOADED",
     date: "01/04/2026",
   },
 ];
 
 const statusStyles: Record<string, string> = {
-  Confirmado: "bg-honeydew-500/15 text-honeydew-200",
-  Pendiente: "bg-cerulean-500/15 text-cerulean-600",
-  Enviado: "bg-frosted-blue-500/20 text-frosted-blue-200",
-  Preparando: "bg-frosted-blue-500/20 text-frosted-blue-200",
-  Entregado: "bg-honeydew-500/15 text-honeydew-300",
+  PENDING: "bg-[#2b6485]/15 text-[#2b6485]",
+  CONFIRMED: "bg-[#7cb56e]/15 text-[#5a9a4e]",
+  DOWNLOADED: "bg-[#336366]/20 text-[#4c7c7f]",
+  SHIPPED: "bg-[#336366]/20 text-[#4c7c7f]",
+};
+
+const statusLabels: Record<string, string> = {
+  PENDING: "Pendiente",
+  CONFIRMED: "Confirmado",
+  DOWNLOADED: "Descargado",
+  SHIPPED: "Enviado",
 };
 
 export default function AdminPage() {
@@ -118,7 +133,7 @@ export default function AdminPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + index * 0.05 }}
             >
-              <Card className="gap-4 p-6">
+              <Card className="rounded-[2rem] gap-4 p-6">
                 <div className="flex items-center justify-between">
                   <div
                     className={`flex size-12 items-center justify-center rounded-2xl ${stat.color}`}
@@ -126,7 +141,7 @@ export default function AdminPage() {
                     <Icon className="size-6" />
                   </div>
                   <div
-                    className={`flex items-center gap-1 text-xs font-medium ${stat.trend === "up" ? "text-cerulean-500" : "text-punch-red-400"}`}
+                    className={`flex items-center gap-1 text-xs font-medium ${stat.trend === "up" ? "text-[#2b6485]" : "text-[#b7102a]"}`}
                   >
                     {stat.trend === "up" ? (
                       <ArrowUp01Icon className="size-3" />
@@ -137,10 +152,20 @@ export default function AdminPage() {
                   </div>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-on-surface">
+                  <p
+                    className="text-2xl font-bold text-[#161d16]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     {stat.value}
                   </p>
-                  <p className="text-sm text-on-surface-variant">
+                  <p
+                    className="text-sm text-[#3d4a3d]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     {stat.label}
                   </p>
                 </div>
@@ -156,48 +181,65 @@ export default function AdminPage() {
         transition={{ delay: 0.3, duration: 0.4 }}
         className="mt-8"
       >
-        <Card className="p-0 overflow-hidden">
-          <div className="border-b border-outline-variant/10 p-6">
-            <h2 className="text-lg font-bold text-on-surface">
-              Pedidos Recientes
-            </h2>
-          </div>
-          <div className="divide-y divide-outline-variant/10">
-            {recentOrders.map((order, index) => (
-              <motion.div
-                key={order.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35 + index * 0.05 }}
-                className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-surface-container/30"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-sm font-semibold text-cerulean-500">
-                    {order.id}
-                  </span>
-                  <div>
-                    <p className="text-sm font-medium text-on-surface">
-                      {order.cliente}
-                    </p>
-                    <p className="text-xs text-on-surface-variant">
-                      {order.date}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-semibold text-on-surface">
-                    {order.total}
-                  </span>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[order.status]}`}
-                  >
-                    {order.status}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </Card>
+        <DataTable<Pedido>
+          title="Pedidos Recientes"
+          columns={[
+            {
+              key: "id",
+              label: "Pedido",
+              render: (item) => (
+                <span className="font-mono text-sm font-semibold text-[#2b6485]">
+                  {item.id}
+                </span>
+              ),
+            },
+            {
+              key: "cliente",
+              label: "Cliente",
+              render: (item) => (
+                <p className="text-sm font-medium text-[#161d16]">
+                  {item.cliente}
+                </p>
+              ),
+            },
+            {
+              key: "date",
+              label: "Fecha",
+              render: (item) => (
+                <p className="text-sm text-[#3d4a3d]">{item.date}</p>
+              ),
+            },
+            {
+              key: "total",
+              label: "Total",
+              render: (item) => (
+                <p
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  {item.total}
+                </p>
+              ),
+            },
+            {
+              key: "status",
+              label: "Estado",
+              render: (item) => (
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[item.status]}`}
+                >
+                  {statusLabels[item.status]}
+                </span>
+              ),
+            },
+          ]}
+          data={recentOrders}
+          keyExtractor={(item) => item.id}
+          emptyMessage="No hay pedidos recientes"
+          totalLabel={`${recentOrders.length} pedidos`}
+        />
       </motion.div>
     </AppLayout>
   );

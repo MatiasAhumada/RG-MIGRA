@@ -13,7 +13,6 @@ interface GenericModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "4xl";
-  variant?: "default" | "dark";
 }
 
 const SIZE_CLASSES = {
@@ -33,15 +32,8 @@ export function GenericModal({
   children,
   footer,
   size = "md",
-  variant = "default",
 }: GenericModalProps) {
-  const isDark = variant === "dark";
   const shouldReduceMotion = useReducedMotion();
-
-  const bgClass = isDark ? "bg-onyx" : "bg-neutral-950";
-  const headerBgClass = isDark ? "bg-neutral-950" : "bg-neutral-900";
-  const footerBgClass = isDark ? "bg-neutral-950" : "bg-neutral-900";
-  const contentBgClass = isDark ? "bg-onyx" : "bg-neutral-950";
 
   const modalVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
@@ -93,7 +85,7 @@ export function GenericModal({
             animate="visible"
             exit="exit"
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-[#161d16]/60 backdrop-blur-sm"
           />
           <motion.div
             variants={shouldReduceMotion ? undefined : modalVariants}
@@ -103,33 +95,35 @@ export function GenericModal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className={`${bgClass} border border-neutral-800 rounded-xl shadow-2xl ${SIZE_CLASSES[size]} w-full max-h-[90vh] overflow-y-auto pointer-events-auto`}
+              className={`rounded-[2rem] bg-white shadow-[0_16px_64px_rgba(29,53,87,0.12)] ${SIZE_CLASSES[size]} w-full max-h-[90vh] overflow-y-auto pointer-events-auto`}
             >
-              <div
-                className={`flex items-center justify-between p-6 border-b border-neutral-800 ${headerBgClass}`}
-              >
+              <div className="flex items-center justify-between border-b border-[#161d16]/5 p-6">
                 <div>
-                  <h2 className="text-lg font-semibold text-white">{title}</h2>
+                  <h2
+                    className="text-lg font-bold text-[#161d16]"
+                    style={{
+                      fontFamily:
+                        "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    {title}
+                  </h2>
                   {description && (
-                    <p className="text-sm text-neutral-400 mt-1">
-                      {description}
-                    </p>
+                    <p className="mt-1 text-sm text-[#3d4a3d]">{description}</p>
                   )}
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => onOpenChange(false)}
-                  className="text-neutral-400 hover:text-white hover:bg-neutral-800"
+                  className="text-[#3d4a3d] hover:bg-[#f3fcf0]/60 hover:text-[#161d16]"
                 >
-                  <Cancel01Icon size={20} />
+                  <Cancel01Icon className="size-5" />
                 </Button>
               </div>
-              <div className={`p-6 ${contentBgClass}`}>{children}</div>
+              <div className="p-6">{children}</div>
               {footer && (
-                <div
-                  className={`flex justify-end gap-2 p-6 border-t border-neutral-800 ${footerBgClass}`}
-                >
+                <div className="flex justify-end gap-3 border-t border-[#161d16]/5 p-6">
                   {footer}
                 </div>
               )}
@@ -193,7 +187,7 @@ export function ConfirmModal({
         </>
       }
     >
-      <p className="text-sm text-neutral-400">{description}</p>
+      <p className="text-sm text-[#3d4a3d]">{description}</p>
     </GenericModal>
   );
 }

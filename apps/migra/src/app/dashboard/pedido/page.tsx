@@ -7,6 +7,7 @@ import { PageHeader, NurtureBar } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft01Icon } from "hugeicons-react";
+import { formatCurrency } from "@/utils/formatters";
 
 const orderDetail = {
   id: "PED-001",
@@ -40,9 +41,8 @@ const orderDetail = {
 const orderSteps = [
   { key: "pending", label: "Pendiente", completed: true },
   { key: "confirmed", label: "Confirmado", completed: true },
-  { key: "preparing", label: "Preparando", completed: false, current: true },
+  { key: "downloaded", label: "Descargado", completed: false, current: true },
   { key: "shipped", label: "Enviado", completed: false },
-  { key: "delivered", label: "Entregado", completed: false },
 ];
 
 export default function DashboardPedidoPage() {
@@ -53,7 +53,11 @@ export default function DashboardPedidoPage() {
         description={`Realizado el ${orderDetail.date}`}
         action={
           <Link href="/dashboard/ordenes">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 rounded-[2rem]"
+            >
               <ArrowLeft01Icon className="size-4" />
               Volver a Pedidos
             </Button>
@@ -67,8 +71,11 @@ export default function DashboardPedidoPage() {
         transition={{ delay: 0.15, duration: 0.4 }}
         className="mt-8"
       >
-        <Card className="p-6">
-          <h3 className="mb-4 text-base font-bold text-on-surface">
+        <Card className="rounded-[2rem] p-6">
+          <h3
+            className="mb-4 text-base font-bold text-[#161d16]"
+            style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+          >
             Seguimiento del Pedido
           </h3>
           <NurtureBar steps={orderSteps} />
@@ -82,14 +89,19 @@ export default function DashboardPedidoPage() {
         className="mt-8 grid gap-6 lg:grid-cols-3"
       >
         <div className="lg:col-span-2">
-          <Card className="p-0 overflow-hidden">
-            <div className="border-b border-outline-variant/10 px-6 py-4">
-              <h3 className="text-base font-bold text-on-surface">
+          <Card className="rounded-[2rem] p-0 overflow-hidden">
+            <div className="border-b border-[#161d16]/10 px-6 py-4">
+              <h3
+                className="text-base font-bold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
                 Detalle del Pedido
               </h3>
             </div>
 
-            <div className="divide-y divide-outline-variant/5">
+            <div className="divide-y divide-[#161d16]/5">
               {orderDetail.items.map((item, index) => (
                 <motion.div
                   key={item.sku}
@@ -99,33 +111,63 @@ export default function DashboardPedidoPage() {
                   className="flex items-center justify-between px-6 py-4"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-on-surface">
+                    <p
+                      className="text-sm font-semibold text-[#161d16]"
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
+                    >
                       {item.name}
                     </p>
-                    <p className="text-xs text-on-surface-variant">
+                    <p
+                      className="text-xs text-[#3d4a3d]"
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
+                    >
                       SKU: {item.sku}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-on-surface-variant">
-                      {item.qty} x ${item.unitPrice.toLocaleString("es-AR")}
+                    <p
+                      className="text-sm text-[#3d4a3d]"
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
+                    >
+                      {item.qty} x {formatCurrency(item.unitPrice)}
                     </p>
-                    <p className="text-sm font-bold text-on-surface">
-                      ${item.subtotal.toLocaleString("es-AR")}
+                    <p
+                      className="text-sm font-bold text-[#161d16]"
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
+                    >
+                      {formatCurrency(item.subtotal)}
                     </p>
                   </div>
                 </motion.div>
               ))}
             </div>
 
-            <div className="border-t border-outline-variant/10 px-6 py-4">
+            <div className="border-t border-[#161d16]/10 px-6 py-4">
               <div className="flex justify-end">
                 <div className="text-right">
-                  <p className="text-sm text-on-surface-variant">
+                  <p
+                    className="text-sm text-[#3d4a3d]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     Total del Pedido
                   </p>
-                  <p className="text-2xl font-bold text-primary">
-                    ${orderDetail.total.toLocaleString("es-AR")}
+                  <p
+                    className="text-2xl font-bold text-[#b7102a]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    {formatCurrency(orderDetail.total)}
                   </p>
                 </div>
               </div>
@@ -134,22 +176,47 @@ export default function DashboardPedidoPage() {
         </div>
 
         <div>
-          <Card className="p-6">
-            <h3 className="mb-4 text-base font-bold text-on-surface">
+          <Card className="rounded-[2rem] p-6">
+            <h3
+              className="mb-4 text-base font-bold text-[#161d16]"
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
+            >
               Dirección de Envío
             </h3>
             <div className="flex flex-col gap-3">
-              <div className="rounded-xl bg-surface-container p-4">
-                <p className="text-sm font-semibold text-on-surface">
+              <div className="rounded-xl bg-[#f3fcf0]/60 p-4">
+                <p
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
                   {orderDetail.address.direccion}
                 </p>
-                <p className="text-sm text-on-surface-variant">
+                <p
+                  className="text-sm text-[#3d4a3d]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
                   {orderDetail.address.localidad}
                 </p>
-                <p className="text-sm text-on-surface-variant">
+                <p
+                  className="text-sm text-[#3d4a3d]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
                   {orderDetail.address.provincia}
                 </p>
-                <p className="text-sm text-on-surface-variant">
+                <p
+                  className="text-sm text-[#3d4a3d]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
                   CP: {orderDetail.address.codPostal}
                 </p>
               </div>

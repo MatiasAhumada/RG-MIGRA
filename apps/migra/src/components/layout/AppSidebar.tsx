@@ -81,15 +81,21 @@ export function AppSidebar({ variant = "admin" }: AppSidebarProps) {
         )}
       >
         <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between px-5 py-6">
-            <Link href="/" className="flex items-center">
-              <span className="flex h-10 items-center rounded-2xl gradient-primary px-3 text-base font-bold text-white whitespace-nowrap shadow-ambient">
+          <div className="flex items-center justify-center px-5 py-6">
+            <Link href="/" className="flex items-center justify-center w-full">
+              <span
+                className="text-4xl font-bold italic tracking-tight"
+                style={{
+                  fontFamily: "Calibri, Candara, Segoe, 'Segoe UI', sans-serif",
+                  color: "#c0392b",
+                }}
+              >
                 MIGRA
               </span>
             </Link>
             <button
               onClick={() => setIsOpen(false)}
-              className="flex size-9 items-center justify-center rounded-xl text-white/80 hover:bg-white/10 md:hidden"
+              className="absolute top-6 right-4 flex size-9 items-center justify-center rounded-xl text-white/80 hover:bg-white/10 md:hidden"
             >
               <Cancel01Icon className="size-5" />
             </button>
