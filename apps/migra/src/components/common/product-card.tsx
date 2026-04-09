@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart01Icon } from "hugeicons-react";
+import { formatCurrency } from "@/utils/formatters";
 
 interface ProductCardProps {
   id: string | number;
@@ -27,10 +28,7 @@ export function ProductCard({
   className,
   showPrice = true,
 }: ProductCardProps) {
-  const formattedPrice = new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-  }).format(price);
+  const formattedPrice = formatCurrency(price);
 
   return (
     <motion.div

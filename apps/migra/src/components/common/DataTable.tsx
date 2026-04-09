@@ -49,11 +49,17 @@ export function DataTable<T>({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="lg:ml-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-wide">
+          <h1
+            className="text-[1.75rem] md:text-[2.25rem] font-extrabold text-[#161d16]"
+            style={{
+              fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+              letterSpacing: "-0.02em",
+            }}
+          >
             {title}
           </h1>
           {subtitle && (
-            <p className="text-neutral-400 mt-1 text-sm sm:text-base">
+            <p className="text-[#3d4a3d] mt-1 text-sm sm:text-base">
               {subtitle}
             </p>
           )}
@@ -63,18 +69,18 @@ export function DataTable<T>({
         )}
       </div>
 
-      <div className="border border-neutral-800 rounded-xl shadow-lg bg-neutral-950">
+      <div className="rounded-[2rem] bg-white shadow-[0_8px_40px_rgba(29,53,87,0.06)] overflow-hidden">
         {onSearch && (
-          <div className="p-5 border-b border-neutral-800">
+          <div className="p-5 border-b border-[#161d16]/5">
             <div className="relative flex-1 w-full sm:max-w-md">
               <Search01Icon
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#3d4a3d]/50"
               />
               <Input
                 placeholder={searchPlaceholder}
                 onChange={(e) => onSearch(e.target.value)}
-                className="pl-10 bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-400 focus:border-red-600 focus:ring-red-600 text-sm"
+                className="pl-10 h-12 text-base"
               />
             </div>
           </div>
@@ -82,13 +88,13 @@ export function DataTable<T>({
 
         <div className="p-5 overflow-visible">
           <div className="w-full overflow-x-auto overflow-y-visible">
-            <table className="w-full min-w-[800px]">
+            <table className="w-full min-w-[600px]">
               <thead>
-                <tr className="border-b border-neutral-800 text-left text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                <tr className="border-b border-[#161d16]/5 text-left text-xs font-semibold uppercase tracking-wider text-[#3d4a3d]">
                   {columns.map((column) => (
                     <th
                       key={column.key}
-                      className={`pb-3 font-semibold ${column.className || ""}`}
+                      className={`pb-3 ${column.className || ""}`}
                     >
                       {column.label}
                     </th>
@@ -100,10 +106,10 @@ export function DataTable<T>({
                   <tr>
                     <td
                       colSpan={columns.length}
-                      className="py-8 text-center text-neutral-400 font-medium"
+                      className="py-8 text-center text-[#3d4a3d] font-medium"
                     >
                       <div className="flex items-center justify-center gap-3">
-                        <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                        <div className="size-5 animate-spin rounded-full border-2 border-[#b7102a] border-t-transparent" />
                         Cargando...
                       </div>
                     </td>
@@ -112,16 +118,15 @@ export function DataTable<T>({
                   <tr>
                     <td
                       colSpan={columns.length}
-                      className="py-8 text-center text-neutral-400 font-medium"
+                      className="py-8 text-center text-[#3d4a3d] font-medium"
                     >
                       {emptyMessage}
                     </td>
                   </tr>
                 ) : (
                   data.map((item, index) => (
-                    <>
+                    <Fragment key={keyExtractor(item)}>
                       <motion.tr
-                        key={keyExtractor(item)}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{
@@ -129,23 +134,23 @@ export function DataTable<T>({
                           delay: shouldReduceMotion ? 0 : index * 0.03,
                         }}
                         onClick={() => onRowClick?.(item)}
-                        className={`border-b border-neutral-800 hover:bg-neutral-900/50 transition-colors ${
+                        className={`border-b border-[#161d16]/5 hover:bg-[#f3fcf0]/30 transition-colors ${
                           onRowClick ? "cursor-pointer" : ""
                         }`}
                       >
                         {columns.map((column) => (
                           <td
                             key={column.key}
-                            className="py-4 text-sm font-medium text-white"
+                            className="py-4 text-sm font-medium text-[#161d16]"
                           >
                             {column.render
                               ? column.render(item)
-                              : (item as any)[column.key]}
+                              : (item as Record<string, unknown>)[column.key]}
                           </td>
                         ))}
                       </motion.tr>
                       {expandedContent?.(item)}
-                    </>
+                    </Fragment>
                   ))
                 )}
               </tbody>
@@ -153,8 +158,8 @@ export function DataTable<T>({
           </div>
 
           {totalLabel && (
-            <div className="mt-4 pt-4 border-t border-neutral-800">
-              <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+            <div className="mt-4 pt-4 border-t border-[#161d16]/5">
+              <p className="text-xs font-medium uppercase tracking-wider text-[#3d4a3d]">
                 {totalLabel}
               </p>
             </div>
@@ -163,4 +168,8 @@ export function DataTable<T>({
       </div>
     </div>
   );
+}
+
+function Fragment({ children }: { children: ReactNode }) {
+  return <>{children}</>;
 }

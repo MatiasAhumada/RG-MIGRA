@@ -15,6 +15,26 @@ interface HandlerOptions {
   toastOptions?: { description?: string; duration?: number };
 }
 
+interface ErrorLike {
+  message?: unknown;
+}
+
+function isErrorLike(value: unknown): value is ErrorLike {
+  return (
+    value !== undefined &&
+    value !== null &&
+    Object.prototype.hasOwnProperty.call(value, "message")
+  );
+}
+
+function isStringRecord(value: unknown): value is Record<string, unknown> {
+  return (
+    value !== undefined &&
+    value !== null &&
+    Object.prototype.toString.call(value) === "[object Object]"
+  );
+}
+
 function normalizeError(error: unknown): Error {
   if (error instanceof AxiosError) {
     const isNetworkError = !error.response;
@@ -27,17 +47,19 @@ function normalizeError(error: unknown): Error {
     };
   }
 
-  if (error && typeof error === "object" && !("message" in error)) {
+  if (error instanceof Error) return error;
+
+  if (typeof error === "string") return new Error(error);
+
+  if (isStringRecord(error) && !isErrorLike(error)) {
     return new Error(ERROR_MESSAGES.FORM_VALIDATION);
   }
 
-  if (error instanceof Error) return error;
-  if (typeof error === "string") return new Error(error);
+  if (isErrorLike(error) && typeof error.message === "string") {
+    return new Error(error.message);
+  }
 
-  if (error && typeof error === "object") {
-    if ("message" in error && typeof (error as any).message === "string") {
-      return new Error((error as any).message);
-    }
+  if (isStringRecord(error)) {
     return new Error(JSON.stringify(error));
   }
 

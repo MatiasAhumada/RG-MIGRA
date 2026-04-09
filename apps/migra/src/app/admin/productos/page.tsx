@@ -3,18 +3,24 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
-import { PageHeader, ProductCard } from "@/components/common";
+import { PageHeader } from "@/components/common";
+import { DataTable } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { GenericModal } from "@/components/common";
-import {
-  Add01Icon,
-  Search01Icon,
-  Edit02Icon,
-  Delete01Icon,
-} from "hugeicons-react";
+import { GenericModal, ConfirmModal } from "@/components/common";
+import { Add01Icon, Edit02Icon, Delete01Icon } from "hugeicons-react";
+import { formatCurrency } from "@/utils/formatters";
 
-const sampleProducts = [
+interface Producto {
+  id: number;
+  name: string;
+  tipo: string;
+  sku: string;
+  price: number;
+  imgUrl: string;
+}
+
+const sampleProducts: Producto[] = [
   {
     id: 1,
     name: "Pack Pañales Premium Talle M",
@@ -51,121 +57,337 @@ const sampleProducts = [
     imgUrl:
       "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=400&fit=crop",
   },
+  {
+    id: 5,
+    name: "Crema Hidratante Bebé 200g",
+    tipo: "Cuidado",
+    sku: "CRH-BEB-200",
+    price: 5400,
+    imgUrl:
+      "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=400&fit=crop",
+  },
+  {
+    id: 6,
+    name: "Chupete Silicona 6-18m",
+    tipo: "Accesorios",
+    sku: "CHU-SIL-618",
+    price: 3200,
+    imgUrl:
+      "https://images.unsplash.com/photo-1594125345722-e6e726a33a79?w=400&h=400&fit=crop",
+  },
 ];
 
 export default function AdminProductosPage() {
   const [search, setSearch] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editProducto, setEditProducto] = useState<Producto | null>(null);
+  const [deleteProducto, setDeleteProducto] = useState<Producto | null>(null);
+
+  const filteredProducts = sampleProducts.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.tipo.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <AppLayout variant="admin">
       <PageHeader
         title="Productos"
         description="Gestión del catálogo de productos"
-        action={
-          <Button onClick={() => setIsModalOpen(true)} className="gap-2">
-            <Add01Icon className="size-5" />
-            Nuevo Producto
-          </Button>
-        }
       />
-
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.4 }}
-        className="mt-6"
-      >
-        <div className="relative max-w-sm">
-          <Search01Icon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
-          <Input
-            placeholder="Buscar producto..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
-        className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+        transition={{ delay: 0.15, duration: 0.4 }}
+        className="mt-8"
       >
-        {sampleProducts.map((product, index) => (
-          <motion.div
-            key={product.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 + index * 0.05 }}
-          >
-            <div className="group relative">
-              <ProductCard {...product} />
-              <div className="absolute top-4 right-4 z-10 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                <Button
-                  size="icon-xs"
-                  variant="outline"
-                  className="bg-surface-container-lowest"
+        <DataTable<Producto>
+          title=""
+          subtitle=""
+          columns={[
+            {
+              key: "name",
+              label: "Producto",
+              render: (item) => (
+                <div className="flex items-center gap-3">
+                  <div className="size-10 shrink-0 overflow-hidden rounded-xl bg-[#f3fcf0]/60">
+                    <img
+                      src={item.imgUrl}
+                      alt={item.name}
+                      className="size-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p
+                      className="text-sm font-semibold text-[#161d16]"
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
+                    >
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-[#3d4a3d]">{item.tipo}</p>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: "sku",
+              label: "SKU",
+              render: (item) => (
+                <p className="text-sm font-mono text-[#3d4a3d]">{item.sku}</p>
+              ),
+            },
+            {
+              key: "price",
+              label: "Precio",
+              render: (item) => (
+                <p
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
-                  <Edit02Icon className="size-3" />
-                </Button>
-                <Button
-                  size="icon-xs"
-                  variant="outline"
-                  className="bg-surface-container-lowest text-destructive"
-                >
-                  <Delete01Icon className="size-3" />
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+                  {formatCurrency(item.price)}
+                </p>
+              ),
+            },
+            {
+              key: "actions",
+              label: "Acciones",
+              render: (item) => (
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="icon-xs"
+                    variant="outline"
+                    onClick={() => setEditProducto(item)}
+                    title="Editar"
+                  >
+                    <Edit02Icon className="size-3" />
+                  </Button>
+                  <Button
+                    size="icon-xs"
+                    variant="outline"
+                    className="text-[#db313f] hover:bg-[#db313f]/10"
+                    onClick={() => setDeleteProducto(item)}
+                    title="Eliminar"
+                  >
+                    <Delete01Icon className="size-3" />
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
+          data={filteredProducts}
+          keyExtractor={(item) => item.id.toString()}
+          emptyMessage="No se encontraron productos"
+          searchPlaceholder="Buscar producto..."
+          onSearch={setSearch}
+          actions={
+            <Button
+              onClick={() => setIsCreateOpen(true)}
+              className="gap-2 rounded-[2rem]"
+            >
+              <Add01Icon className="size-5" />
+              Nuevo Producto
+            </Button>
+          }
+          totalLabel={`${filteredProducts.length} productos`}
+        />
       </motion.div>
 
       <GenericModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
         title="Nuevo Producto"
-        size="md"
+        description="Completá los datos para agregar un producto al catálogo"
+        size="lg"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => setIsCreateOpen(false)}>
+              Guardar Producto
+            </Button>
+          </>
+        }
       >
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
-            <label className="text-label-sm text-on-surface">
+            <label
+              className="text-sm font-semibold text-[#161d16]"
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
+            >
               Nombre del Producto
             </label>
-            <Input placeholder="Ej: Pack Pañales Premium Talle M" />
+            <Input
+              placeholder="Ej: Pack Pañales Premium Talle M"
+              className="h-12 text-base"
+            />
           </div>
           <div className="grid gap-5 md:grid-cols-2">
             <div className="flex flex-col gap-2">
-              <label className="text-label-sm text-on-surface">Tipo</label>
-              <Input placeholder="Ej: Pañales" />
+              <label
+                className="text-sm font-semibold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
+                Tipo
+              </label>
+              <Input placeholder="Ej: Pañales" className="h-12 text-base" />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-label-sm text-on-surface">SKU</label>
-              <Input placeholder="Ej: PAN-PRE-M" />
+              <label
+                className="text-sm font-semibold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
+                SKU
+              </label>
+              <Input placeholder="Ej: PAN-PRE-M" className="h-12 text-base" />
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-label-sm text-on-surface">Precio</label>
-            <Input type="number" placeholder="0.00" />
+            <label
+              className="text-sm font-semibold text-[#161d16]"
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
+            >
+              Precio
+            </label>
+            <Input
+              type="number"
+              placeholder="0.00"
+              className="h-12 text-base"
+            />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-label-sm text-on-surface">
+            <label
+              className="text-sm font-semibold text-[#161d16]"
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
+            >
               URL de Imagen
             </label>
-            <Input placeholder="https://..." />
+            <Input placeholder="https://..." className="h-12 text-base" />
           </div>
         </div>
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={() => setIsModalOpen(false)}>
-            Guardar Producto
-          </Button>
-        </div>
       </GenericModal>
+
+      <GenericModal
+        open={!!editProducto}
+        onOpenChange={() => setEditProducto(null)}
+        title="Editar Producto"
+        description={`Editando: ${editProducto?.name}`}
+        size="lg"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setEditProducto(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => setEditProducto(null)}>
+              Guardar Cambios
+            </Button>
+          </>
+        }
+      >
+        {editProducto && (
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <label
+                className="text-sm font-semibold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
+                Nombre del Producto
+              </label>
+              <Input
+                defaultValue={editProducto.name}
+                className="h-12 text-base"
+              />
+            </div>
+            <div className="grid gap-5 md:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <label
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Tipo
+                </label>
+                <Input
+                  defaultValue={editProducto.tipo}
+                  className="h-12 text-base"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  SKU
+                </label>
+                <Input
+                  defaultValue={editProducto.sku}
+                  className="h-12 text-base"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label
+                className="text-sm font-semibold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
+                Precio
+              </label>
+              <Input
+                type="number"
+                defaultValue={editProducto.price}
+                className="h-12 text-base"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label
+                className="text-sm font-semibold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
+                URL de Imagen
+              </label>
+              <Input
+                defaultValue={editProducto.imgUrl}
+                className="h-12 text-base"
+              />
+            </div>
+          </div>
+        )}
+      </GenericModal>
+
+      <ConfirmModal
+        open={!!deleteProducto}
+        onOpenChange={() => setDeleteProducto(null)}
+        title="Eliminar Producto"
+        description={`¿Estás seguro de que deseas eliminar "${deleteProducto?.name}" del catálogo? Esta acción no se puede deshacer.`}
+        onConfirm={() => setDeleteProducto(null)}
+        confirmText="Eliminar"
+        variant="destructive"
+      />
     </AppLayout>
   );
 }

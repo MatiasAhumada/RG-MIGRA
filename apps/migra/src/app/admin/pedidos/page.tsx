@@ -4,12 +4,22 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar } from "@/components/common";
+import { DataTable } from "@/components/common";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Search01Icon, EyeIcon, FilterIcon } from "hugeicons-react";
+import { GenericModal } from "@/components/common";
+import { EyeIcon, FilterIcon } from "hugeicons-react";
+import { formatCurrency } from "@/utils/formatters";
 
-const sampleOrders = [
+interface Pedido {
+  id: string;
+  cliente: string;
+  items: number;
+  total: number;
+  status: "PENDING" | "CONFIRMED" | "DOWNLOADED" | "SHIPPED";
+  date: string;
+}
+
+const sampleOrders: Pedido[] = [
   {
     id: "PED-001",
     cliente: "Baby Store S.R.L",
@@ -39,7 +49,7 @@ const sampleOrders = [
     cliente: "La Casita del Bebé",
     items: 6,
     total: 28900,
-    status: "PREPARING",
+    status: "CONFIRMED",
     date: "02/04/2026",
   },
   {
@@ -47,7 +57,7 @@ const sampleOrders = [
     cliente: "Baby Store S.R.L",
     items: 18,
     total: 51300,
-    status: "DELIVERED",
+    status: "DOWNLOADED",
     date: "01/04/2026",
   },
   {
@@ -55,40 +65,121 @@ const sampleOrders = [
     cliente: "Mundo Bebé",
     items: 3,
     total: 9600,
-    status: "CANCELLED",
+    status: "PENDING",
     date: "31/03/2026",
   },
 ];
 
 const statusStyles: Record<string, string> = {
-  PENDING: "bg-cerulean-500/15 text-cerulean-600",
-  CONFIRMED: "bg-honeydew-500/15 text-honeydew-200",
-  PREPARING: "bg-frosted-blue-500/20 text-frosted-blue-200",
-  SHIPPED: "bg-frosted-blue-500/20 text-frosted-blue-200",
-  DELIVERED: "bg-honeydew-500/15 text-honeydew-300",
-  CANCELLED: "bg-punch-red-500/15 text-punch-red-400",
+  PENDING: "bg-[#2b6485]/15 text-[#2b6485]",
+  CONFIRMED: "bg-[#7cb56e]/15 text-[#5a9a4e]",
+  DOWNLOADED: "bg-[#336366]/20 text-[#4c7c7f]",
+  SHIPPED: "bg-[#336366]/20 text-[#4c7c7f]",
 };
 
 const statusLabels: Record<string, string> = {
   PENDING: "Pendiente",
   CONFIRMED: "Confirmado",
-  PREPARING: "Preparando",
+  DOWNLOADED: "Descargado",
   SHIPPED: "Enviado",
-  DELIVERED: "Entregado",
-  CANCELLED: "Cancelado",
 };
 
-const orderSteps = [
+const orderSteps: {
+  key: string;
+  label: string;
+  completed?: boolean;
+  current?: boolean;
+}[] = [
   { key: "pending", label: "Pendiente", completed: true },
   { key: "confirmed", label: "Confirmado", completed: true },
-  { key: "preparing", label: "Preparando", completed: false, current: true },
+  { key: "downloaded", label: "Descargado", completed: false, current: true },
   { key: "shipped", label: "Enviado", completed: false },
-  { key: "delivered", label: "Entregado", completed: false },
 ];
+
+const orderItems: Record<
+  string,
+  { name: string; sku: string; qty: number; unitPrice: number }[]
+> = {
+  "PED-001": [
+    {
+      name: "Pack Pañales Premium Talle M",
+      sku: "PAN-PRE-M",
+      qty: 4,
+      unitPrice: 15800,
+    },
+    { name: "Toallitas Húmedas x100", sku: "TOH-100", qty: 2, unitPrice: 4200 },
+    {
+      name: "Leche Infantil Fórmula 900g",
+      sku: "LEI-FOR-900",
+      qty: 6,
+      unitPrice: 12500,
+    },
+  ],
+  "PED-002": [
+    {
+      name: "Biberón Anticólicos 270ml",
+      sku: "BIB-ANT-270",
+      qty: 8,
+      unitPrice: 6800,
+    },
+  ],
+  "PED-003": [
+    {
+      name: "Pack Pañales Premium Talle L",
+      sku: "PAN-PRE-L",
+      qty: 10,
+      unitPrice: 17200,
+    },
+    {
+      name: "Crema Hidratante Bebé 200g",
+      sku: "CRH-BEB-200",
+      qty: 14,
+      unitPrice: 5400,
+    },
+  ],
+  "PED-004": [
+    {
+      name: "Chupete Silicona 6-18m",
+      sku: "CHU-SIL-618",
+      qty: 6,
+      unitPrice: 3200,
+    },
+  ],
+  "PED-005": [
+    {
+      name: "Mochila Pañalera Premium",
+      sku: "MOC-PRE-001",
+      qty: 3,
+      unitPrice: 18500,
+    },
+    {
+      name: "Pack Toallas de Baño x3",
+      sku: "TOB-BAO-3",
+      qty: 15,
+      unitPrice: 8900,
+    },
+  ],
+  "PED-006": [
+    {
+      name: "Talco Puder Bebé 300g",
+      sku: "TAL-PUD-300",
+      qty: 3,
+      unitPrice: 3800,
+    },
+  ],
+};
 
 export default function AdminPedidosPage() {
   const [search, setSearch] = useState("");
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [selectedPedido, setSelectedPedido] = useState<string | null>(null);
+
+  const filteredOrders = sampleOrders.filter(
+    (o) =>
+      o.id.toLowerCase().includes(search.toLowerCase()) ||
+      o.cliente.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const selectedData = sampleOrders.find((o) => o.id === selectedPedido);
 
   return (
     <AppLayout variant="admin">
@@ -98,120 +189,195 @@ export default function AdminPedidosPage() {
       />
 
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.4 }}
-        className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
-      >
-        <div className="relative max-w-sm">
-          <Search01Icon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
-          <Input
-            placeholder="Buscar pedido..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Button variant="outline" size="sm" className="gap-2">
-          <FilterIcon className="size-4" />
-          Filtrar
-        </Button>
-      </motion.div>
-
-      {selectedOrder && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-6"
-        >
-          <Card className="p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-on-surface">
-                  Pedido {selectedOrder}
-                </h3>
-                <p className="text-sm text-on-surface-variant">
-                  Seguimiento del pedido
-                </p>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedOrder(null)}
-              >
-                Cerrar
-              </Button>
-            </div>
-            <NurtureBar steps={orderSteps} />
-          </Card>
-        </motion.div>
-      )}
-
-      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
+        transition={{ delay: 0.15, duration: 0.4 }}
         className="mt-8"
       >
-        <Card className="p-0 overflow-hidden">
-          <div className="hidden gap-4 border-b border-outline-variant/10 px-6 py-4 md:grid md:grid-cols-12 text-label-sm text-on-surface-variant">
-            <div className="col-span-2">Pedido</div>
-            <div className="col-span-3">Cliente</div>
-            <div className="col-span-1">Items</div>
-            <div className="col-span-2">Total</div>
-            <div className="col-span-2">Estado</div>
-            <div className="col-span-2 text-right">Acciones</div>
-          </div>
-
-          {sampleOrders.map((order, index) => (
-            <motion.div
-              key={order.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.25 + index * 0.05 }}
-              className="flex flex-col gap-3 border-b border-outline-variant/5 px-6 py-4 transition-colors hover:bg-surface-container/30 last:border-b-0 md:grid md:grid-cols-12 md:items-center md:gap-4"
-            >
-              <div className="col-span-2">
-                <span className="font-mono text-sm font-semibold text-cerulean-500">
-                  {order.id}
+        <DataTable<Pedido>
+          title=""
+          subtitle=""
+          columns={[
+            {
+              key: "id",
+              label: "Pedido",
+              render: (item) => (
+                <span className="font-mono text-sm font-semibold text-[#2b6485]">
+                  {item.id}
                 </span>
-                <p className="text-xs text-on-surface-variant md:hidden">
-                  {order.date}
+              ),
+            },
+            {
+              key: "cliente",
+              label: "Cliente",
+              render: (item) => (
+                <p className="text-sm font-medium text-[#161d16]">
+                  {item.cliente}
                 </p>
-              </div>
-              <div className="col-span-3">
-                <p className="text-sm font-medium text-on-surface">
-                  {order.cliente}
+              ),
+            },
+            {
+              key: "items",
+              label: "Items",
+              render: (item) => (
+                <p className="text-sm text-[#3d4a3d]">{item.items}</p>
+              ),
+            },
+            {
+              key: "total",
+              label: "Total",
+              render: (item) => (
+                <p
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  {formatCurrency(item.total)}
                 </p>
-              </div>
-              <div className="col-span-1">
-                <p className="text-sm text-on-surface-variant">{order.items}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-sm font-semibold text-on-surface">
-                  ${order.total.toLocaleString("es-AR")}
-                </p>
-              </div>
-              <div className="col-span-2">
+              ),
+            },
+            {
+              key: "status",
+              label: "Estado",
+              render: (item) => (
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[order.status]}`}
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[item.status]}`}
                 >
-                  {statusLabels[order.status]}
+                  {statusLabels[item.status]}
                 </span>
-              </div>
-              <div className="col-span-2 flex justify-end">
-                <Button
-                  size="icon-xs"
-                  variant="outline"
-                  onClick={() => setSelectedOrder(order.id)}
-                >
-                  <EyeIcon className="size-3" />
-                </Button>
-              </div>
-            </motion.div>
-          ))}
-        </Card>
+              ),
+            },
+            {
+              key: "actions",
+              label: "Acciones",
+              render: (item) => (
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="icon-xs"
+                    variant="outline"
+                    onClick={() => setSelectedPedido(item.id)}
+                    title="Ver detalle"
+                  >
+                    <EyeIcon className="size-3" />
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
+          data={filteredOrders}
+          keyExtractor={(item) => item.id}
+          emptyMessage="No se encontraron pedidos"
+          searchPlaceholder="Buscar pedido..."
+          onSearch={setSearch}
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 rounded-[2rem]"
+            >
+              <FilterIcon className="size-4" />
+              Filtrar
+            </Button>
+          }
+          totalLabel={`${filteredOrders.length} pedidos`}
+        />
       </motion.div>
+
+      <GenericModal
+        open={!!selectedPedido}
+        onOpenChange={() => setSelectedPedido(null)}
+        title={`Pedido ${selectedPedido}`}
+        description={`Detalle y seguimiento del pedido`}
+        size="xl"
+      >
+        {selectedData && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3
+                className="mb-3 text-sm font-bold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
+                Seguimiento
+              </h3>
+              <NurtureBar steps={orderSteps} />
+            </div>
+
+            <div>
+              <h3
+                className="mb-3 text-sm font-bold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
+                Items del Pedido
+              </h3>
+              <div className="divide-y divide-[#161d16]/5 rounded-xl border border-[#161d16]/5">
+                {(orderItems[selectedPedido] || []).map((item) => (
+                  <div
+                    key={item.sku}
+                    className="flex items-center justify-between px-4 py-3"
+                  >
+                    <div>
+                      <p
+                        className="text-sm font-semibold text-[#161d16]"
+                        style={{
+                          fontFamily:
+                            "'Manrope', 'Inter', system-ui, sans-serif",
+                        }}
+                      >
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-[#3d4a3d]">SKU: {item.sku}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-[#3d4a3d]">
+                        {item.qty} x {formatCurrency(item.unitPrice)}
+                      </p>
+                      <p
+                        className="text-sm font-bold text-[#161d16]"
+                        style={{
+                          fontFamily:
+                            "'Manrope', 'Inter', system-ui, sans-serif",
+                        }}
+                      >
+                        {formatCurrency(item.qty * item.unitPrice)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between rounded-xl bg-[#f3fcf0]/60 p-4">
+              <div>
+                <p className="text-sm text-[#3d4a3d]">Cliente</p>
+                <p
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  {selectedData.cliente}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-[#3d4a3d]">Total</p>
+                <p
+                  className="text-xl font-bold text-[#b7102a]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  {formatCurrency(selectedData.total)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </GenericModal>
     </AppLayout>
   );
 }

@@ -14,6 +14,7 @@ import {
   ArrowRight01Icon,
   GridIcon,
 } from "hugeicons-react";
+import { formatCurrency } from "@/utils/formatters";
 
 const recentOrders = [
   {
@@ -34,21 +35,23 @@ const recentOrders = [
     id: "PED-003",
     items: 24,
     total: 67500,
-    status: "DELIVERED",
+    status: "SHIPPED",
     date: "28/03/2026",
   },
 ];
 
 const statusStyles: Record<string, string> = {
-  PENDING: "bg-cerulean-500/15 text-cerulean-600",
-  CONFIRMED: "bg-honeydew-500/15 text-honeydew-200",
-  DELIVERED: "bg-honeydew-500/15 text-honeydew-300",
+  PENDING: "bg-[#2b6485]/15 text-[#2b6485]",
+  CONFIRMED: "bg-[#7cb56e]/15 text-[#5a9a4e]",
+  DOWNLOADED: "bg-[#336366]/20 text-[#4c7c7f]",
+  SHIPPED: "bg-[#336366]/20 text-[#4c7c7f]",
 };
 
 const statusLabels: Record<string, string> = {
   PENDING: "Pendiente",
   CONFIRMED: "Confirmado",
-  DELIVERED: "Entregado",
+  DOWNLOADED: "Descargado",
+  SHIPPED: "Enviado",
 };
 
 const suggestedProducts = [
@@ -84,9 +87,8 @@ const suggestedProducts = [
 const orderSteps = [
   { key: "pending", label: "Pendiente", completed: true },
   { key: "confirmed", label: "Confirmado", completed: true },
-  { key: "preparing", label: "Preparando", completed: false, current: true },
+  { key: "downloaded", label: "Descargado", completed: false, current: true },
   { key: "shipped", label: "Enviado", completed: false },
-  { key: "delivered", label: "Entregado", completed: false },
 ];
 
 export default function DashboardPage() {
@@ -105,19 +107,19 @@ export default function DashboardPage() {
             label: "Pedidos Activos",
             value: "2",
             icon: ShoppingCart01Icon,
-            color: "bg-frosted-blue-500/20 text-cerulean-500",
+            color: "bg-[#336366]/20 text-[#4c7c7f]",
           },
           {
             label: "Pendientes",
             value: "1",
             icon: Clock01Icon,
-            color: "bg-cerulean-500/15 text-cerulean-600",
+            color: "bg-[#2b6485]/15 text-[#2b6485]",
           },
           {
             label: "Entregados",
             value: "15",
             icon: CheckmarkCircle01Icon,
-            color: "bg-honeydew-800/50 text-honeydew-200",
+            color: "bg-[#7cb56e]/15 text-[#5a9a4e]",
           },
         ].map((stat, index) => {
           const Icon = stat.icon;
@@ -129,17 +131,27 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + index * 0.05 }}
             >
-              <Card className="gap-4 p-6">
+              <Card className="rounded-[2rem] gap-4 p-6">
                 <div
                   className={`flex size-12 items-center justify-center rounded-2xl ${stat.color}`}
                 >
                   <Icon className="size-6" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-on-surface">
+                  <p
+                    className="text-2xl font-bold text-[#161d16]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     {stat.value}
                   </p>
-                  <p className="text-sm text-on-surface-variant">
+                  <p
+                    className="text-sm text-[#3d4a3d]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     {stat.label}
                   </p>
                 </div>
@@ -155,9 +167,14 @@ export default function DashboardPage() {
         transition={{ delay: 0.25, duration: 0.4 }}
         className="mt-8"
       >
-        <Card className="p-6">
+        <Card className="rounded-[2rem] p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-base font-bold text-on-surface">
+            <h3
+              className="text-base font-bold text-[#161d16]"
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
+            >
               Pedido PED-001 - Seguimiento
             </h3>
             <Link href="/dashboard/ordenes">
@@ -178,7 +195,10 @@ export default function DashboardPage() {
         className="mt-8"
       >
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-on-surface">
+          <h2
+            className="text-lg font-bold text-[#161d16]"
+            style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+          >
             Pedidos Recientes
           </h2>
           <Link href="/dashboard/ordenes">
@@ -189,32 +209,52 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <Card className="p-0 overflow-hidden">
+        <Card className="rounded-[2rem] p-0 overflow-hidden">
           {recentOrders.map((order, index) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 + index * 0.05 }}
-              className="flex items-center justify-between border-b border-outline-variant/5 px-6 py-4 transition-colors hover:bg-surface-container/30 last:border-b-0"
+              className="flex items-center justify-between border-b border-[#161d16]/5 px-6 py-4 transition-colors hover:bg-[#f3fcf0]/30 last:border-b-0"
             >
               <div className="flex items-center gap-4">
-                <span className="font-mono text-sm font-semibold text-cerulean-500">
+                <span className="font-mono text-sm font-semibold text-[#2b6485]">
                   {order.id}
                 </span>
                 <div>
-                  <p className="text-sm text-on-surface">{order.items} items</p>
-                  <p className="text-xs text-on-surface-variant">
+                  <p
+                    className="text-sm text-[#161d16]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
+                    {order.items} items
+                  </p>
+                  <p
+                    className="text-xs text-[#3d4a3d]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     {order.date}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-sm font-semibold text-on-surface">
-                  ${order.total.toLocaleString("es-AR")}
+                <span
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  {formatCurrency(order.total)}
                 </span>
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[order.status]}`}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {statusLabels[order.status]}
                 </span>
@@ -231,7 +271,10 @@ export default function DashboardPage() {
         className="mt-12 mb-8"
       >
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-on-surface">
+          <h2
+            className="text-lg font-bold text-[#161d16]"
+            style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+          >
             Productos Sugeridos
           </h2>
           <Link href="/catalogo">

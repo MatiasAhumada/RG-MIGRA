@@ -56,42 +56,66 @@ export default function RegisterPage() {
           className="w-full max-w-lg"
         >
           <div className="mb-10 text-center">
-            <h1 className="text-headline-md text-on-surface">Crear cuenta</h1>
-            <p className="mt-3 text-sm text-on-surface-variant">
+            <h1
+              className="text-[1.75rem] font-extrabold text-[#161d16] md:text-[2.25rem]"
+              style={{
+                fontFamily:
+                  "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Crear cuenta
+            </h1>
+            <p
+              className="mt-3 text-sm text-[#3d4a3d]"
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
+            >
               Completá el formulario para solicitar acceso al catálogo
             </p>
           </div>
 
-          <Card>
+          <Card className="rounded-[2rem] p-6">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
-                  <label className="text-label-sm text-on-surface">
+                  <label
+                    className="text-sm font-semibold text-[#161d16]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     Razón Social
                   </label>
                   <div className="relative">
-                    <Building02Icon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
+                    <Building02Icon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
                     <Input
                       placeholder="Mi Negocio S.R.L"
                       value={formData.razonSocial}
                       onChange={handleChange("razonSocial")}
-                      className="pl-10"
+                      className="h-12 pl-12 text-base"
                       required
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-label-sm text-on-surface">
+                  <label
+                    className="text-sm font-semibold text-[#161d16]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     Titular
                   </label>
                   <div className="relative">
-                    <UserIcon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
+                    <UserIcon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
                     <Input
                       placeholder="Nombre completo"
                       value={formData.titular}
                       onChange={handleChange("titular")}
-                      className="pl-10"
+                      className="h-12 pl-12 text-base"
                       required
                     />
                   </div>
@@ -100,66 +124,86 @@ export default function RegisterPage() {
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
-                  <label className="text-label-sm text-on-surface">
+                  <label
+                    className="text-sm font-semibold text-[#161d16]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     C.U.I.T
                   </label>
                   <div className="relative">
-                    <File01Icon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
+                    <File01Icon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
                     <Input
                       placeholder="20-12345678-9"
                       value={formData.cuit}
                       onChange={handleChange("cuit")}
-                      className="pl-10"
+                      className="h-12 pl-12 text-base"
                       required
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-label-sm text-on-surface">
+                  <label
+                    className="text-sm font-semibold text-[#161d16]"
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
+                  >
                     Teléfono
                   </label>
                   <div className="relative">
-                    <SmartPhone01Icon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
+                    <SmartPhone01Icon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
                     <Input
                       placeholder="+54 9 11 1234-5678"
                       value={formData.telefono}
                       onChange={handleChange("telefono")}
-                      className="pl-10"
+                      className="h-12 pl-12 text-base"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-label-sm text-on-surface">
+                <label
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
                   Correo electrónico
                 </label>
                 <div className="relative">
-                  <Mail01Icon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
+                  <Mail01Icon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
                   <Input
                     type="email"
                     placeholder="tu@email.com"
                     value={formData.correo}
                     onChange={handleChange("correo")}
-                    className="pl-10"
+                    className="h-12 pl-12 text-base"
                     required
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-label-sm text-on-surface">
+                <label
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
                   Contraseña
                 </label>
                 <div className="relative">
-                  <LockIcon className="absolute top-3.5 left-4 size-4 text-on-surface-variant/50" />
+                  <LockIcon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
                   <Input
                     type="password"
                     placeholder="Mínimo 8 caracteres"
                     value={formData.password}
                     onChange={handleChange("password")}
-                    className="pl-10"
+                    className="h-12 pl-12 text-base"
                     required
                     minLength={8}
                   />
@@ -170,11 +214,11 @@ export default function RegisterPage() {
                 type="submit"
                 size="lg"
                 disabled={isLoading}
-                className="gap-2"
+                className="gap-2 rounded-[2rem] text-base"
               >
                 {isLoading ? (
                   <span className="flex items-center gap-2">
-                    <span className="size-4 animate-spin rounded-full border-2 border-on-primary/30 border-t-on-primary" />
+                    <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                     Registrando...
                   </span>
                 ) : (
@@ -186,12 +230,17 @@ export default function RegisterPage() {
               </Button>
             </form>
 
-            <div className="mt-6 border-t border-outline-variant/10 pt-6 text-center">
-              <p className="text-sm text-on-surface-variant">
+            <div className="mt-6 border-t border-[#161d16]/5 pt-6 text-center">
+              <p
+                className="text-sm text-[#3d4a3d]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
                 ¿Ya tenés cuenta?{" "}
                 <Link
                   href={ROUTES.LOGIN}
-                  className="font-semibold text-secondary hover:underline"
+                  className="font-semibold text-[#2b6485] hover:underline"
                 >
                   Ingresá acá
                 </Link>
