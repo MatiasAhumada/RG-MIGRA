@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { GenericModal } from "@/components/common";
 import { EyeIcon, FilterIcon } from "hugeicons-react";
 import { formatCurrency } from "@/utils/formatters";
+import type { NurtureBarStep } from "@/components/common";
 
 interface Pedido {
   id: string;
@@ -84,12 +85,7 @@ const statusLabels: Record<string, string> = {
   SHIPPED: "Enviado",
 };
 
-const orderSteps: {
-  key: string;
-  label: string;
-  completed?: boolean;
-  current?: boolean;
-}[] = [
+const orderSteps: NurtureBarStep[] = [
   { key: "pending", label: "Pendiente", completed: true },
   { key: "confirmed", label: "Confirmado", completed: true },
   { key: "downloaded", label: "Descargado", completed: false, current: true },
@@ -291,7 +287,7 @@ export default function AdminPedidosPage() {
         description={`Detalle y seguimiento del pedido`}
         size="xl"
       >
-        {selectedData && (
+        {selectedPedido && selectedData && (
           <div className="flex flex-col gap-6">
             <div>
               <h3

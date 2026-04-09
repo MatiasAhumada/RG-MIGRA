@@ -145,7 +145,9 @@ export function DataTable<T>({
                           >
                             {column.render
                               ? column.render(item)
-                              : (item as Record<string, unknown>)[column.key]}
+                              : String(
+                                  (item as Record<string, unknown>)[column.key] ?? "",
+                                )}
                           </td>
                         ))}
                       </motion.tr>
