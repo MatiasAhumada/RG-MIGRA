@@ -42,20 +42,21 @@ const brandData = [
 async function main() {
   console.log("Buscando o creando empresa MIGRA...");
 
-  const existingEmpresa = await prisma.empresa.findFirst({
+  const foundEmpresa = await prisma.empresa.findFirst({
     where: { name: "MIGRA Distribuciones S.R.L" },
   });
 
-  let empresa = existingEmpresa;
+  const empresa = foundEmpresa
+    ? foundEmpresa
+    : await prisma.empresa.create({
+        data: { name: "MIGRA Distribuciones S.R.L" },
+      });
 
-  if (existingEmpresa) {
-    console.log(`Empresa "${existingEmpresa.name}" ya existe con ID: ${existingEmpresa.id}`);
-  } else {
-    empresa = await prisma.empresa.create({
-      data: { name: "MIGRA Distribuciones S.R.L" },
-    });
-    console.log(`Empresa creada con ID: ${empresa.id}`);
-  }
+  console.log(
+    foundEmpresa
+      ? `Empresa "${foundEmpresa.name}" ya existe con ID: ${foundEmpresa.id}`
+      : `Empresa creada con ID: ${empresa.id}`,
+  );
 
   for (const brand of brandData) {
     console.log(`Procesando marca: ${brand.name}`);

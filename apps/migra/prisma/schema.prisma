@@ -177,7 +177,7 @@ model Pedido {
 }
 
 model DetallePedido {
-  id         Int       @id @default(cuid())
+  id         Int       @id @default(autoincrement())
   cantidad   Int
   total      Float
   pedidoId   Int
