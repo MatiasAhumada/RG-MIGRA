@@ -37,6 +37,8 @@ model User {
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@map("usuarios")
 }
 
 model Empresa {
@@ -51,6 +53,8 @@ model Empresa {
   deletedAt     DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+
+  @@map("empresas")
 }
 
 model Cliente {
@@ -70,6 +74,8 @@ model Cliente {
   deletedAt   DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  @@map("clientes")
 }
 
 model Address {
@@ -84,6 +90,8 @@ model Address {
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@map("direcciones")
 }
 
 model Categoria {
@@ -96,6 +104,8 @@ model Categoria {
   deletedAt     DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+
+  @@map("categorias")
 }
 
 model Subcategoria {
@@ -109,6 +119,8 @@ model Subcategoria {
   deletedAt   DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  @@map("subcategorias")
 }
 
 model Marca {
@@ -120,6 +132,8 @@ model Marca {
   deletedAt DateTime?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+
+  @@map("marcas")
 }
 
 model Producto {
@@ -140,6 +154,8 @@ model Producto {
   deletedAt      DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@map("productos")
 }
 
 model Pedido {
@@ -156,10 +172,12 @@ model Pedido {
   deletedAt      DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@map("pedidos")
 }
 
 model DetallePedido {
-  id         Int       @id @default(autoincrement())
+  id         Int       @id @default(cuid())
   cantidad   Int
   total      Float
   pedidoId   Int
@@ -170,5 +188,5 @@ model DetallePedido {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
-  @@map("detalle_pedido")
+  @@map("detalle_pedidos")
 }

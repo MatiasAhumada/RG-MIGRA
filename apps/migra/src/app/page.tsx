@@ -2,28 +2,25 @@
 
 import { useState, useRef, type MouseEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { PublicLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/common";
 import { useSearch } from "@/context/search-context";
 import {
-  ShoppingCart01Icon,
-  Shield01Icon,
-  DeliveryTruck01Icon,
   ArrowRight01Icon,
   Login01Icon,
   CheckmarkCircle01Icon,
-  Package01Icon,
   Cancel01Icon,
 } from "hugeicons-react";
 import { ROUTES } from "@/constants/routes";
 
 const brands = [
-  { name: "Babelito", icon: Shield01Icon },
-  { name: "SPA", icon: Package01Icon },
-  { name: "Random", icon: DeliveryTruck01Icon },
-  { name: "Jactans", icon: ShoppingCart01Icon },
+  { name: "babelito", label: "Babelito" },
+  { name: "spa", label: "SPA" },
+  { name: "random", label: "Random" },
+  { name: "jactans", label: "Jactans" },
 ];
 
 const sampleProducts = [
@@ -272,10 +269,10 @@ export default function HomePage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="flex flex-wrap items-center justify-center gap-10 md:gap-16"
+            className="flex flex-wrap items-center justify-center gap-10 md:gap-14"
           >
             {brands.map((brand) => {
-              const Icon = brand.icon;
+              const isSpa = brand.name === "spa";
 
               return (
                 <motion.div
@@ -286,8 +283,18 @@ export default function HomePage() {
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   className="flex cursor-pointer flex-col items-center gap-3"
                 >
-                  <div className="flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-[#2b6485] to-[#336366] shadow-lg shadow-[#2b6485]/20 transition-shadow hover:shadow-xl hover:shadow-[#2b6485]/30">
-                    <Icon className="size-10 text-white" />
+                  <div
+                    className={`flex items-center justify-center rounded-[1.5rem] bg-white shadow-[0_8px_32px_rgba(29,53,87,0.08)] transition-shadow duration-300 hover:shadow-[0_12px_48px_rgba(29,53,87,0.14)] ${
+                      isSpa ? "h-28 w-44 p-4" : "h-28 w-48 p-5"
+                    }`}
+                  >
+                    <Image
+                      src={`/assets/images/logos/${brand.name}.svg`}
+                      alt={brand.label}
+                      width={isSpa ? 160 : 170}
+                      height={isSpa ? 64 : 64}
+                      className="object-contain"
+                    />
                   </div>
                   <span
                     className="text-sm font-bold text-[#161d16]"
@@ -295,7 +302,7 @@ export default function HomePage() {
                       fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
                     }}
                   >
-                    {brand.name}
+                    {brand.label}
                   </span>
                 </motion.div>
               );
