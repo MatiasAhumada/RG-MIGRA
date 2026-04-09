@@ -61,42 +61,44 @@ async function main() {
   for (const brand of brandData) {
     console.log(`Procesando marca: ${brand.name}`);
 
-    const existingMarca = await prisma.marca.findFirst({
+    const foundMarca = await prisma.marca.findFirst({
       where: { name: brand.name, empresaId: empresa.id },
     });
 
-    let marca = existingMarca;
-
-    if (existingMarca) {
-      console.log(`  Marca "${brand.name}" ya existe con ID: ${existingMarca.id}`);
-    } else {
-      marca = await prisma.marca.create({
-        data: {
-          name: brand.name,
-          empresaId: empresa.id,
-        },
-      });
-      console.log(`  Marca creada con ID: ${marca.id}`);
-    }
-
-    for (const category of brand.categories) {
-      const existingCategoria = await prisma.categoria.findFirst({
-        where: { name: category.name, empresaId: empresa.id },
-      });
-
-      let categoria = existingCategoria;
-
-      if (existingCategoria) {
-        console.log(`    Categoría "${category.name}" ya existe con ID: ${existingCategoria.id}`);
-      } else {
-        categoria = await prisma.categoria.create({
+    const marca = foundMarca
+      ? foundMarca
+      : await prisma.marca.create({
           data: {
-            name: category.name,
+            name: brand.name,
             empresaId: empresa.id,
           },
         });
-        console.log(`    Categoría creada con ID: ${categoria.id}`);
-      }
+
+    console.log(
+      foundMarca
+        ? `  Marca "${brand.name}" ya existe con ID: ${foundMarca.id}`
+        : `  Marca creada con ID: ${marca.id}`,
+    );
+
+    for (const category of brand.categories) {
+      const foundCategoria = await prisma.categoria.findFirst({
+        where: { name: category.name, empresaId: empresa.id },
+      });
+
+      const categoria = foundCategoria
+        ? foundCategoria
+        : await prisma.categoria.create({
+            data: {
+              name: category.name,
+              empresaId: empresa.id,
+            },
+          });
+
+      console.log(
+        foundCategoria
+          ? `    Categoría "${category.name}" ya existe con ID: ${foundCategoria.id}`
+          : `    Categoría creada con ID: ${categoria.id}`,
+      );
 
       for (const subName of category.subcategories) {
         const existingSub = await prisma.subcategoria.findFirst({
