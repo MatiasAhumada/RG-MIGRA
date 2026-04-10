@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { AppLayout } from "@/components/layout";
@@ -7,57 +8,87 @@ import { PageHeader, NurtureBar } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft01Icon } from "hugeicons-react";
+import { pedidoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
+import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import type { PedidoWithRelations } from "@/types/pedido.types";
+import type { NurtureBarStep } from "@/components/common";
 
-const orderDetail = {
-  id: "PED-001",
-  date: "03/04/2026",
-  status: "CONFIRMED",
-  total: 45200,
-  items: [
-    {
-      name: "Pack Pañales Premium Talle M",
-      sku: "PAN-PRE-M",
-      qty: 4,
-      unitPrice: 15800,
-      subtotal: 63200,
-    },
-    {
-      name: "Toallitas Húmedas x100",
-      sku: "TOH-100",
-      qty: 2,
-      unitPrice: 4200,
-      subtotal: 8400,
-    },
+const orderStepsMap: Record<string, NurtureBarStep[]> = {
+  PENDING: [
+    { key: "pending", label: "Pendiente", completed: false, current: true },
+    { key: "confirmed", label: "Confirmado", completed: false },
+    { key: "downloaded", label: "Descargado", completed: false },
+    { key: "shipped", label: "Enviado", completed: false },
   ],
-  address: {
-    provincia: "Buenos Aires",
-    localidad: "Capital Federal",
-    direccion: "Av. Corrientes 1234",
-    codPostal: "1043",
-  },
+  CONFIRMED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: false, current: true },
+    { key: "downloaded", label: "Descargado", completed: false },
+    { key: "shipped", label: "Enviado", completed: false },
+  ],
+  DOWNLOADED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: true },
+    { key: "downloaded", label: "Descargado", completed: false, current: true },
+    { key: "shipped", label: "Enviado", completed: false },
+  ],
+  SHIPPED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: true },
+    { key: "downloaded", label: "Descargado", completed: true },
+    { key: "shipped", label: "Enviado", completed: false, current: true },
+  ],
 };
 
-const orderSteps = [
-  { key: "pending", label: "Pendiente", completed: true },
-  { key: "confirmed", label: "Confirmado", completed: true },
-  { key: "downloaded", label: "Descargado", completed: false, current: true },
-  { key: "shipped", label: "Enviado", completed: false },
-];
-
 export default function DashboardPedidoPage() {
+  const [pedido, setPedido] = useState<PedidoWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadPedido();
+  }, []);
+
+  const loadPedido = async () => {
+    try {
+      setIsLoading(true);
+      const data = await pedidoService.findById(1);
+      setPedido(data);
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <AppLayout variant="client">
+        <div className="flex items-center justify-center py-20">
+          <span className="size-6 animate-spin rounded-full border-2 border-[#2b6485]/30 border-t-[#2b6485]" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!pedido) {
+    return (
+      <AppLayout variant="client">
+        <div className="py-20 text-center">
+          <p className="text-sm text-[#3d4a3d]">No se encontró el pedido</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout variant="client">
       <PageHeader
-        title={`Pedido ${orderDetail.id}`}
-        description={`Realizado el ${orderDetail.date}`}
+        title={`Pedido PED-${pedido.id}`}
+        description={`Realizado el ${new Date(pedido.fecha).toLocaleDateString("es-AR")}`}
         action={
           <Link href="/dashboard/ordenes">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 rounded-[2rem]"
-            >
+            <Button variant="outline" size="sm" className="gap-2 rounded-[2rem]">
               <ArrowLeft01Icon className="size-4" />
               Volver a Pedidos
             </Button>
@@ -78,7 +109,7 @@ export default function DashboardPedidoPage() {
           >
             Seguimiento del Pedido
           </h3>
-          <NurtureBar steps={orderSteps} />
+          <NurtureBar steps={orderStepsMap[pedido.status] || []} />
         </Card>
       </motion.div>
 
@@ -93,57 +124,43 @@ export default function DashboardPedidoPage() {
             <div className="border-b border-[#161d16]/10 px-6 py-4">
               <h3
                 className="text-base font-bold text-[#161d16]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
                 Detalle del Pedido
               </h3>
             </div>
 
             <div className="divide-y divide-[#161d16]/5">
-              {orderDetail.items.map((item, index) => (
+              {pedido.detalles.map((item) => (
                 <motion.div
-                  key={item.sku}
+                  key={item.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.05 }}
                   className="flex items-center justify-between px-6 py-4"
                 >
                   <div>
                     <p
                       className="text-sm font-semibold text-[#161d16]"
-                      style={{
-                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                      }}
+                      style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                     >
-                      {item.name}
+                      {item.producto.name}
                     </p>
-                    <p
-                      className="text-xs text-[#3d4a3d]"
-                      style={{
-                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                      }}
-                    >
-                      SKU: {item.sku}
+                    <p className="text-xs text-[#3d4a3d]">
+                      SKU: {item.producto.sku}
                     </p>
                   </div>
                   <div className="text-right">
                     <p
                       className="text-sm text-[#3d4a3d]"
-                      style={{
-                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                      }}
+                      style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                     >
-                      {item.qty} x {formatCurrency(item.unitPrice)}
+                      {item.cantidad} x {formatCurrency(item.producto.price)}
                     </p>
                     <p
                       className="text-sm font-bold text-[#161d16]"
-                      style={{
-                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                      }}
+                      style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                     >
-                      {formatCurrency(item.subtotal)}
+                      {formatCurrency(item.total)}
                     </p>
                   </div>
                 </motion.div>
@@ -155,19 +172,15 @@ export default function DashboardPedidoPage() {
                 <div className="text-right">
                   <p
                     className="text-sm text-[#3d4a3d]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
                     Total del Pedido
                   </p>
                   <p
                     className="text-2xl font-bold text-[#b7102a]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
-                    {formatCurrency(orderDetail.total)}
+                    {formatCurrency(pedido.totalPedido)}
                   </p>
                 </div>
               </div>
@@ -179,9 +192,7 @@ export default function DashboardPedidoPage() {
           <Card className="rounded-[2rem] p-6">
             <h3
               className="mb-4 text-base font-bold text-[#161d16]"
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
+              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
             >
               Dirección de Envío
             </h3>
@@ -189,35 +200,27 @@ export default function DashboardPedidoPage() {
               <div className="rounded-xl bg-[#f3fcf0]/60 p-4">
                 <p
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
-                  {orderDetail.address.direccion}
+                  {pedido.direccion.direccion}
                 </p>
                 <p
                   className="text-sm text-[#3d4a3d]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
-                  {orderDetail.address.localidad}
+                  {pedido.direccion.localidad}
                 </p>
                 <p
                   className="text-sm text-[#3d4a3d]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
-                  {orderDetail.address.provincia}
+                  {pedido.direccion.provincia}
                 </p>
                 <p
                   className="text-sm text-[#3d4a3d]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
-                  CP: {orderDetail.address.codPostal}
+                  CP: {pedido.direccion.codPostal}
                 </p>
               </div>
             </div>

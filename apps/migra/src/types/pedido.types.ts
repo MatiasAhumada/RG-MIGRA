@@ -25,9 +25,9 @@ export interface UpdatePedidoStatusDto {
 export interface PedidoWithRelations extends Pedido {
   cliente: Cliente;
   direccion: Address;
-  detalles: DetallePedido[];
+  detalles: DetallePedidoWithRelations[];
 }
 
 import { Cliente } from "./cliente.types";
 import { Address } from "./address.types";
-import { DetallePedido } from "./detalle-pedido.types";
+import { DetallePedidoWithRelations } from "./detalle-pedido.types";

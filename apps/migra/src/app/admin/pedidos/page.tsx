@@ -3,73 +3,15 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
-import { PageHeader, NurtureBar } from "@/components/common";
-import { DataTable } from "@/components/common";
+import { PageHeader, NurtureBar, DataTable } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { GenericModal } from "@/components/common";
 import { EyeIcon, FilterIcon } from "hugeicons-react";
+import { pedidoService, productoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
+import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import type { PedidoWithRelations, PedidoStatus } from "@/types/pedido.types";
 import type { NurtureBarStep } from "@/components/common";
-
-interface Pedido {
-  id: string;
-  cliente: string;
-  items: number;
-  total: number;
-  status: "PENDING" | "CONFIRMED" | "DOWNLOADED" | "SHIPPED";
-  date: string;
-}
-
-const sampleOrders: Pedido[] = [
-  {
-    id: "PED-001",
-    cliente: "Baby Store S.R.L",
-    items: 12,
-    total: 45200,
-    status: "CONFIRMED",
-    date: "03/04/2026",
-  },
-  {
-    id: "PED-002",
-    cliente: "Mundo Bebé",
-    items: 8,
-    total: 32800,
-    status: "PENDING",
-    date: "03/04/2026",
-  },
-  {
-    id: "PED-003",
-    cliente: "Pequeños Pasos",
-    items: 24,
-    total: 67500,
-    status: "SHIPPED",
-    date: "02/04/2026",
-  },
-  {
-    id: "PED-004",
-    cliente: "La Casita del Bebé",
-    items: 6,
-    total: 28900,
-    status: "CONFIRMED",
-    date: "02/04/2026",
-  },
-  {
-    id: "PED-005",
-    cliente: "Baby Store S.R.L",
-    items: 18,
-    total: 51300,
-    status: "DOWNLOADED",
-    date: "01/04/2026",
-  },
-  {
-    id: "PED-006",
-    cliente: "Mundo Bebé",
-    items: 3,
-    total: 9600,
-    status: "PENDING",
-    date: "31/03/2026",
-  },
-];
 
 const statusStyles: Record<string, string> = {
   PENDING: "bg-[#2b6485]/15 text-[#2b6485]",
@@ -85,97 +27,56 @@ const statusLabels: Record<string, string> = {
   SHIPPED: "Enviado",
 };
 
-const orderSteps: NurtureBarStep[] = [
-  { key: "pending", label: "Pendiente", completed: true },
-  { key: "confirmed", label: "Confirmado", completed: true },
-  { key: "downloaded", label: "Descargado", completed: false, current: true },
-  { key: "shipped", label: "Enviado", completed: false },
-];
-
-const orderItems: Record<
-  string,
-  { name: string; sku: string; qty: number; unitPrice: number }[]
-> = {
-  "PED-001": [
-    {
-      name: "Pack Pañales Premium Talle M",
-      sku: "PAN-PRE-M",
-      qty: 4,
-      unitPrice: 15800,
-    },
-    { name: "Toallitas Húmedas x100", sku: "TOH-100", qty: 2, unitPrice: 4200 },
-    {
-      name: "Leche Infantil Fórmula 900g",
-      sku: "LEI-FOR-900",
-      qty: 6,
-      unitPrice: 12500,
-    },
+const orderStepsMap: Record<string, NurtureBarStep[]> = {
+  PENDING: [
+    { key: "pending", label: "Pendiente", completed: false, current: true },
+    { key: "confirmed", label: "Confirmado", completed: false },
+    { key: "downloaded", label: "Descargado", completed: false },
+    { key: "shipped", label: "Enviado", completed: false },
   ],
-  "PED-002": [
-    {
-      name: "Biberón Anticólicos 270ml",
-      sku: "BIB-ANT-270",
-      qty: 8,
-      unitPrice: 6800,
-    },
+  CONFIRMED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: false, current: true },
+    { key: "downloaded", label: "Descargado", completed: false },
+    { key: "shipped", label: "Enviado", completed: false },
   ],
-  "PED-003": [
-    {
-      name: "Pack Pañales Premium Talle L",
-      sku: "PAN-PRE-L",
-      qty: 10,
-      unitPrice: 17200,
-    },
-    {
-      name: "Crema Hidratante Bebé 200g",
-      sku: "CRH-BEB-200",
-      qty: 14,
-      unitPrice: 5400,
-    },
+  DOWNLOADED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: true },
+    { key: "downloaded", label: "Descargado", completed: false, current: true },
+    { key: "shipped", label: "Enviado", completed: false },
   ],
-  "PED-004": [
-    {
-      name: "Chupete Silicona 6-18m",
-      sku: "CHU-SIL-618",
-      qty: 6,
-      unitPrice: 3200,
-    },
-  ],
-  "PED-005": [
-    {
-      name: "Mochila Pañalera Premium",
-      sku: "MOC-PRE-001",
-      qty: 3,
-      unitPrice: 18500,
-    },
-    {
-      name: "Pack Toallas de Baño x3",
-      sku: "TOB-BAO-3",
-      qty: 15,
-      unitPrice: 8900,
-    },
-  ],
-  "PED-006": [
-    {
-      name: "Talco Puder Bebé 300g",
-      sku: "TAL-PUD-300",
-      qty: 3,
-      unitPrice: 3800,
-    },
+  SHIPPED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: true },
+    { key: "downloaded", label: "Descargado", completed: true },
+    { key: "shipped", label: "Enviado", completed: false, current: true },
   ],
 };
 
 export default function AdminPedidosPage() {
   const [search, setSearch] = useState("");
-  const [selectedPedido, setSelectedPedido] = useState<string | null>(null);
+  const [pedidos, setPedidos] = useState<PedidoWithRelations[]>([]);
+  const [selectedPedido, setSelectedPedido] = useState<PedidoWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filteredOrders = sampleOrders.filter(
+  const loadPedidos = async () => {
+    try {
+      setIsLoading(true);
+      const data = await pedidoService.findAll();
+      setPedidos(data);
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredOrders = pedidos.filter(
     (o) =>
-      o.id.toLowerCase().includes(search.toLowerCase()) ||
-      o.cliente.toLowerCase().includes(search.toLowerCase()),
+      o.id.toString().toLowerCase().includes(search.toLowerCase()) ||
+      o.cliente.razonSocial.toLowerCase().includes(search.toLowerCase()),
   );
-
-  const selectedData = sampleOrders.find((o) => o.id === selectedPedido);
 
   return (
     <AppLayout variant="admin">
@@ -190,7 +91,7 @@ export default function AdminPedidosPage() {
         transition={{ delay: 0.15, duration: 0.4 }}
         className="mt-8"
       >
-        <DataTable<Pedido>
+        <DataTable<PedidoWithRelations>
           title=""
           subtitle=""
           columns={[
@@ -199,7 +100,7 @@ export default function AdminPedidosPage() {
               label: "Pedido",
               render: (item) => (
                 <span className="font-mono text-sm font-semibold text-[#2b6485]">
-                  {item.id}
+                  PED-{item.id}
                 </span>
               ),
             },
@@ -208,28 +109,28 @@ export default function AdminPedidosPage() {
               label: "Cliente",
               render: (item) => (
                 <p className="text-sm font-medium text-[#161d16]">
-                  {item.cliente}
+                  {item.cliente.razonSocial}
                 </p>
               ),
             },
             {
-              key: "items",
-              label: "Items",
+              key: "fecha",
+              label: "Fecha",
               render: (item) => (
-                <p className="text-sm text-[#3d4a3d]">{item.items}</p>
+                <p className="text-sm text-[#3d4a3d]">
+                  {new Date(item.fecha).toLocaleDateString("es-AR")}
+                </p>
               ),
             },
             {
-              key: "total",
+              key: "totalPedido",
               label: "Total",
               render: (item) => (
                 <p
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
-                  {formatCurrency(item.total)}
+                  {formatCurrency(item.totalPedido)}
                 </p>
               ),
             },
@@ -252,7 +153,7 @@ export default function AdminPedidosPage() {
                   <Button
                     size="icon-xs"
                     variant="outline"
-                    onClick={() => setSelectedPedido(item.id)}
+                    onClick={() => setSelectedPedido(item)}
                     title="Ver detalle"
                   >
                     <EyeIcon className="size-3" />
@@ -261,20 +162,30 @@ export default function AdminPedidosPage() {
               ),
             },
           ]}
-          data={filteredOrders}
-          keyExtractor={(item) => item.id}
+          data={isLoading ? [] : filteredOrders}
+          keyExtractor={(item) => String(item.id)}
           emptyMessage="No se encontraron pedidos"
           searchPlaceholder="Buscar pedido..."
           onSearch={setSearch}
           actions={
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 rounded-[2rem]"
-            >
-              <FilterIcon className="size-4" />
-              Filtrar
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 rounded-[2rem]"
+              >
+                <FilterIcon className="size-4" />
+                Filtrar
+              </Button>
+              <Button
+                size="sm"
+                className="rounded-[2rem]"
+                onClick={loadPedidos}
+                disabled={isLoading}
+              >
+                {isLoading ? "Cargando..." : "Actualizar"}
+              </Button>
+            </div>
           }
           totalLabel={`${filteredOrders.length} pedidos`}
         />
@@ -283,63 +194,55 @@ export default function AdminPedidosPage() {
       <GenericModal
         open={!!selectedPedido}
         onOpenChange={() => setSelectedPedido(null)}
-        title={`Pedido ${selectedPedido}`}
+        title={`Pedido PED-${selectedPedido?.id}`}
         description={`Detalle y seguimiento del pedido`}
         size="xl"
       >
-        {selectedPedido && selectedData && (
+        {selectedPedido && (
           <div className="flex flex-col gap-6">
             <div>
               <h3
                 className="mb-3 text-sm font-bold text-[#161d16]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
                 Seguimiento
               </h3>
-              <NurtureBar steps={orderSteps} />
+              <NurtureBar steps={orderStepsMap[selectedPedido.status] || []} />
             </div>
 
             <div>
               <h3
                 className="mb-3 text-sm font-bold text-[#161d16]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
                 Items del Pedido
               </h3>
               <div className="divide-y divide-[#161d16]/5 rounded-xl border border-[#161d16]/5">
-                {(orderItems[selectedPedido] || []).map((item) => (
+                {selectedPedido.detalles.map((detalle) => (
                   <div
-                    key={item.sku}
+                    key={detalle.id}
                     className="flex items-center justify-between px-4 py-3"
                   >
                     <div>
                       <p
                         className="text-sm font-semibold text-[#161d16]"
-                        style={{
-                          fontFamily:
-                            "'Manrope', 'Inter', system-ui, sans-serif",
-                        }}
+                        style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                       >
-                        {item.name}
+                        {detalle.producto.name}
                       </p>
-                      <p className="text-xs text-[#3d4a3d]">SKU: {item.sku}</p>
+                      <p className="text-xs text-[#3d4a3d]">
+                        SKU: {detalle.producto.sku}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-[#3d4a3d]">
-                        {item.qty} x {formatCurrency(item.unitPrice)}
+                        {detalle.cantidad} x {formatCurrency(detalle.producto.price)}
                       </p>
                       <p
                         className="text-sm font-bold text-[#161d16]"
-                        style={{
-                          fontFamily:
-                            "'Manrope', 'Inter', system-ui, sans-serif",
-                        }}
+                        style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                       >
-                        {formatCurrency(item.qty * item.unitPrice)}
+                        {formatCurrency(detalle.total)}
                       </p>
                     </div>
                   </div>
@@ -352,22 +255,18 @@ export default function AdminPedidosPage() {
                 <p className="text-sm text-[#3d4a3d]">Cliente</p>
                 <p
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
-                  {selectedData.cliente}
+                  {selectedPedido.cliente.razonSocial}
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-[#3d4a3d]">Total</p>
                 <p
                   className="text-xl font-bold text-[#b7102a]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
-                  {formatCurrency(selectedData.total)}
+                  {formatCurrency(selectedPedido.totalPedido)}
                 </p>
               </div>
             </div>

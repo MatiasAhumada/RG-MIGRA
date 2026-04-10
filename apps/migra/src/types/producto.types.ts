@@ -32,6 +32,13 @@ export interface ProductoWithEmpresa extends Producto {
   empresa: Empresa;
 }
 
+export interface ProductoWithRelations extends Producto {
+  empresa: Empresa;
+  categoria: Categoria;
+  subcategoria: Subcategoria;
+  marca: Marca;
+}
+
 export interface ParsedProduct {
   sku: string;
   name: string;
@@ -39,3 +46,6 @@ export interface ParsedProduct {
 }
 
 import { Empresa } from "./empresa.types";
+import { Categoria } from "./categoria.types";
+import { Subcategoria } from "./subcategoria.types";
+import { Marca } from "./marca.types";

@@ -1,3 +1,4 @@
+export { authService } from "./auth.service";
 export { userService } from "./user.service";
 export { clienteService } from "./cliente.service";
 export { productoService } from "./producto.service";

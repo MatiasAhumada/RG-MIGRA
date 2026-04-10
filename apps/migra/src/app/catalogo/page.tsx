@@ -1,118 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { PublicLayout } from "@/components/layout";
 import { ProductCard } from "@/components/common";
 import { Input } from "@/components/ui/input";
 import { Search01Icon } from "hugeicons-react";
-
-const sampleProducts = [
-  {
-    id: 1,
-    name: "Pack Pañales Premium Talle M",
-    tipo: "Pañales",
-    sku: "PAN-PRE-M",
-    price: 15800,
-    imgUrl:
-      "https://images.unsplash.com/photo-1594125345722-e6e726a33a79?w=400&h=400&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Toallitas Húmedas x100",
-    tipo: "Higiene",
-    sku: "TOH-100",
-    price: 4200,
-    imgUrl:
-      "https://images.unsplash.com/photo-1627916560298-0227d0754b40?w=400&h=400&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Leche Infantil Fórmula 900g",
-    tipo: "Alimentación",
-    sku: "LEI-FOR-900",
-    price: 12500,
-    imgUrl:
-      "https://images.unsplash.com/photo-1584693786687-3e4b0a0e3e3e?w=400&h=400&fit=crop&q=80",
-  },
-  {
-    id: 4,
-    name: "Biberón Anticólicos 270ml",
-    tipo: "Accesorios",
-    sku: "BIB-ANT-270",
-    price: 6800,
-    imgUrl:
-      "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=400&fit=crop",
-  },
-  {
-    id: 5,
-    name: "Crema Hidratante Bebé 200g",
-    tipo: "Cuidado",
-    sku: "CRH-BEB-200",
-    price: 5400,
-    imgUrl:
-      "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=400&fit=crop",
-  },
-  {
-    id: 6,
-    name: "Chupete Silicona 6-18m",
-    tipo: "Accesorios",
-    sku: "CHU-SIL-618",
-    price: 3200,
-    imgUrl:
-      "https://images.unsplash.com/photo-1594125345722-e6e726a33a79?w=400&h=400&fit=crop",
-  },
-  {
-    id: 7,
-    name: "Pack Toallas de Baño x3",
-    tipo: "Textil",
-    sku: "TOB-BAO-3",
-    price: 8900,
-    imgUrl:
-      "https://images.unsplash.com/photo-1627916560298-0227d0754b40?w=400&h=400&fit=crop",
-  },
-  {
-    id: 8,
-    name: "Talco Puder Bebé 300g",
-    tipo: "Cuidado",
-    sku: "TAL-PUD-300",
-    price: 3800,
-    imgUrl:
-      "https://images.unsplash.com/photo-1584693786687-3e4b0a0e3e3e?w=400&h=400&fit=crop&q=80",
-  },
-  {
-    id: 9,
-    name: "Mochila Pañalera Premium",
-    tipo: "Accesorios",
-    sku: "MOC-PRE-001",
-    price: 18500,
-    imgUrl:
-      "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=400&fit=crop",
-  },
-];
-
-const categories = [
-  "Todos",
-  "Pañales",
-  "Higiene",
-  "Alimentación",
-  "Accesorios",
-  "Cuidado",
-  "Textil",
-];
+import { productoService } from "@/services";
+import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import type { ProductoWithRelations } from "@/types/producto.types";
 
 export default function CatalogPage() {
   const [search, setSearch] = useState("");
+  const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadProductos();
+  }, []);
+
+  const loadProductos = async () => {
+    try {
+      setIsLoading(true);
+      const data = await productoService.findAll(search);
+      setProductos(data);
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const categories = ["Todos", ...new Set(productos.map((p) => p.categoria.name))];
   const [activeCategory, setActiveCategory] = useState("Todos");
 
-  const filteredProducts = sampleProducts.filter((product) => {
+  const filteredProducts = productos.filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.tipo.toLowerCase().includes(search.toLowerCase()) ||
+      product.categoria.name.toLowerCase().includes(search.toLowerCase()) ||
       product.sku.toLowerCase().includes(search.toLowerCase());
 
     const matchesCategory =
-      activeCategory === "Todos" || product.tipo === activeCategory;
+      activeCategory === "Todos" || product.categoria.name === activeCategory;
 
     return matchesSearch && matchesCategory;
   });
@@ -169,9 +98,7 @@ export default function CatalogPage() {
                   ? "bg-[#2b6485] text-white shadow-lg"
                   : "bg-[#f3fcf0]/60 text-[#3d4a3d] hover:bg-[#f3fcf0]"
               }`}
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
+              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
             >
               {category}
             </button>
@@ -186,12 +113,20 @@ export default function CatalogPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05, duration: 0.4 }}
             >
-              <ProductCard {...product} showPrice={false} />
+              <ProductCard
+                id={product.id}
+                name={product.name}
+                tipo={product.categoria.name}
+                sku={product.sku}
+                price={product.price}
+                imgUrl={product.imgUrl || ""}
+                showPrice={false}
+              />
             </motion.div>
           ))}
         </div>
 
-        {filteredProducts.length === 0 && (
+        {filteredProducts.length === 0 && !isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -199,13 +134,17 @@ export default function CatalogPage() {
           >
             <p
               className="text-lg text-[#3d4a3d]"
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
+              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
             >
               No se encontraron productos con esos criterios.
             </p>
           </motion.div>
+        )}
+
+        {isLoading && (
+          <div className="flex items-center justify-center py-20">
+            <span className="size-6 animate-spin rounded-full border-2 border-[#2b6485]/30 border-t-[#2b6485]" />
+          </div>
         )}
       </div>
     </PublicLayout>

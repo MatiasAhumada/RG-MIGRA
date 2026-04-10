@@ -57,4 +57,20 @@ export const clienteService = {
     });
     return data;
   },
+
+  async approve(id: number) {
+    const { data } = await clientAxios.patch<{ message: string }>(
+      `${API_ROUTES.CLIENTES}/${id}/approve`,
+      { action: "APPROVE" },
+    );
+    return data;
+  },
+
+  async reject(id: number) {
+    const { data } = await clientAxios.patch<{ message: string }>(
+      `${API_ROUTES.CLIENTES}/${id}/approve`,
+      { action: "REJECT" },
+    );
+    return data;
+  },
 };

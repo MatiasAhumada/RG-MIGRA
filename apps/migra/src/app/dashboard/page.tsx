@@ -1,7 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar } from "@/components/common";
 import { Card } from "@/components/ui/card";
@@ -14,31 +14,13 @@ import {
   ArrowRight01Icon,
   GridIcon,
 } from "hugeicons-react";
+import Link from "next/link";
+import { pedidoService, productoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
-
-const recentOrders = [
-  {
-    id: "PED-001",
-    items: 12,
-    total: 45200,
-    status: "CONFIRMED",
-    date: "03/04/2026",
-  },
-  {
-    id: "PED-002",
-    items: 8,
-    total: 32800,
-    status: "PENDING",
-    date: "01/04/2026",
-  },
-  {
-    id: "PED-003",
-    items: 24,
-    total: 67500,
-    status: "SHIPPED",
-    date: "28/03/2026",
-  },
-];
+import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import type { PedidoWithRelations } from "@/types/pedido.types";
+import type { ProductoWithRelations } from "@/types/producto.types";
+import type { NurtureBarStep } from "@/components/common";
 
 const statusStyles: Record<string, string> = {
   PENDING: "bg-[#2b6485]/15 text-[#2b6485]",
@@ -54,37 +36,7 @@ const statusLabels: Record<string, string> = {
   SHIPPED: "Enviado",
 };
 
-const suggestedProducts = [
-  {
-    id: 1,
-    name: "Pack Pañales Premium Talle M",
-    tipo: "Pañales",
-    sku: "PAN-PRE-M",
-    price: 15800,
-    imgUrl:
-      "https://images.unsplash.com/photo-1594125345722-e6e726a33a79?w=400&h=400&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Toallitas Húmedas x100",
-    tipo: "Higiene",
-    sku: "TOH-100",
-    price: 4200,
-    imgUrl:
-      "https://images.unsplash.com/photo-1627916560298-0227d0754b40?w=400&h=400&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Leche Infantil Fórmula 900g",
-    tipo: "Alimentación",
-    sku: "LEI-FOR-900",
-    price: 12500,
-    imgUrl:
-      "https://images.unsplash.com/photo-1584693786687-3e4b0a0e3e3e?w=400&h=400&fit=crop&q=80",
-  },
-];
-
-const orderSteps = [
+const orderSteps: NurtureBarStep[] = [
   { key: "pending", label: "Pendiente", completed: true },
   { key: "confirmed", label: "Confirmado", completed: true },
   { key: "downloaded", label: "Descargado", completed: false, current: true },
@@ -92,9 +44,41 @@ const orderSteps = [
 ];
 
 export default function DashboardPage() {
+  const [pedidos, setPedidos] = useState<PedidoWithRelations[]>([]);
+  const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const [pedidosData, productosData] = await Promise.all([
+        pedidoService.findAll(),
+        productoService.findAll(),
+      ]);
+      setPedidos(pedidosData);
+      setProductos(productosData);
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const pendingCount = pedidos.filter((p) => p.status === "PENDING").length;
+  const confirmedCount = pedidos.filter(
+    (p) => p.status === "CONFIRMED" || p.status === "DOWNLOADED" || p.status === "SHIPPED",
+  ).length;
+
   return (
     <AppLayout variant="client">
-      <PageHeader title="Mi Panel" description="Bienvenido, Baby Store S.R.L" />
+      <PageHeader
+        title="Mi Panel"
+        description="Bienvenido"
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -105,19 +89,19 @@ export default function DashboardPage() {
         {[
           {
             label: "Pedidos Activos",
-            value: "2",
+            value: confirmedCount.toString(),
             icon: ShoppingCart01Icon,
             color: "bg-[#336366]/20 text-[#4c7c7f]",
           },
           {
             label: "Pendientes",
-            value: "1",
+            value: pendingCount.toString(),
             icon: Clock01Icon,
             color: "bg-[#2b6485]/15 text-[#2b6485]",
           },
           {
-            label: "Entregados",
-            value: "15",
+            label: "Productos Disponibles",
+            value: productos.length.toString(),
             icon: CheckmarkCircle01Icon,
             color: "bg-[#7cb56e]/15 text-[#5a9a4e]",
           },
@@ -132,25 +116,19 @@ export default function DashboardPage() {
               transition={{ delay: 0.1 + index * 0.05 }}
             >
               <Card className="rounded-[2rem] gap-4 p-6">
-                <div
-                  className={`flex size-12 items-center justify-center rounded-2xl ${stat.color}`}
-                >
+                <div className={`flex size-12 items-center justify-center rounded-2xl ${stat.color}`}>
                   <Icon className="size-6" />
                 </div>
                 <div>
                   <p
                     className="text-2xl font-bold text-[#161d16]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
-                    {stat.value}
+                    {isLoading ? "..." : stat.value}
                   </p>
                   <p
                     className="text-sm text-[#3d4a3d]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
                     {stat.label}
                   </p>
@@ -161,32 +139,32 @@ export default function DashboardPage() {
         })}
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, duration: 0.4 }}
-        className="mt-8"
-      >
-        <Card className="rounded-[2rem] p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h3
-              className="text-base font-bold text-[#161d16]"
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
-            >
-              Pedido PED-001 - Seguimiento
-            </h3>
-            <Link href="/dashboard/ordenes">
-              <Button variant="ghost" size="sm" className="gap-1">
-                Ver todos
-                <ArrowRight01Icon className="size-4" />
-              </Button>
-            </Link>
-          </div>
-          <NurtureBar steps={orderSteps} />
-        </Card>
-      </motion.div>
+      {pedidos.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.4 }}
+          className="mt-8"
+        >
+          <Card className="rounded-[2rem] p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h3
+                className="text-base font-bold text-[#161d16]"
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+              >
+                Pedido Reciente - PED-{pedidos[0].id}
+              </h3>
+              <Link href="/dashboard/ordenes">
+                <Button variant="ghost" size="sm" className="gap-1">
+                  Ver todos
+                  <ArrowRight01Icon className="size-4" />
+                </Button>
+              </Link>
+            </div>
+            <NurtureBar steps={orderSteps} />
+          </Card>
+        </motion.div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -210,7 +188,7 @@ export default function DashboardPage() {
         </div>
 
         <Card className="rounded-[2rem] p-0 overflow-hidden">
-          {recentOrders.map((order, index) => (
+          {pedidos.slice(0, 5).map((order, index) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, x: -10 }}
@@ -220,47 +198,43 @@ export default function DashboardPage() {
             >
               <div className="flex items-center gap-4">
                 <span className="font-mono text-sm font-semibold text-[#2b6485]">
-                  {order.id}
+                  PED-{order.id}
                 </span>
                 <div>
                   <p
                     className="text-sm text-[#161d16]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
-                    {order.items} items
+                    {order.detalles.length} items
                   </p>
-                  <p
-                    className="text-xs text-[#3d4a3d]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
-                  >
-                    {order.date}
+                  <p className="text-xs text-[#3d4a3d]">
+                    {new Date(order.fecha).toLocaleDateString("es-AR")}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <span
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
-                  {formatCurrency(order.total)}
+                  {formatCurrency(order.totalPedido)}
                 </span>
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyles[order.status]}`}
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
                 >
                   {statusLabels[order.status]}
                 </span>
               </div>
             </motion.div>
           ))}
+
+          {pedidos.length === 0 && !isLoading && (
+            <div className="py-12 text-center">
+              <p className="text-sm text-[#3d4a3d]">
+                No tenés pedidos todavía
+              </p>
+            </div>
+          )}
         </Card>
       </motion.div>
 
@@ -286,8 +260,16 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {suggestedProducts.map((product) => (
-            <ProductCard key={product.id} {...product} />
+          {productos.slice(0, 4).map((product) => (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              tipo={product.categoria.name}
+              sku={product.sku}
+              price={product.price}
+              imgUrl={product.imgUrl || ""}
+            />
           ))}
         </div>
       </motion.div>
