@@ -10,29 +10,27 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ROUTES } from "@/constants/routes";
 import {
-  UserAdd01Icon,
   Mail01Icon,
-  LockIcon,
   UserIcon,
   Building02Icon,
   SmartPhone01Icon,
   File01Icon,
+  CheckmarkCircle01Icon,
 } from "hugeicons-react";
-import { useAuth } from "@/context/auth-context";
-import { clientSuccessHandler } from "@/utils/handlers/clientHandler";
+import { authService } from "@/services";
+import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth();
   const [formData, setFormData] = useState({
     razonSocial: "",
     titular: "",
     cuit: "",
     correo: "",
     telefono: "",
-    password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange =
     (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,10 +42,8 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await register({
-        email: formData.correo,
-        password: formData.password,
-        name: formData.titular,
+      await authService.registerCliente({
+        correo: formData.correo,
         razonSocial: formData.razonSocial,
         titular: formData.titular,
         cuit: formData.cuit,
@@ -56,14 +52,62 @@ export default function RegisterPage() {
       });
 
       clientSuccessHandler(
-        `Registro enviado correctamente.\nTu solicitud para "${formData.razonSocial}" será revisada.`,
+        `Solicitud enviada correctamente.\nTu registro para "${formData.razonSocial}" será revisado por el administrador.`,
       );
 
-      router.push(ROUTES.LOGIN);
+      setIsSubmitted(true);
+    } catch (error) {
+      clientErrorHandler(error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (isSubmitted) {
+    return (
+      <PublicLayout>
+        <div className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-lg items-center justify-center px-6 py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full max-w-md text-center"
+          >
+            <div className="mb-6 flex justify-center">
+              <div className="flex size-20 items-center justify-center rounded-full bg-[#7cb56e]/15">
+                <CheckmarkCircle01Icon className="size-10 text-[#5a9a4e]" />
+              </div>
+            </div>
+            <h1
+              className="text-[1.75rem] font-extrabold text-[#161d16] md:text-[2.25rem]"
+              style={{
+                fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Solicitud Enviada
+            </h1>
+            <p
+              className="mt-3 text-sm text-[#3d4a3d]"
+              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+            >
+              Tu solicitud de registro para{" "}
+              <strong className="font-semibold text-[#161d16]">
+                {formData.razonSocial}
+              </strong>{" "}
+              fue recibida correctamente. El administrador la revisará y te
+              notificará cuando tu cuenta esté activa.
+            </p>
+            <Link href={ROUTES.LOGIN}>
+              <Button size="lg" className="mt-8 gap-2 rounded-[2rem]">
+                Ir al Login
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </PublicLayout>
+    );
+  }
 
   return (
     <PublicLayout>
@@ -83,7 +127,7 @@ export default function RegisterPage() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Crear cuenta
+              Solicitar Registro
             </h1>
             <p
               className="mt-3 text-sm text-[#3d4a3d]"
@@ -95,43 +139,41 @@ export default function RegisterPage() {
 
           <Card className="rounded-[2rem] p-6">
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div className="grid gap-5 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <label
-                    className="text-sm font-semibold text-[#161d16]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-                  >
-                    Razón Social
-                  </label>
-                  <div className="relative">
-                    <Building02Icon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
-                    <Input
-                      placeholder="Mi Negocio S.R.L"
-                      value={formData.razonSocial}
-                      onChange={handleChange("razonSocial")}
-                      className="h-12 pl-12 text-base"
-                      required
-                    />
-                  </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                >
+                  Razón Social
+                </label>
+                <div className="relative">
+                  <Building02Icon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
+                  <Input
+                    placeholder="Mi Negocio S.R.L"
+                    value={formData.razonSocial}
+                    onChange={handleChange("razonSocial")}
+                    className="h-12 pl-12 text-base"
+                    required
+                  />
                 </div>
+              </div>
 
-                <div className="flex flex-col gap-2">
-                  <label
-                    className="text-sm font-semibold text-[#161d16]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-                  >
-                    Titular
-                  </label>
-                  <div className="relative">
-                    <UserIcon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
-                    <Input
-                      placeholder="Nombre completo"
-                      value={formData.titular}
-                      onChange={handleChange("titular")}
-                      className="h-12 pl-12 text-base"
-                      required
-                    />
-                  </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                >
+                  Titular
+                </label>
+                <div className="relative">
+                  <UserIcon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
+                  <Input
+                    placeholder="Nombre completo"
+                    value={formData.titular}
+                    onChange={handleChange("titular")}
+                    className="h-12 pl-12 text-base"
+                    required
+                  />
                 </div>
               </div>
 
@@ -194,27 +236,6 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-                >
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <LockIcon className="absolute top-4 left-4 size-5 text-[#3d4a3d]/50" />
-                  <Input
-                    type="password"
-                    placeholder="Mínimo 8 caracteres"
-                    value={formData.password}
-                    onChange={handleChange("password")}
-                    className="h-12 pl-12 text-base"
-                    required
-                    minLength={8}
-                  />
-                </div>
-              </div>
-
               <Button
                 type="submit"
                 size="lg"
@@ -224,12 +245,11 @@ export default function RegisterPage() {
                 {isLoading ? (
                   <span className="flex items-center gap-2">
                     <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Registrando...
+                    Enviando...
                   </span>
                 ) : (
                   <>
-                    Solicitar Registro
-                    <UserAdd01Icon className="size-5" />
+                    Enviar Solicitud
                   </>
                 )}
               </Button>

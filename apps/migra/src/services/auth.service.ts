@@ -7,13 +7,11 @@ export interface LoginDto {
   password: string;
 }
 
-export interface RegisterDto {
-  email: string;
-  password: string;
-  name: string;
+export interface RegisterClienteDto {
   razonSocial: string;
   titular: string;
   cuit: string;
+  correo: string;
   telefono: string;
   empresaId: number;
 }
@@ -30,6 +28,10 @@ interface AuthResponse {
 
 interface SessionResponse {
   user: AuthResponse["user"] | null;
+}
+
+interface RegisterResponse {
+  message: string;
 }
 
 export const authService = {
@@ -55,11 +57,11 @@ export const authService = {
     return data.user;
   },
 
-  async register(dto: RegisterDto) {
-    const { data } = await clientAxios.post<AuthResponse>(
+  async registerCliente(dto: RegisterClienteDto) {
+    const { data } = await clientAxios.post<RegisterResponse>(
       API_ROUTES.AUTH.REGISTER,
       dto,
     );
-    return data.user;
+    return data;
   },
 };

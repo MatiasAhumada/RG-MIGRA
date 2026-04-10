@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { userService } from "@/server/services/user.service";
 import { clienteService } from "@/server/services/cliente.service";
 import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
 import httpStatus from "http-status";
@@ -8,32 +7,26 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { email, password, name, razonSocial, titular, cuit, telefono, empresaId } = body;
+    const { razonSocial, titular, cuit, correo, telefono, empresaId } = body;
 
-    if (!email || !password || !name || !razonSocial || !titular || !cuit) {
+    if (!razonSocial || !titular || !cuit || !correo) {
       throw new ApiError({
         status: httpStatus.BAD_REQUEST,
-        message: "Todos los campos son requeridos",
+        message: "Razón Social, Titular, CUIT y correo son requeridos",
       });
     }
-
-    const user = await userService.create({
-      email,
-      password,
-      name,
-    });
 
     await clienteService.create({
       razonSocial,
       titular,
       cuit,
-      correo: email,
+      correo,
       telefono: telefono || "",
       empresaId: empresaId || 1,
     });
 
     return NextResponse.json(
-      { user: { id: user.id, email: user.email, name: user.name, role: user.role } },
+      { message: "Solicitud de registro enviada correctamente" },
       { status: httpStatus.CREATED },
     );
   } catch (error) {

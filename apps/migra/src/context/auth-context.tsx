@@ -28,16 +28,6 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
-  register: (data: {
-    email: string;
-    password: string;
-    name: string;
-    razonSocial: string;
-    titular: string;
-    cuit: string;
-    telefono: string;
-    empresaId: number;
-  }) => Promise<AuthUser>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -84,25 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (data: {
-    email: string;
-    password: string;
-    name: string;
-    razonSocial: string;
-    titular: string;
-    cuit: string;
-    telefono: string;
-    empresaId: number;
-  }) => {
-    try {
-      const registeredUser = await authService.register(data);
-      return registeredUser;
-    } catch (error) {
-      clientErrorHandler(error);
-      throw error;
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -113,7 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login,
         logout,
-        register,
       }}
     >
       {children}

@@ -4,6 +4,7 @@ import {
   CreateProductoDto,
   UpdateProductoDto,
   Producto,
+  ProductoWithRelations,
 } from "@/types/producto.types";
 
 export const productoService = {
@@ -45,7 +46,7 @@ export const productoService = {
   },
 
   async findById(id: number) {
-    const { data } = await clientAxios.get<Producto>(
+    const { data } = await clientAxios.get<ProductoWithRelations>(
       `${API_ROUTES.PRODUCTOS}/${id}`,
     );
     return data;
@@ -56,7 +57,7 @@ export const productoService = {
     if (search) params.search = search;
     if (empresaId) params.empresaId = String(empresaId);
 
-    const { data } = await clientAxios.get<Producto[]>(API_ROUTES.PRODUCTOS, {
+    const { data } = await clientAxios.get<ProductoWithRelations[]>(API_ROUTES.PRODUCTOS, {
       params,
     });
     return data;

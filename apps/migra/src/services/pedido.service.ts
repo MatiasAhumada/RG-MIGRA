@@ -4,6 +4,7 @@ import {
   CreatePedidoDto,
   UpdatePedidoDto,
   Pedido,
+  PedidoWithRelations,
   PedidoStatus,
 } from "@/types/pedido.types";
 import { CreateDetallePedidoDto } from "@/types/detalle-pedido.types";
@@ -32,7 +33,7 @@ export const pedidoService = {
   },
 
   async findById(id: number) {
-    const { data } = await clientAxios.get<Pedido>(
+    const { data } = await clientAxios.get<PedidoWithRelations>(
       `${API_ROUTES.PEDIDOS}/${id}`,
     );
     return data;
@@ -42,21 +43,21 @@ export const pedidoService = {
     const params: Record<string, string> = {};
     if (clienteId) params.clienteId = String(clienteId);
 
-    const { data } = await clientAxios.get<Pedido[]>(API_ROUTES.PEDIDOS, {
+    const { data } = await clientAxios.get<PedidoWithRelations[]>(API_ROUTES.PEDIDOS, {
       params,
     });
     return data;
   },
 
   async findByClienteId(clienteId: number) {
-    const { data } = await clientAxios.get<Pedido[]>(API_ROUTES.PEDIDOS, {
+    const { data } = await clientAxios.get<PedidoWithRelations[]>(API_ROUTES.PEDIDOS, {
       params: { clienteId: String(clienteId) },
     });
     return data;
   },
 
   async findByStatus(status: PedidoStatus) {
-    const { data } = await clientAxios.get<Pedido[]>(API_ROUTES.PEDIDOS, {
+    const { data } = await clientAxios.get<PedidoWithRelations[]>(API_ROUTES.PEDIDOS, {
       params: { status },
     });
     return data;

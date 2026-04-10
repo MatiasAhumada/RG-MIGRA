@@ -5,101 +5,38 @@ import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
 import { PageHeader, DataTable, PdfUpload } from "@/components/common";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { GenericModal, ConfirmModal } from "@/components/common";
 import { Add01Icon, Edit02Icon, Delete01Icon } from "hugeicons-react";
+import { productoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
-import {
-  clientSuccessHandler,
-  clientErrorHandler,
-} from "@/utils/handlers/clientHandler";
-
-interface Producto {
-  id: number;
-  name: string;
-  tipo: string;
-  sku: string;
-  price: number;
-  imgUrl: string;
-}
-
-const sampleProducts: Producto[] = [
-  {
-    id: 1,
-    name: "Pack Pañales Premium Talle M",
-    tipo: "Pañales",
-    sku: "PAN-PRE-M",
-    price: 15800,
-    imgUrl:
-      "https://images.unsplash.com/photo-1594125345722-e6e726a33a79?w=400&h=400&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Toallitas Húmedas x100",
-    tipo: "Higiene",
-    sku: "TOH-100",
-    price: 4200,
-    imgUrl:
-      "https://images.unsplash.com/photo-1627916560298-0227d0754b40?w=400&h=400&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Leche Infantil Fórmula 900g",
-    tipo: "Alimentación",
-    sku: "LEI-FOR-900",
-    price: 12500,
-    imgUrl:
-      "https://images.unsplash.com/photo-1584693786687-3e4b0a0e3e3e?w=400&h=400&fit=crop&q=80",
-  },
-  {
-    id: 4,
-    name: "Biberón Anticólicos 270ml",
-    tipo: "Accesorios",
-    sku: "BIB-ANT-270",
-    price: 6800,
-    imgUrl:
-      "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=400&fit=crop",
-  },
-  {
-    id: 5,
-    name: "Crema Hidratante Bebé 200g",
-    tipo: "Cuidado",
-    sku: "CRH-BEB-200",
-    price: 5400,
-    imgUrl:
-      "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=400&fit=crop",
-  },
-  {
-    id: 6,
-    name: "Chupete Silicona 6-18m",
-    tipo: "Accesorios",
-    sku: "CHU-SIL-618",
-    price: 3200,
-    imgUrl:
-      "https://images.unsplash.com/photo-1594125345722-e6e726a33a79?w=400&h=400&fit=crop",
-  },
-];
+import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import type { ProductoWithRelations, CreateProductoDto, UpdateProductoDto } from "@/types/producto.types";
 
 export default function AdminProductosPage() {
   const [search, setSearch] = useState("");
+  const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editProducto, setEditProducto] = useState<Producto | null>(null);
-  const [deleteProducto, setDeleteProducto] = useState<Producto | null>(null);
+  const [editProducto, setEditProducto] = useState<ProductoWithRelations | null>(null);
+  const [deleteProducto, setDeleteProducto] = useState<ProductoWithRelations | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filteredProducts = sampleProducts.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.tipo.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase()),
-  );
+  const loadProductos = async () => {
+    try {
+      setIsLoading(true);
+      const data = await productoService.findAll(search);
+      setProductos(data);
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCreateProduct = async () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      clientSuccessHandler(
-        "Producto creado y agregado al catálogo exitosamente.",
-      );
+      clientSuccessHandler("Producto creado y agregado al catálogo exitosamente.");
 
       setIsCreateOpen(false);
     } catch (error) {
@@ -122,14 +59,16 @@ export default function AdminProductosPage() {
   };
 
   const handleDeleteProduct = async () => {
+    if (!deleteProducto) return;
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await productoService.delete(deleteProducto.id);
 
       clientSuccessHandler(
-        `Producto "${deleteProducto?.name}" eliminado del catálogo.`,
+        `Producto "${deleteProducto.name}" eliminado del catálogo.`,
       );
 
       setDeleteProducto(null);
+      loadProductos();
     } catch (error) {
       clientErrorHandler(error);
     }
@@ -139,7 +78,14 @@ export default function AdminProductosPage() {
     clientSuccessHandler(
       `Catálogo "${fileName}" importado.\nProductos actualizados en el catálogo.`,
     );
+    loadProductos();
   };
+
+  const filteredProducts = productos.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.sku.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <AppLayout variant="admin">
@@ -160,10 +106,10 @@ export default function AdminProductosPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15, duration: 0.4 }}
+        transition={{ delay: 0.2, duration: 0.4 }}
         className="mt-8"
       >
-        <DataTable<Producto>
+        <DataTable<ProductoWithRelations>
           title=""
           subtitle=""
           columns={[
@@ -172,23 +118,23 @@ export default function AdminProductosPage() {
               label: "Producto",
               render: (item) => (
                 <div className="flex items-center gap-3">
-                  <div className="size-10 shrink-0 overflow-hidden rounded-xl bg-[#f3fcf0]/60">
-                    <img
-                      src={item.imgUrl}
-                      alt={item.name}
-                      className="size-full object-cover"
-                    />
-                  </div>
+                  {item.imgUrl && (
+                    <div className="size-10 shrink-0 overflow-hidden rounded-xl bg-[#f3fcf0]/60">
+                      <img
+                        src={item.imgUrl}
+                        alt={item.name}
+                        className="size-full object-cover"
+                      />
+                    </div>
+                  )}
                   <div>
                     <p
                       className="text-sm font-semibold text-[#161d16]"
-                      style={{
-                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                      }}
+                      style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                     >
                       {item.name}
                     </p>
-                    <p className="text-xs text-[#3d4a3d]">{item.tipo}</p>
+                    <p className="text-xs text-[#3d4a3d]">{item.categoria.name}</p>
                   </div>
                 </div>
               ),
@@ -206,12 +152,17 @@ export default function AdminProductosPage() {
               render: (item) => (
                 <p
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
                   {formatCurrency(item.price)}
                 </p>
+              ),
+            },
+            {
+              key: "marca",
+              label: "Marca",
+              render: (item) => (
+                <p className="text-sm text-[#3d4a3d]">{item.marca.name}</p>
               ),
             },
             {
@@ -240,19 +191,30 @@ export default function AdminProductosPage() {
               ),
             },
           ]}
-          data={filteredProducts}
-          keyExtractor={(item) => item.id.toString()}
+          data={isLoading ? [] : filteredProducts}
+          keyExtractor={(item) => String(item.id)}
           emptyMessage="No se encontraron productos"
           searchPlaceholder="Buscar producto..."
           onSearch={setSearch}
           actions={
-            <Button
-              onClick={() => setIsCreateOpen(true)}
-              className="gap-2 rounded-[2rem]"
-            >
-              <Add01Icon className="size-5" />
-              Nuevo Producto
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setIsCreateOpen(true)}
+                className="gap-2 rounded-[2rem]"
+              >
+                <Add01Icon className="size-5" />
+                Nuevo Producto
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-[2rem]"
+                onClick={loadProductos}
+                disabled={isLoading}
+              >
+                {isLoading ? "Cargando..." : "Actualizar"}
+              </Button>
+            </div>
           }
           totalLabel={`${filteredProducts.length} productos`}
         />
@@ -269,7 +231,9 @@ export default function AdminProductosPage() {
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleCreateProduct}>Guardar Producto</Button>
+            <Button onClick={handleCreateProduct}>
+              Guardar Producto
+            </Button>
           </>
         }
       >
@@ -277,9 +241,7 @@ export default function AdminProductosPage() {
           <div className="flex flex-col gap-2">
             <label
               className="text-sm font-semibold text-[#161d16]"
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
+              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
             >
               Nombre del Producto
             </label>
@@ -292,47 +254,26 @@ export default function AdminProductosPage() {
             <div className="flex flex-col gap-2">
               <label
                 className="text-sm font-semibold text-[#161d16]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
-              >
-                Tipo
-              </label>
-              <Input placeholder="Ej: Pañales" className="h-12 text-base" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label
-                className="text-sm font-semibold text-[#161d16]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
                 SKU
               </label>
               <Input placeholder="Ej: PAN-PRE-M" className="h-12 text-base" />
             </div>
+            <div className="flex flex-col gap-2">
+              <label
+                className="text-sm font-semibold text-[#161d16]"
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+              >
+                Precio
+              </label>
+              <Input type="number" placeholder="0.00" className="h-12 text-base" />
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <label
               className="text-sm font-semibold text-[#161d16]"
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
-            >
-              Precio
-            </label>
-            <Input
-              type="number"
-              placeholder="0.00"
-              className="h-12 text-base"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label
-              className="text-sm font-semibold text-[#161d16]"
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
+              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
             >
               URL de Imagen
             </label>
@@ -352,7 +293,9 @@ export default function AdminProductosPage() {
             <Button variant="outline" onClick={() => setEditProducto(null)}>
               Cancelar
             </Button>
-            <Button onClick={handleEditProduct}>Guardar Cambios</Button>
+            <Button onClick={handleEditProduct}>
+              Guardar Cambios
+            </Button>
           </>
         }
       >
@@ -361,9 +304,7 @@ export default function AdminProductosPage() {
             <div className="flex flex-col gap-2">
               <label
                 className="text-sm font-semibold text-[#161d16]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
                 Nombre del Producto
               </label>
@@ -376,23 +317,7 @@ export default function AdminProductosPage() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
-                >
-                  Tipo
-                </label>
-                <Input
-                  defaultValue={editProducto.tipo}
-                  className="h-12 text-base"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
                   SKU
                 </label>
@@ -401,33 +326,29 @@ export default function AdminProductosPage() {
                   className="h-12 text-base"
                 />
               </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  className="text-sm font-semibold text-[#161d16]"
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                >
+                  Precio
+                </label>
+                <Input
+                  type="number"
+                  defaultValue={editProducto.price}
+                  className="h-12 text-base"
+                />
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <label
                 className="text-sm font-semibold text-[#161d16]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
-              >
-                Precio
-              </label>
-              <Input
-                type="number"
-                defaultValue={editProducto.price}
-                className="h-12 text-base"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label
-                className="text-sm font-semibold text-[#161d16]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
                 URL de Imagen
               </label>
               <Input
-                defaultValue={editProducto.imgUrl}
+                defaultValue={editProducto.imgUrl || ""}
                 className="h-12 text-base"
               />
             </div>
@@ -447,3 +368,5 @@ export default function AdminProductosPage() {
     </AppLayout>
   );
 }
+
+import { Input } from "@/components/ui/input";
