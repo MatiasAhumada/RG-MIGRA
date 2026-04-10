@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
-import { PageHeader, DataTable, PdfUploadCompact } from "@/components/common";
+import { PageHeader, DataTable, PdfUpload } from "@/components/common";
 import { Card } from "@/components/ui/card";
 import {
   Package01Icon,
@@ -113,7 +113,7 @@ const statusLabels: Record<string, string> = {
 export default function AdminPage() {
   const handleUploadComplete = (fileName: string) => {
     clientSuccessHandler(
-      `Catálogo "${fileName}" importado. Productos actualizados en el catálogo.`,
+      `Catálogo "${fileName}" importado.\nProductos actualizados en el catálogo.`,
     );
   };
 
@@ -180,14 +180,15 @@ export default function AdminPage() {
             </motion.div>
           );
         })}
+      </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-        >
-          <PdfUploadCompact onUploadComplete={handleUploadComplete} />
-        </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mt-6"
+      >
+        <PdfUpload onUploadComplete={handleUploadComplete} variant="full" />
       </motion.div>
 
       <motion.div

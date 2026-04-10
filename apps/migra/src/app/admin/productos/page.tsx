@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
-import { PageHeader } from "@/components/common";
-import { DataTable } from "@/components/common";
+import { PageHeader, DataTable, PdfUpload } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GenericModal, ConfirmModal } from "@/components/common";
@@ -136,12 +135,27 @@ export default function AdminProductosPage() {
     }
   };
 
+  const handleUploadComplete = (fileName: string) => {
+    clientSuccessHandler(
+      `Catálogo "${fileName}" importado.\nProductos actualizados en el catálogo.`,
+    );
+  };
+
   return (
     <AppLayout variant="admin">
       <PageHeader
         title="Productos"
         description="Gestión del catálogo de productos"
       />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="mt-8"
+      >
+        <PdfUpload onUploadComplete={handleUploadComplete} variant="full" />
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
