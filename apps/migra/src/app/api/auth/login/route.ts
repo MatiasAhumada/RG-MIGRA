@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { userRepository } from "@/server/repository/user.repository";
 import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
 import httpStatus from "http-status";
+import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +26,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (user.password !== password) {
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
       throw new ApiError({
         status: httpStatus.UNAUTHORIZED,
         message: "Credenciales inválidas",
