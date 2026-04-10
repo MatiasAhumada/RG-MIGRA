@@ -98,8 +98,10 @@ export function clientSuccessHandler(
     toastOptions = {},
   }: Omit<HandlerOptions, "defaultMessage"> = {},
 ): void {
+  const formattedMessage = message.replace(/\. /g, ".\n");
+  if (logToConsole) console.log(formattedMessage);
   if (showToast) {
-    toastSuccess(`${messagePrefix}${message}`, toastOptions);
+    toastSuccess(`${messagePrefix}${formattedMessage}`, toastOptions);
   }
 
   callback();

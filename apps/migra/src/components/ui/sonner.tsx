@@ -2,14 +2,12 @@
 
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
-import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  CheckmarkCircle02Icon,
+  CheckmarkCircle01Icon,
   InformationCircleIcon,
   Alert02Icon,
-  MultiplicationSignCircleIcon,
-  Loading03Icon,
-} from "@hugeicons/core-free-icons";
+  Cancel01Icon,
+} from "hugeicons-react";
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
@@ -19,41 +17,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
-        success: (
-          <HugeiconsIcon
-            icon={CheckmarkCircle02Icon}
-            strokeWidth={2}
-            className="size-4"
-          />
-        ),
-        info: (
-          <HugeiconsIcon
-            icon={InformationCircleIcon}
-            strokeWidth={2}
-            className="size-4"
-          />
-        ),
-        warning: (
-          <HugeiconsIcon
-            icon={Alert02Icon}
-            strokeWidth={2}
-            className="size-4"
-          />
-        ),
-        error: (
-          <HugeiconsIcon
-            icon={MultiplicationSignCircleIcon}
-            strokeWidth={2}
-            className="size-4"
-          />
-        ),
-        loading: (
-          <HugeiconsIcon
-            icon={Loading03Icon}
-            strokeWidth={2}
-            className="size-4 animate-spin"
-          />
-        ),
+        success: <CheckmarkCircle01Icon className="size-5 text-white" />,
+        info: <InformationCircleIcon className="size-5 text-white" />,
+        warning: <Alert02Icon className="size-5 text-white" />,
+        error: <Cancel01Icon className="size-5 text-white" />,
       }}
       style={
         {
@@ -61,11 +28,30 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
-        } as React.CSSProperties
+          "--success-bg": "#5a9a4e",
+          "--success-text": "#ffffff",
+          "--success-border": "#5a9a4e",
+          "--error-bg": "#b7102a",
+          "--error-text": "#ffffff",
+          "--error-border": "#b7102a",
+          "--warning-bg": "#e6a700",
+          "--warning-text": "#ffffff",
+          "--warning-border": "#e6a700",
+          "--info-bg": "#2b6485",
+          "--info-text": "#ffffff",
+          "--info-border": "#2b6485",
+        } as React.CSSProperties & Record<string, string>
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast:
+            "group/toast border rounded-2xl p-4 shadow-lg font-medium [&>[data-icon]]:shrink-0",
+          success: "!bg-[#5a9a4e] !text-white !border-[#5a9a4e]",
+          error: "!bg-[#b7102a] !text-white !border-[#b7102a]",
+          warning: "!bg-[#e6a700] !text-white !border-[#e6a700]",
+          info: "!bg-[#2b6485] !text-white !border-[#2b6485]",
+          content: "whitespace-pre-line text-sm",
+          description: "whitespace-pre-line text-xs opacity-90 mt-1",
         },
       }}
       {...props}

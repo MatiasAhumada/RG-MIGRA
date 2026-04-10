@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
-import { PageHeader, DataTable, PdfUpload } from "@/components/common";
+import { PageHeader, DataTable, PdfUploadCompact } from "@/components/common";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Package01Icon,
   Group01Icon,
@@ -13,7 +12,6 @@ import {
   Analytics01Icon,
   ArrowUp01Icon,
   ArrowDown01Icon,
-  Upload01Icon,
 } from "hugeicons-react";
 import { clientSuccessHandler } from "@/utils/handlers/clientHandler";
 
@@ -113,13 +111,10 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function AdminPage() {
-  const [showPdfUpload, setShowPdfUpload] = useState(false);
-
   const handleUploadComplete = (fileName: string) => {
     clientSuccessHandler(
       `Catálogo "${fileName}" importado. Productos actualizados en el catálogo.`,
     );
-    setShowPdfUpload(false);
   };
 
   return (
@@ -127,29 +122,7 @@ export default function AdminPage() {
       <PageHeader
         title="Panel de Administración"
         description="Resumen general de la operación"
-        action={
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-[2rem]"
-            onClick={() => setShowPdfUpload(!showPdfUpload)}
-          >
-            <Upload01Icon className="size-4" />
-            {showPdfUpload ? "Ocultar carga" : "Cargar catálogo"}
-          </Button>
-        }
       />
-
-      {showPdfUpload && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="mt-8"
-        >
-          <PdfUpload onUploadComplete={handleUploadComplete} />
-        </motion.div>
-      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -207,6 +180,14 @@ export default function AdminPage() {
             </motion.div>
           );
         })}
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+        >
+          <PdfUploadCompact onUploadComplete={handleUploadComplete} />
+        </motion.div>
       </motion.div>
 
       <motion.div

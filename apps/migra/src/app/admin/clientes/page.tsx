@@ -13,7 +13,10 @@ import {
   CheckmarkCircle01Icon,
   CancelCircleIcon,
 } from "hugeicons-react";
-import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 
 interface Cliente {
   id: number;

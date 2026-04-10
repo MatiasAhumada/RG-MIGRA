@@ -10,7 +10,10 @@ import { Input } from "@/components/ui/input";
 import { GenericModal, ConfirmModal } from "@/components/common";
 import { Add01Icon, Edit02Icon, Delete01Icon } from "hugeicons-react";
 import { formatCurrency } from "@/utils/formatters";
-import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 
 interface Producto {
   id: number;
@@ -95,7 +98,9 @@ export default function AdminProductosPage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      clientSuccessHandler("Producto creado y agregado al catálogo exitosamente.");
+      clientSuccessHandler(
+        "Producto creado y agregado al catálogo exitosamente.",
+      );
 
       setIsCreateOpen(false);
     } catch (error) {
@@ -250,9 +255,7 @@ export default function AdminProductosPage() {
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleCreateProduct}>
-              Guardar Producto
-            </Button>
+            <Button onClick={handleCreateProduct}>Guardar Producto</Button>
           </>
         }
       >
@@ -335,9 +338,7 @@ export default function AdminProductosPage() {
             <Button variant="outline" onClick={() => setEditProducto(null)}>
               Cancelar
             </Button>
-            <Button onClick={handleEditProduct}>
-              Guardar Cambios
-            </Button>
+            <Button onClick={handleEditProduct}>Guardar Cambios</Button>
           </>
         }
       >
