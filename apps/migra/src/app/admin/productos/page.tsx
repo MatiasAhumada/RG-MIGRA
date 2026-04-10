@@ -3,13 +3,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
-import { PageHeader } from "@/components/common";
-import { DataTable } from "@/components/common";
+import { PageHeader, DataTable, PdfUpload } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GenericModal, ConfirmModal } from "@/components/common";
 import { Add01Icon, Edit02Icon, Delete01Icon } from "hugeicons-react";
 import { formatCurrency } from "@/utils/formatters";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 
 interface Producto {
   id: number;
@@ -90,12 +93,69 @@ export default function AdminProductosPage() {
       p.sku.toLowerCase().includes(search.toLowerCase()),
   );
 
+  const handleCreateProduct = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      clientSuccessHandler(
+        "Producto creado y agregado al catálogo exitosamente.",
+      );
+
+      setIsCreateOpen(false);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
+
+  const handleEditProduct = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      clientSuccessHandler(
+        `Producto "${editProducto?.name}" actualizado correctamente.`,
+      );
+
+      setEditProducto(null);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
+
+  const handleDeleteProduct = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      clientSuccessHandler(
+        `Producto "${deleteProducto?.name}" eliminado del catálogo.`,
+      );
+
+      setDeleteProducto(null);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
+
+  const handleUploadComplete = (fileName: string) => {
+    clientSuccessHandler(
+      `Catálogo "${fileName}" importado.\nProductos actualizados en el catálogo.`,
+    );
+  };
+
   return (
     <AppLayout variant="admin">
       <PageHeader
         title="Productos"
         description="Gestión del catálogo de productos"
       />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="mt-8"
+      >
+        <PdfUpload onUploadComplete={handleUploadComplete} variant="full" />
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -209,9 +269,7 @@ export default function AdminProductosPage() {
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={() => setIsCreateOpen(false)}>
-              Guardar Producto
-            </Button>
+            <Button onClick={handleCreateProduct}>Guardar Producto</Button>
           </>
         }
       >
@@ -294,9 +352,7 @@ export default function AdminProductosPage() {
             <Button variant="outline" onClick={() => setEditProducto(null)}>
               Cancelar
             </Button>
-            <Button onClick={() => setEditProducto(null)}>
-              Guardar Cambios
-            </Button>
+            <Button onClick={handleEditProduct}>Guardar Cambios</Button>
           </>
         }
       >
@@ -384,7 +440,7 @@ export default function AdminProductosPage() {
         onOpenChange={() => setDeleteProducto(null)}
         title="Eliminar Producto"
         description={`¿Estás seguro de que deseas eliminar "${deleteProducto?.name}" del catálogo? Esta acción no se puede deshacer.`}
-        onConfirm={() => setDeleteProducto(null)}
+        onConfirm={handleDeleteProduct}
         confirmText="Eliminar"
         variant="destructive"
       />

@@ -10,6 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ROUTES } from "@/constants/routes";
 import { Login01Icon, Mail01Icon, LockIcon } from "hugeicons-react";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,15 +25,21 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    if (email === "admin@example.com") {
-      router.push("/admin");
-    } else {
-      router.push("/dashboard");
+      const isAdmin = email === "admin@example.com";
+
+      clientSuccessHandler(
+        `Sesión iniciada correctamente. Bienvenido${isAdmin ? " al panel de administración" : ""}.`,
+      );
+
+      router.push(isAdmin ? "/admin" : "/dashboard");
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (

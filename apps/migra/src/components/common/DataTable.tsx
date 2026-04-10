@@ -146,7 +146,9 @@ export function DataTable<T>({
                             {column.render
                               ? column.render(item)
                               : String(
-                                  (item as Record<string, unknown>)[column.key] ?? "",
+                                  (item as Record<string, unknown>)[
+                                    column.key
+                                  ] ?? "",
                                 )}
                           </td>
                         ))}

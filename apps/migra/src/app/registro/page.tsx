@@ -18,6 +18,10 @@ import {
   SmartPhone01Icon,
   File01Icon,
 } from "hugeicons-react";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -40,10 +44,19 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    router.push("/login");
-    setIsLoading(false);
+      clientSuccessHandler(
+        `Registro enviado correctamente. Tu solicitud para "${formData.razonSocial}" será revisada.`,
+      );
+
+      router.push("/login");
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
