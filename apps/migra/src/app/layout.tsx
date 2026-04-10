@@ -28,6 +28,7 @@ export const metadata: Metadata = {
 };
 
 import { SearchProvider } from "@/context/search-context";
+import { AuthProvider } from "@/context/auth-context";
 
 export default function RootLayout({
   children,
@@ -44,10 +45,12 @@ export default function RootLayout({
           geistMono.variable,
         )}
       >
-        <SearchProvider>
-          {children}
-          <Toaster />
-        </SearchProvider>
+        <AuthProvider>
+          <SearchProvider>
+            {children}
+            <Toaster />
+          </SearchProvider>
+        </AuthProvider>
       </body>
     </html>
   );

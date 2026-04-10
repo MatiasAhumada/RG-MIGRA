@@ -18,13 +18,12 @@ import {
   SmartPhone01Icon,
   File01Icon,
 } from "hugeicons-react";
-import {
-  clientSuccessHandler,
-  clientErrorHandler,
-} from "@/utils/handlers/clientHandler";
+import { useAuth } from "@/context/auth-context";
+import { clientSuccessHandler } from "@/utils/handlers/clientHandler";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     razonSocial: "",
     titular: "",
@@ -45,15 +44,22 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await register({
+        email: formData.correo,
+        password: formData.password,
+        name: formData.titular,
+        razonSocial: formData.razonSocial,
+        titular: formData.titular,
+        cuit: formData.cuit,
+        telefono: formData.telefono,
+        empresaId: 1,
+      });
 
       clientSuccessHandler(
-        `Registro enviado correctamente. Tu solicitud para "${formData.razonSocial}" será revisada.`,
+        `Registro enviado correctamente.\nTu solicitud para "${formData.razonSocial}" será revisada.`,
       );
 
-      router.push("/login");
-    } catch (error) {
-      clientErrorHandler(error);
+      router.push(ROUTES.LOGIN);
     } finally {
       setIsLoading(false);
     }
@@ -81,9 +87,7 @@ export default function RegisterPage() {
             </h1>
             <p
               className="mt-3 text-sm text-[#3d4a3d]"
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
+              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
             >
               Completá el formulario para solicitar acceso al catálogo
             </p>
@@ -95,9 +99,7 @@ export default function RegisterPage() {
                 <div className="flex flex-col gap-2">
                   <label
                     className="text-sm font-semibold text-[#161d16]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
                     Razón Social
                   </label>
@@ -116,9 +118,7 @@ export default function RegisterPage() {
                 <div className="flex flex-col gap-2">
                   <label
                     className="text-sm font-semibold text-[#161d16]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
                     Titular
                   </label>
@@ -139,9 +139,7 @@ export default function RegisterPage() {
                 <div className="flex flex-col gap-2">
                   <label
                     className="text-sm font-semibold text-[#161d16]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
                     C.U.I.T
                   </label>
@@ -160,9 +158,7 @@ export default function RegisterPage() {
                 <div className="flex flex-col gap-2">
                   <label
                     className="text-sm font-semibold text-[#161d16]"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
+                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                   >
                     Teléfono
                   </label>
@@ -181,9 +177,7 @@ export default function RegisterPage() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
                   Correo electrónico
                 </label>
@@ -203,9 +197,7 @@ export default function RegisterPage() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
                   Contraseña
                 </label>
@@ -246,9 +238,7 @@ export default function RegisterPage() {
             <div className="mt-6 border-t border-[#161d16]/5 pt-6 text-center">
               <p
                 className="text-sm text-[#3d4a3d]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
                 ¿Ya tenés cuenta?{" "}
                 <Link
