@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ROUTES } from "@/constants/routes";
 import { Login01Icon, Mail01Icon, LockIcon } from "hugeicons-react";
+import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,15 +22,21 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    if (email === "admin@example.com") {
-      router.push("/admin");
-    } else {
-      router.push("/dashboard");
+      const isAdmin = email === "admin@example.com";
+
+      clientSuccessHandler(
+        `Sesión iniciada correctamente. Bienvenido${isAdmin ? " al panel de administración" : ""}.`,
+      );
+
+      router.push(isAdmin ? "/admin" : "/dashboard");
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
@@ -54,9 +61,7 @@ export default function LoginPage() {
             </h1>
             <p
               className="mt-3 text-sm text-[#3d4a3d]"
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
+              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
             >
               Ingresá a tu cuenta para acceder al catálogo completo
             </p>
@@ -67,9 +72,7 @@ export default function LoginPage() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
                   Correo electrónico
                 </label>
@@ -89,9 +92,7 @@ export default function LoginPage() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{
-                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                  }}
+                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
                 >
                   Contraseña
                 </label>
@@ -131,9 +132,7 @@ export default function LoginPage() {
             <div className="mt-6 rounded-2xl bg-[#f3fcf0]/60 p-4">
               <p
                 className="text-sm text-[#3d4a3d]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
+                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
                 <strong>Demo:</strong> Usá{" "}
                 <code className="rounded bg-[#161d16]/5 px-1.5 py-0.5 font-mono text-[#b7102a]">

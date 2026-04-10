@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { GenericModal, ConfirmModal } from "@/components/common";
 import { Add01Icon, Edit02Icon, Delete01Icon } from "hugeicons-react";
 import { formatCurrency } from "@/utils/formatters";
+import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
 
 interface Producto {
   id: number;
@@ -89,6 +90,46 @@ export default function AdminProductosPage() {
       p.tipo.toLowerCase().includes(search.toLowerCase()) ||
       p.sku.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const handleCreateProduct = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      clientSuccessHandler("Producto creado y agregado al catálogo exitosamente.");
+
+      setIsCreateOpen(false);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
+
+  const handleEditProduct = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      clientSuccessHandler(
+        `Producto "${editProducto?.name}" actualizado correctamente.`,
+      );
+
+      setEditProducto(null);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
+
+  const handleDeleteProduct = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      clientSuccessHandler(
+        `Producto "${deleteProducto?.name}" eliminado del catálogo.`,
+      );
+
+      setDeleteProducto(null);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
 
   return (
     <AppLayout variant="admin">
@@ -209,7 +250,7 @@ export default function AdminProductosPage() {
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={() => setIsCreateOpen(false)}>
+            <Button onClick={handleCreateProduct}>
               Guardar Producto
             </Button>
           </>
@@ -294,7 +335,7 @@ export default function AdminProductosPage() {
             <Button variant="outline" onClick={() => setEditProducto(null)}>
               Cancelar
             </Button>
-            <Button onClick={() => setEditProducto(null)}>
+            <Button onClick={handleEditProduct}>
               Guardar Cambios
             </Button>
           </>
@@ -384,7 +425,7 @@ export default function AdminProductosPage() {
         onOpenChange={() => setDeleteProducto(null)}
         title="Eliminar Producto"
         description={`¿Estás seguro de que deseas eliminar "${deleteProducto?.name}" del catálogo? Esta acción no se puede deshacer.`}
-        onConfirm={() => setDeleteProducto(null)}
+        onConfirm={handleDeleteProduct}
         confirmText="Eliminar"
         variant="destructive"
       />

@@ -13,6 +13,7 @@ import {
   CheckmarkCircle01Icon,
   CancelCircleIcon,
 } from "hugeicons-react";
+import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
 
 interface Cliente {
   id: number;
@@ -107,12 +108,32 @@ export default function AdminClientesPage() {
     (c) => c.status === "PENDING",
   ).length;
 
-  const handleApprove = () => {
-    setApproveCliente(null);
+  const handleApprove = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      clientSuccessHandler(
+        `Cliente "${approveCliente?.razonSocial}" aprobado exitosamente. Ya puede acceder al catálogo.`,
+      );
+
+      setApproveCliente(null);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
   };
 
-  const handleReject = () => {
-    setRejectCliente(null);
+  const handleReject = async () => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      clientSuccessHandler(
+        `Cliente "${rejectCliente?.razonSocial}" rechazado correctamente.`,
+      );
+
+      setRejectCliente(null);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
   };
 
   return (
