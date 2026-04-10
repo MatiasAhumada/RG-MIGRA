@@ -1,6 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
+
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
+}
 
 const brandData = [
   {
@@ -40,6 +45,8 @@ const brandData = [
 ];
 
 async function main() {
+  // ==================== CREAR EMPRESA Y ADMIN ====================
+  console.log("\n=== EMPRESA Y USUARIO ADMIN ===");
   console.log("Buscando o creando empresa MIGRA...");
 
   const foundEmpresa = await prisma.empresa.findFirst({
@@ -57,6 +64,80 @@ async function main() {
       ? `Empresa "${foundEmpresa.name}" ya existe con ID: ${foundEmpresa.id}`
       : `Empresa creada con ID: ${empresa.id}`,
   );
+
+  // Crear usuario admin de la empresa
+  const adminEmail = "admin@migra.com";
+  const foundAdminUser = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (!foundAdminUser) {
+    const hashedPassword = await hashPassword("admin123");
+    await prisma.user.create({
+      data: {
+        email: adminEmail,
+        password: hashedPassword,
+        name: "Admin MIGRA",
+        role: "ADMIN",
+        empresaId: empresa.id,
+      },
+    });
+    console.log(`✓ Usuario admin creado: ${adminEmail} / admin123`);
+  } else {
+    console.log(`✓ Usuario admin ya existe: ${adminEmail}`);
+  }
+
+  // ==================== CREAR CLIENTE Y USUARIO CLIENTE ====================
+  console.log("\n=== CLIENTE Y USUARIO CLIENTE ===");
+  console.log("Buscando o creando cliente...");
+
+  const foundCliente = await prisma.cliente.findFirst({
+    where: { razonSocial: "Cliente Ejemplo S.A." },
+  });
+
+  const cliente = foundCliente
+    ? foundCliente
+    : await prisma.cliente.create({
+        data: {
+          razonSocial: "Cliente Ejemplo S.A.",
+          titular: "Juan Pérez",
+          cuit: "20-12345678-9",
+          correo: "contacto@clienteejemplo.com",
+          telefono: "+5491112345678",
+          status: "APPROVED",
+          empresaId: empresa.id,
+        },
+      });
+
+  console.log(
+    foundCliente
+      ? `Cliente "${foundCliente.razonSocial}" ya existe con ID: ${foundCliente.id}`
+      : `Cliente creado con ID: ${cliente.id}`,
+  );
+
+  // Crear usuario del cliente
+  const clienteEmail = "cliente@ejemplo.com";
+  const foundClienteUser = await prisma.user.findUnique({
+    where: { email: clienteEmail },
+  });
+
+  if (!foundClienteUser) {
+    const hashedPassword = await hashPassword("cliente123");
+    await prisma.user.create({
+      data: {
+        email: clienteEmail,
+        password: hashedPassword,
+        name: "Juan Pérez",
+        role: "CLIENT",
+        cliente: {
+          connect: { id: cliente.id },
+        },
+      },
+    });
+    console.log(`✓ Usuario cliente creado: ${clienteEmail} / cliente123`);
+  } else {
+    console.log(`✓ Usuario cliente ya existe: ${clienteEmail}`);
+  }
 
   for (const brand of brandData) {
     console.log(`Procesando marca: ${brand.name}`);
