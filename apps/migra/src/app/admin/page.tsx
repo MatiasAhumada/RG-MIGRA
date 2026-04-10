@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
 import { PageHeader, DataTable, PdfUpload } from "@/components/common";
@@ -13,88 +13,10 @@ import {
   ArrowUp01Icon,
   ArrowDown01Icon,
 } from "hugeicons-react";
-import { clientSuccessHandler } from "@/utils/handlers/clientHandler";
-
-const stats = [
-  {
-    label: "Productos Activos",
-    value: "248",
-    change: "+12%",
-    trend: "up" as const,
-    icon: Package01Icon,
-    color: "bg-[#336366]/20 text-[#4c7c7f]",
-  },
-  {
-    label: "Clientes Registrados",
-    value: "86",
-    change: "+8%",
-    trend: "up" as const,
-    icon: Group01Icon,
-    color: "bg-[#2b6485]/15 text-[#2b6485]",
-  },
-  {
-    label: "Pedidos del Mes",
-    value: "142",
-    change: "+23%",
-    trend: "up" as const,
-    icon: ShoppingCart01Icon,
-    color: "bg-[#336366]/20 text-[#4c7c7f]",
-  },
-  {
-    label: "Facturación",
-    value: "$2.4M",
-    change: "-3%",
-    trend: "down" as const,
-    icon: Analytics01Icon,
-    color: "bg-[#b7102a]/15 text-[#b7102a]",
-  },
-];
-
-interface Pedido {
-  id: string;
-  cliente: string;
-  total: string;
-  status: "PENDING" | "CONFIRMED" | "DOWNLOADED" | "SHIPPED";
-  date: string;
-}
-
-const recentOrders: Pedido[] = [
-  {
-    id: "PED-001",
-    cliente: "Baby Store S.R.L",
-    total: "$45.200",
-    status: "CONFIRMED",
-    date: "03/04/2026",
-  },
-  {
-    id: "PED-002",
-    cliente: "Mundo Bebé",
-    total: "$32.800",
-    status: "PENDING",
-    date: "03/04/2026",
-  },
-  {
-    id: "PED-003",
-    cliente: "Pequeños Pasos",
-    total: "$67.500",
-    status: "SHIPPED",
-    date: "02/04/2026",
-  },
-  {
-    id: "PED-004",
-    cliente: "La Casita del Bebé",
-    total: "$28.900",
-    status: "CONFIRMED",
-    date: "02/04/2026",
-  },
-  {
-    id: "PED-005",
-    cliente: "Baby Store S.R.L",
-    total: "$51.300",
-    status: "DOWNLOADED",
-    date: "01/04/2026",
-  },
-];
+import { clienteService, productoService, pedidoService } from "@/services";
+import { formatCurrency } from "@/utils/formatters";
+import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import type { PedidoWithRelations } from "@/types/pedido.types";
 
 const statusStyles: Record<string, string> = {
   PENDING: "bg-[#2b6485]/15 text-[#2b6485]",
@@ -111,10 +33,46 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function AdminPage() {
+  const [productCount, setProductCount] = useState(0);
+  const [clientCount, setClientCount] = useState(0);
+  const [pedidos, setPedidos] = useState<PedidoWithRelations[]>([]);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const [productos, clientes, allPedidos] = await Promise.all([
+        productoService.findAll(),
+        clienteService.findAll(),
+        pedidoService.findAll(),
+      ]);
+
+      setProductCount(productos.length);
+      setClientCount(clientes.length);
+      setPedidos(allPedidos.slice(0, 5));
+
+      const revenue = allPedidos.reduce(
+        (sum, p) => sum + p.totalPedido,
+        0,
+      );
+      setTotalRevenue(revenue);
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleUploadComplete = (fileName: string) => {
     clientSuccessHandler(
       `Catálogo "${fileName}" importado.\nProductos actualizados en el catálogo.`,
     );
+    loadDashboardData();
   };
 
   return (
@@ -127,10 +85,52 @@ export default function AdminPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mt-8"
+      >
+        <PdfUpload onUploadComplete={handleUploadComplete} variant="full" />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
         className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {stats.map((stat, index) => {
+        {[
+          {
+            label: "Productos Activos",
+            value: productCount.toString(),
+            change: "+0%",
+            trend: "up" as const,
+            icon: Package01Icon,
+            color: "bg-[#336366]/20 text-[#4c7c7f]",
+          },
+          {
+            label: "Clientes Registrados",
+            value: clientCount.toString(),
+            change: "+0%",
+            trend: "up" as const,
+            icon: Group01Icon,
+            color: "bg-[#2b6485]/15 text-[#2b6485]",
+          },
+          {
+            label: "Pedidos del Mes",
+            value: pedidos.length.toString(),
+            change: "+0%",
+            trend: "up" as const,
+            icon: ShoppingCart01Icon,
+            color: "bg-[#336366]/20 text-[#4c7c7f]",
+          },
+          {
+            label: "Facturación",
+            value: totalRevenue ? formatCurrency(totalRevenue) : "$0",
+            change: "+0%",
+            trend: "up" as const,
+            icon: Analytics01Icon,
+            color: "bg-[#b7102a]/15 text-[#b7102a]",
+          },
+        ].map((stat, index) => {
           const Icon = stat.icon;
 
           return (
@@ -165,7 +165,7 @@ export default function AdminPage() {
                       fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
                     }}
                   >
-                    {stat.value}
+                    {isLoading ? "..." : stat.value}
                   </p>
                   <p
                     className="text-sm text-[#3d4a3d]"
@@ -185,19 +185,10 @@ export default function AdminPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mt-6"
-      >
-        <PdfUpload onUploadComplete={handleUploadComplete} variant="full" />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.4 }}
         className="mt-8"
       >
-        <DataTable<Pedido>
+        <DataTable<PedidoWithRelations>
           title="Pedidos Recientes"
           columns={[
             {
@@ -205,7 +196,7 @@ export default function AdminPage() {
               label: "Pedido",
               render: (item) => (
                 <span className="font-mono text-sm font-semibold text-[#2b6485]">
-                  {item.id}
+                  PED-{item.id}
                 </span>
               ),
             },
@@ -214,19 +205,21 @@ export default function AdminPage() {
               label: "Cliente",
               render: (item) => (
                 <p className="text-sm font-medium text-[#161d16]">
-                  {item.cliente}
+                  {item.cliente.razonSocial}
                 </p>
               ),
             },
             {
-              key: "date",
+              key: "fecha",
               label: "Fecha",
               render: (item) => (
-                <p className="text-sm text-[#3d4a3d]">{item.date}</p>
+                <p className="text-sm text-[#3d4a3d]">
+                  {new Date(item.fecha).toLocaleDateString("es-AR")}
+                </p>
               ),
             },
             {
-              key: "total",
+              key: "totalPedido",
               label: "Total",
               render: (item) => (
                 <p
@@ -235,7 +228,7 @@ export default function AdminPage() {
                     fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
                   }}
                 >
-                  {item.total}
+                  {formatCurrency(item.totalPedido)}
                 </p>
               ),
             },
@@ -251,10 +244,10 @@ export default function AdminPage() {
               ),
             },
           ]}
-          data={recentOrders}
-          keyExtractor={(item) => item.id}
+          data={pedidos}
+          keyExtractor={(item) => String(item.id)}
           emptyMessage="No hay pedidos recientes"
-          totalLabel={`${recentOrders.length} pedidos`}
+          totalLabel={`${pedidos.length} pedidos`}
         />
       </motion.div>
     </AppLayout>
