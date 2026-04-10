@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type MouseEvent } from "react";
+import { useState, useRef, useEffect, type MouseEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,69 +15,15 @@ import {
   Cancel01Icon,
 } from "hugeicons-react";
 import { ROUTES } from "@/constants/routes";
+import { productoService } from "@/services";
+import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import type { ProductoWithRelations } from "@/types/producto.types";
 
 const brands = [
   { name: "babelito", label: "Babelito" },
   { name: "spa", label: "SPA" },
   { name: "random", label: "Random" },
   { name: "jactans", label: "Jactans" },
-];
-
-const sampleProducts = [
-  {
-    id: 1,
-    name: "Pack Pañales Premium Talle M x50",
-    tipo: "Pañales",
-    sku: "PAN-PRE-M",
-    price: 15800,
-    imgUrl:
-      "https://images.unsplash.com/photo-1594125345722-e6e726a33a79?w=400&h=400&fit=crop",
-  },
-  {
-    id: 2,
-    name: "Toallitas Húmedas Suaves x100",
-    tipo: "Higiene",
-    sku: "TOH-100",
-    price: 4200,
-    imgUrl:
-      "https://images.unsplash.com/photo-1627916560298-0227d0754b40?w=400&h=400&fit=crop",
-  },
-  {
-    id: 3,
-    name: "Leche Infantil Fórmula Premium 900g",
-    tipo: "Alimentación",
-    sku: "LEI-FOR-900",
-    price: 12500,
-    imgUrl:
-      "https://images.unsplash.com/photo-1584693786687-3e4b0a0e3e3e?w=400&h=400&fit=crop&q=80",
-  },
-  {
-    id: 4,
-    name: "Biberón Anticólicos 270ml",
-    tipo: "Mamaderas",
-    sku: "BIB-ANT-270",
-    price: 6800,
-    imgUrl:
-      "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=400&h=400&fit=crop",
-  },
-  {
-    id: 5,
-    name: "Crema Hidratante Bebé 200g",
-    tipo: "Cuidado",
-    sku: "CRH-BEB-200",
-    price: 5400,
-    imgUrl:
-      "https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=400&h=400&fit=crop",
-  },
-  {
-    id: 6,
-    name: "Chupete Anatómico Silicona 6-18m",
-    tipo: "Chupetes",
-    sku: "CHU-SIL-618",
-    price: 3200,
-    imgUrl:
-      "https://images.unsplash.com/photo-1594125345722-e6e726a33a79?w=400&h=400&fit=crop",
-  },
 ];
 
 const containerVariants = {
@@ -102,6 +48,24 @@ export default function HomePage() {
   const isSearching = query.trim().length > 0;
   const [bgPos, setBgPos] = useState({ x: 50, y: 50 });
   const heroRef = useRef<HTMLDivElement>(null);
+  const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    loadProductos();
+  }, []);
+
+  const loadProductos = async () => {
+    try {
+      setIsLoading(true);
+      const data = await productoService.findAll();
+      setProductos(data);
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -114,12 +78,16 @@ export default function HomePage() {
     setBgPos({ x: 50, y: 50 });
   };
 
-  const filteredProducts = sampleProducts.filter(
+  const filteredProducts = productos.filter(
     (p) =>
       p.name.toLowerCase().includes(query.toLowerCase()) ||
-      p.tipo.toLowerCase().includes(query.toLowerCase()) ||
+      p.categoria.name.toLowerCase().includes(query.toLowerCase()) ||
       p.sku.toLowerCase().includes(query.toLowerCase()),
   );
+
+  const displayProducts = isSearching
+    ? filteredProducts
+    : productos.slice(0, 8);
 
   return (
     <PublicLayout>
@@ -337,17 +305,32 @@ export default function HomePage() {
             </Link>
           </motion.div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
-          >
-            {sampleProducts.map((product) => (
-              <ProductCard key={product.id} {...product} showPrice={false} />
-            ))}
-          </motion.div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <span className="size-8 animate-spin rounded-full border-2 border-[#2b6485]/30 border-t-[#2b6485]" />
+            </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
+            >
+              {displayProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  tipo={product.categoria.name}
+                  sku={product.sku}
+                  price={product.price}
+                  imgUrl={product.imgUrl || ""}
+                  showPrice={false}
+                />
+              ))}
+            </motion.div>
+          )}
         </section>
       </div>
 
@@ -396,7 +379,12 @@ export default function HomePage() {
                     {filteredProducts.map((product) => (
                       <ProductCard
                         key={product.id}
-                        {...product}
+                        id={product.id}
+                        name={product.name}
+                        tipo={product.categoria.name}
+                        sku={product.sku}
+                        price={product.price}
+                        imgUrl={product.imgUrl || ""}
                         showPrice={false}
                       />
                     ))}
