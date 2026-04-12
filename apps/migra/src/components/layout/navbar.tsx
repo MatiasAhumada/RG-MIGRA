@@ -1,24 +1,33 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ROUTES } from "@/constants/routes";
 import { useSearch } from "@/context/search-context";
+import { useAuth } from "@/context/auth-context";
 import {
   Login01Icon,
   UserCircleIcon,
   ShoppingCart01Icon,
   Search01Icon,
+  Logout01Icon,
+  ArrowDown01Icon,
 } from "hugeicons-react";
 
 export function Navbar() {
   const pathname = usePathname();
   const { query, setQuery } = useSearch();
-  const isAuthenticated =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+  const { isAuthenticated, isClient, isAdmin, logout, user } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    setIsMenuOpen(false);
+    await logout();
+  };
 
   return (
     <motion.header
@@ -54,28 +63,91 @@ export function Navbar() {
 
         <div className="flex flex-1 items-center justify-end gap-2">
           {isAuthenticated ? (
-            <>
-              <Link href="/dashboard">
-                <motion.div
-                  whileHover={{ scale: 1.15 }}
-                  whileTap={{ scale: 0.95 }}
+            <div className="relative">
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="gap-2"
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
-                  <Button variant="ghost" size="icon-lg">
-                    <UserCircleIcon className="size-7" />
-                  </Button>
-                </motion.div>
-              </Link>
-              <Link href="/dashboard/pedido">
-                <motion.div
-                  whileHover={{ scale: 1.15 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button variant="ghost" size="icon-lg">
-                    <ShoppingCart01Icon className="size-7" />
-                  </Button>
-                </motion.div>
-              </Link>
-            </>
+                  <UserCircleIcon className="size-6" />
+                  <span className="text-sm font-medium hidden md:inline">
+                    {user?.name}
+                  </span>
+                  <ArrowDown01Icon className="size-4" />
+                </Button>
+              </motion.div>
+
+              <AnimatePresence>
+                {isMenuOpen && (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsMenuOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-[#161d16]/10 bg-white shadow-xl"
+                    >
+                      <div className="px-4 py-3 border-b border-[#161d16]/5">
+                        <p className="text-sm font-semibold text-[#161d16]">
+                          {user?.name}
+                        </p>
+                        <p className="text-xs text-[#3d4a3d]">{user?.email}</p>
+                      </div>
+
+                      <div className="py-1">
+                        {isClient && (
+                          <Link href={ROUTES.DASHBOARD}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full justify-start gap-3 rounded-none text-sm"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              <ShoppingCart01Icon className="size-4" />
+                              Mi Panel
+                            </Button>
+                          </Link>
+                        )}
+                        {isAdmin && (
+                          <Link href={ROUTES.ADMIN}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-full justify-start gap-3 rounded-none text-sm"
+                              onClick={() => setIsMenuOpen(false)}
+                            >
+                              <UserCircleIcon className="size-4" />
+                              Panel de Administración
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
+
+                      <div className="border-t border-[#161d16]/5 py-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start gap-3 rounded-none text-sm text-[#b7102a] hover:bg-[#b7102a]/5 hover:text-[#b7102a]"
+                          onClick={handleLogout}
+                        >
+                          <Logout01Icon className="size-4" />
+                          Cerrar Sesión
+                        </Button>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           ) : (
             <Link href={ROUTES.LOGIN} className="shrink-0">
               <motion.div
