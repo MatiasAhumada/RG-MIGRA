@@ -8,11 +8,13 @@ import { PublicLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/common";
 import { useSearch } from "@/context/search-context";
+import { useAuth } from "@/context/auth-context";
 import {
   ArrowRight01Icon,
   Login01Icon,
   CheckmarkCircle01Icon,
   Cancel01Icon,
+  GridIcon,
 } from "hugeicons-react";
 import { ROUTES } from "@/constants/routes";
 import { productoService } from "@/services";
@@ -45,6 +47,7 @@ const itemVariants = {
 
 export default function HomePage() {
   const { query, setQuery } = useSearch();
+  const { isAuthenticated, isClient } = useAuth();
   const isSearching = query.trim().length > 0;
   const [bgPos, setBgPos] = useState({ x: 50, y: 50 });
   const heroRef = useRef<HTMLDivElement>(null);
@@ -196,18 +199,33 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
               >
-                <Link href={ROUTES.REGISTER}>
-                  <Button
-                    size="lg"
-                    className="mt-10 gap-3 rounded-[2rem] bg-[#b7102a] px-10 text-base font-bold text-white shadow-xl hover:bg-[#a00f25] hover:shadow-2xl"
-                    style={{
-                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                    }}
-                  >
-                    Crear mi cuenta
-                    <Login01Icon className="size-5" />
-                  </Button>
-                </Link>
+                {!isAuthenticated ? (
+                  <Link href={ROUTES.REGISTER}>
+                    <Button
+                      size="lg"
+                      className="mt-10 gap-3 rounded-[2rem] bg-[#b7102a] px-10 text-base font-bold text-white shadow-xl hover:bg-[#a00f25] hover:shadow-2xl"
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
+                    >
+                      Crear mi cuenta
+                      <Login01Icon className="size-5" />
+                    </Button>
+                  </Link>
+                ) : isClient ? (
+                  <Link href={ROUTES.DASHBOARD}>
+                    <Button
+                      size="lg"
+                      className="mt-10 gap-3 rounded-[2rem] bg-white/15 px-10 text-base font-bold text-white shadow-xl hover:bg-white/25 backdrop-blur-sm"
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
+                    >
+                      Ir a Mi Panel
+                      <GridIcon className="size-5" />
+                    </Button>
+                  </Link>
+                ) : null}
               </motion.div>
             </div>
           </motion.div>
