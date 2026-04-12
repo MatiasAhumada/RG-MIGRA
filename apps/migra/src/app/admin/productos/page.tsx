@@ -6,30 +6,32 @@ import { AppLayout } from "@/components/layout";
 import { PageHeader, DataTable, PdfUpload } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { GenericModal, ConfirmModal } from "@/components/common";
-import { Add01Icon, Edit02Icon, Delete01Icon } from "hugeicons-react";
+import { Add01Icon, Edit02Icon, Delete01Icon, Refresh01Icon } from "hugeicons-react";
 import { productoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
 import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import { useDataQuery } from "@/hooks/useDataQuery";
 import type { ProductoWithRelations, CreateProductoDto, UpdateProductoDto } from "@/types/producto.types";
 
 export default function AdminProductosPage() {
   const [search, setSearch] = useState("");
-  const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editProducto, setEditProducto] = useState<ProductoWithRelations | null>(null);
   const [deleteProducto, setDeleteProducto] = useState<ProductoWithRelations | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const loadProductos = async () => {
-    try {
-      setIsLoading(true);
-      const data = await productoService.findAll(search);
-      setProductos(data);
-    } catch (error) {
-      clientErrorHandler(error);
-    } finally {
-      setIsLoading(false);
-    }
+  const { data: productos, isLoading, refetch } = useDataQuery<ProductoWithRelations[]>({
+    fetcher: () => productoService.findAll(debouncedSearch),
+    refetchInterval: 10000,
+  });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 500);
+
+    return () => clearTimeout(timeout);
   };
 
   const handleCreateProduct = async () => {
@@ -68,7 +70,7 @@ export default function AdminProductosPage() {
       );
 
       setDeleteProducto(null);
-      loadProductos();
+      refetch();
     } catch (error) {
       clientErrorHandler(error);
     }
@@ -78,10 +80,10 @@ export default function AdminProductosPage() {
     clientSuccessHandler(
       `Catálogo "${fileName}" importado.\nProductos actualizados en el catálogo.`,
     );
-    loadProductos();
+    refetch();
   };
 
-  const filteredProducts = productos.filter(
+  const filteredProducts = (productos || []).filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.sku.toLowerCase().includes(search.toLowerCase()),
@@ -195,7 +197,7 @@ export default function AdminProductosPage() {
           keyExtractor={(item) => String(item.id)}
           emptyMessage="No se encontraron productos"
           searchPlaceholder="Buscar producto..."
-          onSearch={setSearch}
+          onSearch={handleSearchChange}
           actions={
             <div className="flex gap-2">
               <Button
@@ -206,13 +208,14 @@ export default function AdminProductosPage() {
                 Nuevo Producto
               </Button>
               <Button
-                variant="outline"
-                size="sm"
-                className="rounded-[2rem]"
-                onClick={loadProductos}
+                size="icon-sm"
+                variant="ghost"
+                className="rounded-full"
+                onClick={refetch}
                 disabled={isLoading}
+                title="Actualizar ahora"
               >
-                {isLoading ? "Cargando..." : "Actualizar"}
+                <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
               </Button>
             </div>
           }

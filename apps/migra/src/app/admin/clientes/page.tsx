@@ -10,9 +10,11 @@ import {
   EyeIcon,
   CheckmarkCircle01Icon,
   CancelCircleIcon,
+  Refresh01Icon,
 } from "hugeicons-react";
 import { clienteService } from "@/services";
 import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import { useDataQuery } from "@/hooks/useDataQuery";
 import type { Cliente, ClienteStatus } from "@/types/cliente.types";
 
 const statusStyles: Record<string, string> = {
@@ -29,22 +31,23 @@ const statusLabels: Record<string, string> = {
 
 export default function AdminClientesPage() {
   const [search, setSearch] = useState("");
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [viewCliente, setViewCliente] = useState<Cliente | null>(null);
   const [approveCliente, setApproveCliente] = useState<Cliente | null>(null);
   const [rejectCliente, setRejectCliente] = useState<Cliente | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const loadClientes = async () => {
-    try {
-      setIsLoading(true);
-      const data = await clienteService.findAll(search);
-      setClientes(data);
-    } catch (error) {
-      clientErrorHandler(error);
-    } finally {
-      setIsLoading(false);
-    }
+  const { data: clientes, isLoading, refetch } = useDataQuery<Cliente[]>({
+    fetcher: () => clienteService.findAll(debouncedSearch),
+    refetchInterval: 5000,
+  });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 500);
+
+    return () => clearTimeout(timeout);
   };
 
   const handleApprove = async () => {
@@ -57,7 +60,7 @@ export default function AdminClientesPage() {
       );
 
       setApproveCliente(null);
-      loadClientes();
+      refetch();
     } catch (error) {
       clientErrorHandler(error);
     }
@@ -73,13 +76,13 @@ export default function AdminClientesPage() {
       );
 
       setRejectCliente(null);
-      loadClientes();
+      refetch();
     } catch (error) {
       clientErrorHandler(error);
     }
   };
 
-  const filteredClients = clientes.filter(
+  const filteredClients = (clientes || []).filter(
     (c) =>
       c.razonSocial.toLowerCase().includes(search.toLowerCase()) ||
       c.titular.toLowerCase().includes(search.toLowerCase()) ||
@@ -193,17 +196,17 @@ export default function AdminClientesPage() {
           keyExtractor={(item) => String(item.id)}
           emptyMessage="No se encontraron clientes"
           searchPlaceholder="Buscar cliente..."
-          onSearch={(value) => {
-            setSearch(value);
-          }}
+          onSearch={handleSearchChange}
           actions={
             <Button
-              size="sm"
-              className="rounded-[2rem]"
-              onClick={loadClientes}
+              size="icon-sm"
+              variant="ghost"
+              className="rounded-full"
+              onClick={refetch}
               disabled={isLoading}
+              title="Actualizar ahora"
             >
-              {isLoading ? "Cargando..." : "Actualizar"}
+              <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
           }
           totalLabel={`${filteredClients.length} clientes (${pendingCount} pendientes)`}
