@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { PublicLayout } from "@/components/layout";
 import { ProductCard } from "@/components/common";
@@ -8,33 +8,31 @@ import { Input } from "@/components/ui/input";
 import { Search01Icon } from "hugeicons-react";
 import { productoService } from "@/services";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import { useDataQuery } from "@/hooks/useDataQuery";
 import type { ProductoWithRelations } from "@/types/producto.types";
 
 export default function CatalogPage() {
   const [search, setSearch] = useState("");
-  const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadProductos();
-  }, []);
-
-  const loadProductos = async () => {
-    try {
-      setIsLoading(true);
-      const data = await productoService.findAll(search);
-      setProductos(data);
-    } catch (error) {
-      clientErrorHandler(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const categories = ["Todos", ...new Set(productos.map((p) => p.categoria.name))];
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("Todos");
 
-  const filteredProducts = productos.filter((product) => {
+  const { data: productos, isLoading } = useDataQuery<ProductoWithRelations[]>({
+    fetcher: () => productoService.findAll(debouncedSearch),
+    refetchInterval: 30000,
+  });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  };
+
+  const categories = ["Todos", ...new Set((productos || []).map((p) => p.categoria.name))];
+
+  const filteredProducts = (productos || []).filter((product) => {
     const matchesSearch =
       product.name.toLowerCase().includes(search.toLowerCase()) ||
       product.categoria.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -77,7 +75,7 @@ export default function CatalogPage() {
             <Input
               placeholder="Buscar producto, tipo o SKU..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="h-12 pl-12 text-base"
             />
           </div>

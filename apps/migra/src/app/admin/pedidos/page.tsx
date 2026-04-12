@@ -6,11 +6,12 @@ import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar, DataTable } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { GenericModal } from "@/components/common";
-import { EyeIcon, FilterIcon } from "hugeicons-react";
-import { pedidoService, productoService } from "@/services";
+import { EyeIcon, FilterIcon, Refresh01Icon } from "hugeicons-react";
+import { pedidoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
-import type { PedidoWithRelations, PedidoStatus } from "@/types/pedido.types";
+import { useDataQuery } from "@/hooks/useDataQuery";
+import type { PedidoWithRelations } from "@/types/pedido.types";
 import type { NurtureBarStep } from "@/components/common";
 
 const statusStyles: Record<string, string> = {
@@ -56,26 +57,27 @@ const orderStepsMap: Record<string, NurtureBarStep[]> = {
 
 export default function AdminPedidosPage() {
   const [search, setSearch] = useState("");
-  const [pedidos, setPedidos] = useState<PedidoWithRelations[]>([]);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedPedido, setSelectedPedido] = useState<PedidoWithRelations | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const loadPedidos = async () => {
-    try {
-      setIsLoading(true);
-      const data = await pedidoService.findAll();
-      setPedidos(data);
-    } catch (error) {
-      clientErrorHandler(error);
-    } finally {
-      setIsLoading(false);
-    }
+  const { data: pedidos, isLoading, refetch } = useDataQuery<PedidoWithRelations[]>({
+    fetcher: () => pedidoService.findAll(),
+    refetchInterval: 10000,
+  });
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    const timeout = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 500);
+
+    return () => clearTimeout(timeout);
   };
 
-  const filteredOrders = pedidos.filter(
+  const filteredOrders = (pedidos || []).filter(
     (o) =>
-      o.id.toString().toLowerCase().includes(search.toLowerCase()) ||
-      o.cliente.razonSocial.toLowerCase().includes(search.toLowerCase()),
+      o.id.toString().toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      o.cliente.razonSocial.toLowerCase().includes(debouncedSearch.toLowerCase()),
   );
 
   return (
@@ -166,7 +168,7 @@ export default function AdminPedidosPage() {
           keyExtractor={(item) => String(item.id)}
           emptyMessage="No se encontraron pedidos"
           searchPlaceholder="Buscar pedido..."
-          onSearch={setSearch}
+          onSearch={handleSearchChange}
           actions={
             <div className="flex gap-2">
               <Button
@@ -178,12 +180,14 @@ export default function AdminPedidosPage() {
                 Filtrar
               </Button>
               <Button
-                size="sm"
-                className="rounded-[2rem]"
-                onClick={loadPedidos}
+                size="icon-sm"
+                variant="ghost"
+                className="rounded-full"
+                onClick={refetch}
                 disabled={isLoading}
+                title="Actualizar ahora"
               >
-                {isLoading ? "Cargando..." : "Actualizar"}
+                <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
               </Button>
             </div>
           }
