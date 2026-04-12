@@ -7,10 +7,11 @@ import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar, DataTable } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { GenericModal } from "@/components/common";
-import { ArrowLeft01Icon, EyeIcon } from "hugeicons-react";
+import { ArrowLeft01Icon, EyeIcon, Refresh01Icon } from "hugeicons-react";
 import { pedidoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import { useDataQuery } from "@/hooks/useDataQuery";
 import type { PedidoWithRelations } from "@/types/pedido.types";
 import type { NurtureBarStep } from "@/components/common";
 
@@ -56,21 +57,12 @@ const orderStepsMap: Record<string, NurtureBarStep[]> = {
 };
 
 export default function DashboardOrdenesPage() {
-  const [pedidos, setPedidos] = useState<PedidoWithRelations[]>([]);
   const [selectedPedido, setSelectedPedido] = useState<PedidoWithRelations | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const loadPedidos = async () => {
-    try {
-      setIsLoading(true);
-      const data = await pedidoService.findAll();
-      setPedidos(data);
-    } catch (error) {
-      clientErrorHandler(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: pedidos, isLoading, refetch } = useDataQuery<PedidoWithRelations[]>({
+    fetcher: () => pedidoService.findAll(),
+    refetchInterval: 15000,
+  });
 
   return (
     <AppLayout variant="client">
@@ -81,12 +73,13 @@ export default function DashboardOrdenesPage() {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              size="sm"
-              className="gap-2 rounded-[2rem]"
-              onClick={loadPedidos}
+              size="icon-sm"
+              className="rounded-full"
+              onClick={refetch}
               disabled={isLoading}
+              title="Actualizar ahora"
             >
-              {isLoading ? "Cargando..." : "Actualizar"}
+              <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
             <Link href="/dashboard">
               <Button variant="outline" size="sm" className="gap-2 rounded-[2rem]">
@@ -173,10 +166,10 @@ export default function DashboardOrdenesPage() {
               ),
             },
           ]}
-          data={isLoading ? [] : pedidos}
+          data={isLoading ? [] : (pedidos || [])}
           keyExtractor={(item) => String(item.id)}
           emptyMessage="No hay pedidos en el historial"
-          totalLabel={`${pedidos.length} pedidos`}
+          totalLabel={`${(pedidos || []).length} pedidos`}
         />
       </motion.div>
 

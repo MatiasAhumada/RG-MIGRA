@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar } from "@/components/common";
@@ -13,11 +13,13 @@ import {
   CheckmarkCircle01Icon,
   ArrowRight01Icon,
   GridIcon,
+  Refresh01Icon,
 } from "hugeicons-react";
 import Link from "next/link";
 import { pedidoService, productoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import { useDataQuery } from "@/hooks/useDataQuery";
 import type { PedidoWithRelations } from "@/types/pedido.types";
 import type { ProductoWithRelations } from "@/types/producto.types";
 import type { NurtureBarStep } from "@/components/common";
@@ -44,32 +46,22 @@ const orderSteps: NurtureBarStep[] = [
 ];
 
 export default function DashboardPage() {
-  const [pedidos, setPedidos] = useState<PedidoWithRelations[]>([]);
-  const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: pedidos, isLoading: pedidosLoading, refetch: refetchPedidos } = useDataQuery<PedidoWithRelations[]>({
+    fetcher: () => pedidoService.findAll(),
+    refetchInterval: 15000,
+  });
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const { data: productos, isLoading: productosLoading } = useDataQuery<ProductoWithRelations[]>({
+    fetcher: () => productoService.findAll(),
+    refetchInterval: 30000,
+  });
 
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      const [pedidosData, productosData] = await Promise.all([
-        pedidoService.findAll(),
-        productoService.findAll(),
-      ]);
-      setPedidos(pedidosData);
-      setProductos(productosData);
-    } catch (error) {
-      clientErrorHandler(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const pedidosList = pedidos || [];
+  const productosList = productos || [];
+  const isLoading = pedidosLoading || productosLoading;
 
-  const pendingCount = pedidos.filter((p) => p.status === "PENDING").length;
-  const confirmedCount = pedidos.filter(
+  const pendingCount = pedidosList.filter((p) => p.status === "PENDING").length;
+  const confirmedCount = pedidosList.filter(
     (p) => p.status === "CONFIRMED" || p.status === "DOWNLOADED" || p.status === "SHIPPED",
   ).length;
 
@@ -78,6 +70,18 @@ export default function DashboardPage() {
       <PageHeader
         title="Mi Panel"
         description="Bienvenido"
+        action={
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            className="rounded-full"
+            onClick={refetchPedidos}
+            disabled={isLoading}
+            title="Actualizar ahora"
+          >
+            <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
+          </Button>
+        }
       />
 
       <motion.div
@@ -101,7 +105,7 @@ export default function DashboardPage() {
           },
           {
             label: "Productos Disponibles",
-            value: productos.length.toString(),
+            value: productosList.length.toString(),
             icon: CheckmarkCircle01Icon,
             color: "bg-[#7cb56e]/15 text-[#5a9a4e]",
           },
@@ -139,7 +143,7 @@ export default function DashboardPage() {
         })}
       </motion.div>
 
-      {pedidos.length > 0 && (
+      {pedidosList.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -152,7 +156,7 @@ export default function DashboardPage() {
                 className="text-base font-bold text-[#161d16]"
                 style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
               >
-                Pedido Reciente - PED-{pedidos[0].id}
+                Pedido Reciente - PED-{pedidosList[0].id}
               </h3>
               <Link href="/dashboard/ordenes">
                 <Button variant="ghost" size="sm" className="gap-1">
@@ -188,7 +192,7 @@ export default function DashboardPage() {
         </div>
 
         <Card className="rounded-[2rem] p-0 overflow-hidden">
-          {pedidos.slice(0, 5).map((order, index) => (
+          {pedidosList.slice(0, 5).map((order, index) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, x: -10 }}
@@ -228,7 +232,7 @@ export default function DashboardPage() {
             </motion.div>
           ))}
 
-          {pedidos.length === 0 && !isLoading && (
+          {pedidosList.length === 0 && !isLoading && (
             <div className="py-12 text-center">
               <p className="text-sm text-[#3d4a3d]">
                 No tenés pedidos todavía
@@ -260,7 +264,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {productos.slice(0, 4).map((product) => (
+          {productosList.slice(0, 4).map((product) => (
             <ProductCard
               key={product.id}
               id={product.id}
