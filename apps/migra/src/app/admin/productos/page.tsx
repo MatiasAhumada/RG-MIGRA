@@ -22,7 +22,6 @@ export default function AdminProductosPage() {
 
   const { data: productos, isLoading, refetch } = useDataQuery<ProductoWithRelations[]>({
     fetcher: () => productoService.findAll(debouncedSearch),
-    refetchInterval: 10000,
   });
 
   const handleSearchChange = (value: string) => {

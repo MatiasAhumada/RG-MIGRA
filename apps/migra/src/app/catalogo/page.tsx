@@ -18,7 +18,6 @@ export default function CatalogPage() {
 
   const { data: productos, isLoading } = useDataQuery<ProductoWithRelations[]>({
     fetcher: () => productoService.findAll(debouncedSearch),
-    refetchInterval: 30000,
   });
 
   const handleSearchChange = (value: string) => {

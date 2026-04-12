@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 
 interface UseDataQueryOptions<T> {
   fetcher: () => Promise<T>;
-  refetchInterval?: number;
   enabled?: boolean;
 }
 
@@ -15,7 +14,6 @@ interface UseDataQueryResult<T> {
 
 export function useDataQuery<T>({
   fetcher,
-  refetchInterval = 0,
   enabled = true,
 }: UseDataQueryOptions<T>): UseDataQueryResult<T> {
   const [data, setData] = useState<T | null>(null);
@@ -43,14 +41,6 @@ export function useDataQuery<T>({
       execute();
     }
   }, [enabled, execute]);
-
-  useEffect(() => {
-    if (!enabled || refetchInterval <= 0) return;
-
-    const interval = setInterval(execute, refetchInterval);
-
-    return () => clearInterval(interval);
-  }, [enabled, refetchInterval, execute]);
 
   return { data, isLoading, error, refetch: execute };
 }
