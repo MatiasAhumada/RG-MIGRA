@@ -61,7 +61,6 @@ export default function DashboardOrdenesPage() {
 
   const { data: pedidos, isLoading, refetch } = useDataQuery<PedidoWithRelations[]>({
     fetcher: () => pedidoService.findAll(),
-    refetchInterval: 15000,
   });
 
   return (

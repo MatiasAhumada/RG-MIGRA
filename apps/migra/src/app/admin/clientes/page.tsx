@@ -38,7 +38,6 @@ export default function AdminClientesPage() {
 
   const { data: clientes, isLoading, refetch } = useDataQuery<Cliente[]>({
     fetcher: () => clienteService.findAll(debouncedSearch),
-    refetchInterval: 5000,
   });
 
   const handleSearchChange = (value: string) => {

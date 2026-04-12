@@ -2,7 +2,16 @@ import { NextResponse, type NextRequest } from "next/server";
 import { clienteService } from "@/server/services/cliente.service";
 import { userRepository } from "@/server/repository/user.repository";
 import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
+import { sendCredentialsEmail } from "@/services/email.service";
 import httpStatus from "http-status";
+
+function generatePassword(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const length = 12;
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array, (byte) => chars[byte % chars.length]).join("");
+}
 
 export async function PATCH(
   request: NextRequest,
@@ -22,21 +31,27 @@ export async function PATCH(
       const existingUser = await userRepository.findByEmail(cliente.correo);
 
       if (!existingUser) {
-        const defaultPassword = `Migra${cliente.cuit.replace(/-/g, "").slice(-6)}`;
+        const temporaryPassword = generatePassword();
 
         await userRepository.create({
           email: cliente.correo,
-          password: defaultPassword,
+          password: temporaryPassword,
           name: cliente.titular,
           role: "CLIENT",
           empresaId: cliente.empresaId,
+        });
+
+        await sendCredentialsEmail({
+          to: cliente.correo,
+          name: cliente.titular,
+          password: temporaryPassword,
         });
       }
 
       await clienteService.update(id, { status: "APPROVED" });
 
       return NextResponse.json({
-        message: `Cliente "${cliente.razonSocial}" aprobado. Usuario creado con contraseña temporal.`,
+        message: `Cliente "${cliente.razonSocial}" aprobado. Usuario creado y credenciales enviadas por correo.`,
       });
     }
 
