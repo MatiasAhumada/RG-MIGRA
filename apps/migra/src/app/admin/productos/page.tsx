@@ -6,7 +6,7 @@ import { AppLayout } from "@/components/layout";
 import { PageHeader, DataTable, PdfUpload } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { GenericModal, ConfirmModal } from "@/components/common";
-import { Add01Icon, Edit02Icon, Delete01Icon, Refresh01Icon } from "hugeicons-react";
+import { Add01Icon, Edit02Icon, Delete01Icon, Refresh01Icon, PackageAdd01Icon, PackageOutOfStockIcon } from "hugeicons-react";
 import { productoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
 import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
@@ -54,6 +54,22 @@ export default function AdminProductosPage() {
       );
 
       setEditProducto(null);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
+
+  const handleToggleStock = async (item: ProductoWithRelations) => {
+    try {
+      await productoService.toggleSinStock(item.id);
+
+      clientSuccessHandler(
+        item.sinStock
+          ? `Producto "${item.name}" marcado como disponible.`
+          : `Producto "${item.name}" marcado como sin stock.`,
+      );
+
+      refetch();
     } catch (error) {
       clientErrorHandler(error);
     }
@@ -170,7 +186,7 @@ export default function AdminProductosPage() {
               key: "actions",
               label: "Acciones",
               render: (item) => (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <Button
                     size="icon-xs"
                     variant="outline"
@@ -178,6 +194,19 @@ export default function AdminProductosPage() {
                     title="Editar"
                   >
                     <Edit02Icon className="size-3" />
+                  </Button>
+                  <Button
+                    size="icon-xs"
+                    variant="outline"
+                    className={item.sinStock ? "text-[#5a9a4e] hover:bg-[#5a9a4e]/10" : "text-[#e6a700] hover:bg-[#e6a700]/10"}
+                    onClick={() => handleToggleStock(item)}
+                    title={item.sinStock ? "Marcar disponible" : "Marcar sin stock"}
+                  >
+                    {item.sinStock ? (
+                      <PackageAdd01Icon className="size-3" />
+                    ) : (
+                      <PackageOutOfStockIcon className="size-3" />
+                    )}
                   </Button>
                   <Button
                     size="icon-xs"

@@ -100,4 +100,11 @@ export const productoService = {
     );
     return data;
   },
+
+  async toggleSinStock(id: number) {
+    const { data } = await clientAxios.patch<{ message: string }>(
+      `${API_ROUTES.PRODUCTOS}/${id}/stock`,
+    );
+    return data;
+  },
 };
