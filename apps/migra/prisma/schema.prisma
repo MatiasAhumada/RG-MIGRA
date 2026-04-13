@@ -142,6 +142,7 @@ model Producto {
   sku            String          @unique
   price          Float
   imgUrl         String?
+  sinStock       Boolean         @default(false)
   empresaId      Int
   empresa        Empresa         @relation(fields: [empresaId], references: [id])
   categoriaId    Int

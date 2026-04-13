@@ -104,6 +104,12 @@ export const productoService = {
     return productoRepository.findAll(search, empresaId);
   },
 
+  async toggleSinStock(id: number) {
+    const producto = await this.findById(id);
+
+    return productoRepository.update(id, { sinStock: !producto.sinStock });
+  },
+
   async bulkCreateFromPdf(dto: BulkCreateProductoDto) {
     const parsedProducts = await pdfParserService.parseProductCatalog(
       dto.pdfBuffer,
