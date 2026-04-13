@@ -11,6 +11,7 @@ export interface CreateProductoDto {
   categoriaId: number;
   subcategoriaId: number;
   marcaId: number;
+  sinStock?: boolean;
 }
 
 export interface UpdateProductoDto extends Partial<CreateProductoDto> {}

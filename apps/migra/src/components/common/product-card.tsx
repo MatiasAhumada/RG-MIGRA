@@ -16,6 +16,7 @@ interface ProductCardProps {
   imgUrl: string;
   className?: string;
   showPrice?: boolean;
+  sinStock?: boolean;
 }
 
 export function ProductCard({
@@ -27,14 +28,15 @@ export function ProductCard({
   imgUrl,
   className,
   showPrice = true,
+  sinStock = false,
 }: ProductCardProps) {
   const formattedPrice = formatCurrency(price);
 
   return (
     <motion.div
-      whileHover={{ y: -4, scale: 1.02 }}
+      whileHover={sinStock ? {} : { y: -4, scale: 1.02 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={cn("group flex h-full", className)}
+      className={cn("group flex h-full", sinStock && "opacity-50 grayscale pointer-events-none", className)}
     >
       <Card className="relative flex h-full w-full flex-col overflow-hidden p-0 transition-all duration-300 hover:shadow-[0_12px_48px_rgba(29,53,87,0.12)]">
         <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-br from-cerulean-400 to-cerulean-600">

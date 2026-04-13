@@ -345,6 +345,7 @@ export default function HomePage() {
                   price={product.price}
                   imgUrl={product.imgUrl || ""}
                   showPrice={false}
+                  sinStock={product.sinStock}
                 />
               ))}
             </motion.div>
@@ -404,6 +405,7 @@ export default function HomePage() {
                         price={product.price}
                         imgUrl={product.imgUrl || ""}
                         showPrice={false}
+                        sinStock={product.sinStock}
                       />
                     ))}
                   </motion.div>
