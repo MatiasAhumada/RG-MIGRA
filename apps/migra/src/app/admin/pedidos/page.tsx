@@ -62,7 +62,6 @@ export default function AdminPedidosPage() {
 
   const { data: pedidos, isLoading, refetch } = useDataQuery<PedidoWithRelations[]>({
     fetcher: () => pedidoService.findAll(),
-    refetchInterval: 10000,
   });
 
   const handleSearchChange = (value: string) => {

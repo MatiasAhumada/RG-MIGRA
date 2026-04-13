@@ -48,12 +48,10 @@ const orderSteps: NurtureBarStep[] = [
 export default function DashboardPage() {
   const { data: pedidos, isLoading: pedidosLoading, refetch: refetchPedidos } = useDataQuery<PedidoWithRelations[]>({
     fetcher: () => pedidoService.findAll(),
-    refetchInterval: 15000,
   });
 
   const { data: productos, isLoading: productosLoading } = useDataQuery<ProductoWithRelations[]>({
     fetcher: () => productoService.findAll(),
-    refetchInterval: 30000,
   });
 
   const pedidosList = pedidos || [];
