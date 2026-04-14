@@ -61,7 +61,7 @@ export default function AdminProductosPage() {
 
   const handleToggleStock = async (item: ProductoWithRelations) => {
     try {
-      await productoService.toggleSinStock(item.id);
+      await productoService.toggleSinStock(item.id, !item.sinStock);
 
       clientSuccessHandler(
         item.sinStock
