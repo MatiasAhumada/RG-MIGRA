@@ -41,4 +41,6 @@ export const API_ROUTES = {
   PEDIDOS: "/api/pedidos",
   ADDRESSES: "/api/addresses",
   DETALLE_PEDIDOS: "/api/detalle-pedidos",
+  CATEGORIAS: "/api/categorias",
+  MARCAS: "/api/marcas",
 } as const;

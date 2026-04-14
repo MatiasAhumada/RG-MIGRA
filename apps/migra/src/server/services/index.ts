@@ -6,3 +6,5 @@ export { addressService } from "./address.service";
 export { detallePedidoService } from "./detalle-pedido.service";
 export { r2StorageService } from "./r2-storage.service";
 export { pdfParserService } from "./pdf-parser.service";
+export { categoriaService } from "./categoria.service";
+export { marcaService } from "./marca.service";

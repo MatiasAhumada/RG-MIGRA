@@ -5,3 +5,5 @@ export { productoService } from "./producto.service";
 export { pedidoService } from "./pedido.service";
 export { addressService } from "./address.service";
 export { detallePedidoService } from "./detalle-pedido.service";
+export { categoriaService } from "./categoria.service";
+export { marcaService } from "./marca.service";

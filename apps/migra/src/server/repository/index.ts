@@ -4,3 +4,5 @@ export { productoRepository } from "./producto.repository";
 export { pedidoRepository } from "./pedido.repository";
 export { addressRepository } from "./address.repository";
 export { detallePedidoRepository } from "./detalle-pedido.repository";
+export { categoriaRepository } from "./categoria.repository";
+export { marcaRepository } from "./marca.repository";

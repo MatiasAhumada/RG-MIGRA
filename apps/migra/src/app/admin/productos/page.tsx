@@ -1,114 +1,209 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
-import { PageHeader, DataTable, PdfUpload } from "@/components/common";
+import { PageHeader, DataTable, GenericModal, ConfirmModal } from "@/components/common";
 import { Button } from "@/components/ui/button";
-import { GenericModal, ConfirmModal } from "@/components/common";
-import { Add01Icon, Edit02Icon, Delete01Icon, Refresh01Icon, PackageAdd01Icon, PackageOutOfStockIcon } from "hugeicons-react";
-import { productoService } from "@/services";
-import { formatCurrency } from "@/utils/formatters";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Add01Icon, PencilEdit01Icon, Delete02Icon, EyeIcon } from "hugeicons-react";
+import { productoService, categoriaService, marcaService } from "@/services";
 import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
-import { useDataQuery } from "@/hooks/useDataQuery";
+import { formatCurrency } from "@/utils/formatters";
 import type { ProductoWithRelations, CreateProductoDto, UpdateProductoDto } from "@/types/producto.types";
+import type { Categoria } from "@/types/categoria.types";
+import type { Subcategoria } from "@/types/subcategoria.types";
+import type { Marca } from "@/types/marca.types";
+
+interface CategoriaWithSubcategorias extends Categoria {
+  subcategorias: Subcategoria[];
+}
+
+interface ProductFormData {
+  name: string;
+  sku: string;
+  price: string;
+  imgUrl: string;
+  categoriaId: string;
+  subcategoriaId: string;
+  marcaId: string;
+}
+
+const INITIAL_FORM_DATA: ProductFormData = {
+  name: "",
+  sku: "",
+  price: "",
+  imgUrl: "",
+  categoriaId: "",
+  subcategoriaId: "",
+  marcaId: "",
+};
 
 export default function AdminProductosPage() {
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editProducto, setEditProducto] = useState<ProductoWithRelations | null>(null);
-  const [deleteProducto, setDeleteProducto] = useState<ProductoWithRelations | null>(null);
+  const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
+  const [categorias, setCategorias] = useState<CategoriaWithSubcategorias[]>([]);
+  const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ProductoWithRelations | null>(null);
+  const [formData, setFormData] = useState<ProductFormData>(INITIAL_FORM_DATA);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: productos, isLoading, refetch } = useDataQuery<ProductoWithRelations[]>({
-    fetcher: () => productoService.findAll(debouncedSearch),
-  });
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    const timeout = setTimeout(() => {
-      setDebouncedSearch(value);
-    }, 500);
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const [productosData, categoriasData, marcasData] = await Promise.all([
+        productoService.findAll(),
+        categoriaService.findAll(1),
+        marcaService.findAll(1),
+      ]);
+      setProductos(productosData);
+      setCategorias(categoriasData);
+      setMarcas(marcasData);
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return () => clearTimeout(timeout);
+  const handleOpenCreateModal = () => {
+    setFormData(INITIAL_FORM_DATA);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleOpenEditModal = (product: ProductoWithRelations) => {
+    setSelectedProduct(product);
+    setFormData({
+      name: product.name,
+      sku: product.sku,
+      price: String(product.price),
+      imgUrl: product.imgUrl || "",
+      categoriaId: String(product.categoriaId),
+      subcategoriaId: String(product.subcategoriaId),
+      marcaId: String(product.marcaId),
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleOpenDeleteModal = (product: ProductoWithRelations) => {
+    setSelectedProduct(product);
+    setIsDeleteModalOpen(true);
   };
 
   const handleCreateProduct = async () => {
+    if (!formData.name || !formData.sku || !formData.price || !formData.categoriaId || !formData.subcategoriaId || !formData.marcaId) {
+      clientErrorHandler(new Error("Todos los campos son obligatorios"));
+      return;
+    }
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      setIsSubmitting(true);
+      const dto: CreateProductoDto = {
+        name: formData.name,
+        sku: formData.sku,
+        price: Number(formData.price),
+        imgUrl: formData.imgUrl || undefined,
+        empresaId: 1,
+        categoriaId: Number(formData.categoriaId),
+        subcategoriaId: Number(formData.subcategoriaId),
+        marcaId: Number(formData.marcaId),
+      };
 
-      clientSuccessHandler("Producto creado y agregado al catálogo exitosamente.");
-
-      setIsCreateOpen(false);
+      await productoService.create(dto);
+      clientSuccessHandler("Producto creado exitosamente");
+      setIsCreateModalOpen(false);
+      await loadData();
     } catch (error) {
       clientErrorHandler(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleEditProduct = async () => {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+    if (!selectedProduct) return;
 
-      clientSuccessHandler(
-        `Producto "${editProducto?.name}" actualizado correctamente.`,
-      );
-
-      setEditProducto(null);
-    } catch (error) {
-      clientErrorHandler(error);
+    if (!formData.name || !formData.sku || !formData.price || !formData.categoriaId || !formData.subcategoriaId || !formData.marcaId) {
+      clientErrorHandler(new Error("Todos los campos son obligatorios"));
+      return;
     }
-  };
 
-  const handleToggleStock = async (item: ProductoWithRelations) => {
     try {
-      await productoService.toggleSinStock(item.id, !item.sinStock);
+      setIsSubmitting(true);
+      const dto: UpdateProductoDto = {
+        name: formData.name,
+        sku: formData.sku,
+        price: Number(formData.price),
+        imgUrl: formData.imgUrl || undefined,
+        categoriaId: Number(formData.categoriaId),
+        subcategoriaId: Number(formData.subcategoriaId),
+        marcaId: Number(formData.marcaId),
+      };
 
-      clientSuccessHandler(
-        item.sinStock
-          ? `Producto "${item.name}" marcado como disponible.`
-          : `Producto "${item.name}" marcado como sin stock.`,
-      );
-
-      refetch();
+      await productoService.update(selectedProduct.id, dto);
+      clientSuccessHandler("Producto actualizado exitosamente");
+      setIsEditModalOpen(false);
+      await loadData();
     } catch (error) {
       clientErrorHandler(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteProduct = async () => {
-    if (!deleteProducto) return;
+    if (!selectedProduct) return;
+
     try {
-      await productoService.delete(deleteProducto.id);
+      setIsSubmitting(true);
+      await productoService.delete(selectedProduct.id);
+      clientSuccessHandler("Producto eliminado exitosamente");
+      setIsDeleteModalOpen(false);
+      await loadData();
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
+  const handleToggleSinStock = async (product: ProductoWithRelations) => {
+    try {
+      await productoService.toggleSinStock(product.id, !product.sinStock);
       clientSuccessHandler(
-        `Producto "${deleteProducto.name}" eliminado del catálogo.`,
+        product.sinStock
+          ? "Producto marcado como disponible"
+          : "Producto marcado sin stock"
       );
-
-      setDeleteProducto(null);
-      refetch();
+      await loadData();
     } catch (error) {
       clientErrorHandler(error);
     }
   };
 
-  const handleUploadComplete = (fileName: string) => {
-    clientSuccessHandler(
-      `Catálogo "${fileName}" importado.\nProductos actualizados en el catálogo.`,
-    );
-    refetch();
-  };
-
-  const filteredProducts = (productos || []).filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase()),
-  );
+  const selectedCategoria = categorias.find((c) => c.id === Number(formData.categoriaId));
+  const subcategorias = selectedCategoria?.subcategorias || [];
 
   return (
     <AppLayout variant="admin">
       <PageHeader
-        title="Productos"
-        description="Gestión del catálogo de productos"
+        title="Gestión de Productos"
+        description="Administración del catálogo de productos"
+        action={
+          <Button size="lg" onClick={handleOpenCreateModal} className="gap-2">
+            <Add01Icon className="size-5" />
+            Nuevo Producto
+          </Button>
+        }
       />
 
       <motion.div
@@ -117,62 +212,30 @@ export default function AdminProductosPage() {
         transition={{ delay: 0.1, duration: 0.4 }}
         className="mt-8"
       >
-        <PdfUpload onUploadComplete={handleUploadComplete} variant="full" />
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.4 }}
-        className="mt-8"
-      >
         <DataTable<ProductoWithRelations>
-          title=""
-          subtitle=""
+          title="Productos"
           columns={[
-            {
-              key: "name",
-              label: "Producto",
-              render: (item) => (
-                <div className="flex items-center gap-3">
-                  {item.imgUrl && (
-                    <div className="size-10 shrink-0 overflow-hidden rounded-xl bg-[#f3fcf0]/60">
-                      <img
-                        src={item.imgUrl}
-                        alt={item.name}
-                        className="size-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div>
-                    <p
-                      className="text-sm font-semibold text-[#161d16]"
-                      style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-                    >
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-[#3d4a3d]">{item.categoria.name}</p>
-                  </div>
-                </div>
-              ),
-            },
             {
               key: "sku",
               label: "SKU",
               render: (item) => (
-                <p className="text-sm font-mono text-[#3d4a3d]">{item.sku}</p>
+                <span className="font-mono text-sm font-semibold text-[#2b6485]">
+                  {item.sku}
+                </span>
               ),
             },
             {
-              key: "price",
-              label: "Precio",
+              key: "name",
+              label: "Nombre",
               render: (item) => (
-                <p
-                  className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-                >
-                  {formatCurrency(item.price)}
-                </p>
+                <p className="text-sm font-medium text-[#161d16]">{item.name}</p>
+              ),
+            },
+            {
+              key: "categoria",
+              label: "Categoría",
+              render: (item) => (
+                <p className="text-sm text-[#3d4a3d]">{item.categoria.name}</p>
               ),
             },
             {
@@ -183,221 +246,313 @@ export default function AdminProductosPage() {
               ),
             },
             {
+              key: "price",
+              label: "Precio",
+              render: (item) => (
+                <p className="text-sm font-semibold text-[#161d16]">
+                  {formatCurrency(item.price)}
+                </p>
+              ),
+            },
+            {
+              key: "sinStock",
+              label: "Stock",
+              render: (item) => (
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                    item.sinStock
+                      ? "bg-[#b7102a]/15 text-[#b7102a]"
+                      : "bg-[#7cb56e]/15 text-[#5a9a4e]"
+                  }`}
+                >
+                  {item.sinStock ? "Sin Stock" : "Disponible"}
+                </span>
+              ),
+            },
+            {
               key: "actions",
               label: "Acciones",
               render: (item) => (
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <Button
-                    size="icon-xs"
-                    variant="outline"
-                    onClick={() => setEditProducto(item)}
-                    title="Editar"
-                  >
-                    <Edit02Icon className="size-3" />
-                  </Button>
-                  <Button
-                    size="icon-xs"
-                    variant="outline"
-                    className={item.sinStock ? "text-[#5a9a4e] hover:bg-[#5a9a4e]/10" : "text-[#e6a700] hover:bg-[#e6a700]/10"}
-                    onClick={() => handleToggleStock(item)}
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => handleToggleSinStock(item)}
                     title={item.sinStock ? "Marcar disponible" : "Marcar sin stock"}
                   >
-                    {item.sinStock ? (
-                      <PackageAdd01Icon className="size-3" />
-                    ) : (
-                      <PackageOutOfStockIcon className="size-3" />
-                    )}
+                    <EyeIcon className="size-4" />
                   </Button>
                   <Button
-                    size="icon-xs"
-                    variant="outline"
-                    className="text-[#db313f] hover:bg-[#db313f]/10"
-                    onClick={() => setDeleteProducto(item)}
-                    title="Eliminar"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => handleOpenEditModal(item)}
                   >
-                    <Delete01Icon className="size-3" />
+                    <PencilEdit01Icon className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => handleOpenDeleteModal(item)}
+                  >
+                    <Delete02Icon className="size-4" />
                   </Button>
                 </div>
               ),
             },
           ]}
-          data={isLoading ? [] : filteredProducts}
+          data={productos}
           keyExtractor={(item) => String(item.id)}
-          emptyMessage="No se encontraron productos"
-          searchPlaceholder="Buscar producto..."
-          onSearch={handleSearchChange}
-          actions={
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setIsCreateOpen(true)}
-                className="gap-2 rounded-[2rem]"
-              >
-                <Add01Icon className="size-5" />
-                Nuevo Producto
-              </Button>
-              <Button
-                size="icon-sm"
-                variant="ghost"
-                className="rounded-full"
-                onClick={refetch}
-                disabled={isLoading}
-                title="Actualizar ahora"
-              >
-                <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
-              </Button>
-            </div>
-          }
-          totalLabel={`${filteredProducts.length} productos`}
+          loading={isLoading}
+          emptyMessage="No hay productos registrados"
+          totalLabel={`${productos.length} productos`}
         />
       </motion.div>
 
       <GenericModal
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        title="Nuevo Producto"
-        description="Completá los datos para agregar un producto al catálogo"
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        title="Crear Producto"
+        description="Ingresá los datos del nuevo producto"
         size="lg"
         footer={
           <>
-            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button onClick={handleCreateProduct}>
-              Guardar Producto
+            <Button onClick={handleCreateProduct} disabled={isSubmitting}>
+              {isSubmitting ? "Creando..." : "Crear Producto"}
             </Button>
           </>
         }
       >
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <label
-              className="text-sm font-semibold text-[#161d16]"
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-            >
-              Nombre del Producto
-            </label>
+            <Label>Nombre</Label>
             <Input
-              placeholder="Ej: Pack Pañales Premium Talle M"
-              className="h-12 text-base"
+              placeholder="Nombre del producto"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <label
-                className="text-sm font-semibold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-              >
-                SKU
-              </label>
-              <Input placeholder="Ej: PAN-PRE-M" className="h-12 text-base" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label
-                className="text-sm font-semibold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-              >
-                Precio
-              </label>
-              <Input type="number" placeholder="0.00" className="h-12 text-base" />
-            </div>
-          </div>
+
           <div className="flex flex-col gap-2">
-            <label
-              className="text-sm font-semibold text-[#161d16]"
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+            <Label>SKU</Label>
+            <Input
+              placeholder="Código SKU"
+              value={formData.sku}
+              onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Precio</Label>
+            <Input
+              type="number"
+              placeholder="0.00"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Marca</Label>
+            <Select
+              value={formData.marcaId}
+              onValueChange={(value) => setFormData({ ...formData, marcaId: value })}
             >
-              URL de Imagen
-            </label>
-            <Input placeholder="https://..." className="h-12 text-base" />
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar marca" />
+              </SelectTrigger>
+              <SelectContent>
+                {marcas.map((marca) => (
+                  <SelectItem key={marca.id} value={String(marca.id)}>
+                    {marca.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Categoría</Label>
+            <Select
+              value={formData.categoriaId}
+              onValueChange={(value) =>
+                setFormData({ ...formData, categoriaId: value, subcategoriaId: "" })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categorias.map((categoria) => (
+                  <SelectItem key={categoria.id} value={String(categoria.id)}>
+                    {categoria.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Subcategoría</Label>
+            <Select
+              value={formData.subcategoriaId}
+              onValueChange={(value) => setFormData({ ...formData, subcategoriaId: value })}
+              disabled={!formData.categoriaId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar subcategoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {subcategorias.map((subcategoria) => (
+                  <SelectItem key={subcategoria.id} value={String(subcategoria.id)}>
+                    {subcategoria.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>URL de Imagen (opcional)</Label>
+            <Input
+              placeholder="https://..."
+              value={formData.imgUrl}
+              onChange={(e) => setFormData({ ...formData, imgUrl: e.target.value })}
+            />
           </div>
         </div>
       </GenericModal>
 
       <GenericModal
-        open={!!editProducto}
-        onOpenChange={() => setEditProducto(null)}
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
         title="Editar Producto"
-        description={`Editando: ${editProducto?.name}`}
+        description="Modificá los datos del producto"
         size="lg"
         footer={
           <>
-            <Button variant="outline" onClick={() => setEditProducto(null)}>
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button onClick={handleEditProduct}>
-              Guardar Cambios
+            <Button onClick={handleEditProduct} disabled={isSubmitting}>
+              {isSubmitting ? "Guardando..." : "Guardar Cambios"}
             </Button>
           </>
         }
       >
-        {editProducto && (
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <label
-                className="text-sm font-semibold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-              >
-                Nombre del Producto
-              </label>
-              <Input
-                defaultValue={editProducto.name}
-                className="h-12 text-base"
-              />
-            </div>
-            <div className="grid gap-5 md:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-                >
-                  SKU
-                </label>
-                <Input
-                  defaultValue={editProducto.sku}
-                  className="h-12 text-base"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-                >
-                  Precio
-                </label>
-                <Input
-                  type="number"
-                  defaultValue={editProducto.price}
-                  className="h-12 text-base"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <label
-                className="text-sm font-semibold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
-              >
-                URL de Imagen
-              </label>
-              <Input
-                defaultValue={editProducto.imgUrl || ""}
-                className="h-12 text-base"
-              />
-            </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label>Nombre</Label>
+            <Input
+              placeholder="Nombre del producto"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
           </div>
-        )}
+
+          <div className="flex flex-col gap-2">
+            <Label>SKU</Label>
+            <Input
+              placeholder="Código SKU"
+              value={formData.sku}
+              onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Precio</Label>
+            <Input
+              type="number"
+              placeholder="0.00"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Marca</Label>
+            <Select
+              value={formData.marcaId}
+              onValueChange={(value) => setFormData({ ...formData, marcaId: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar marca" />
+              </SelectTrigger>
+              <SelectContent>
+                {marcas.map((marca) => (
+                  <SelectItem key={marca.id} value={String(marca.id)}>
+                    {marca.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Categoría</Label>
+            <Select
+              value={formData.categoriaId}
+              onValueChange={(value) =>
+                setFormData({ ...formData, categoriaId: value, subcategoriaId: "" })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categorias.map((categoria) => (
+                  <SelectItem key={categoria.id} value={String(categoria.id)}>
+                    {categoria.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Subcategoría</Label>
+            <Select
+              value={formData.subcategoriaId}
+              onValueChange={(value) => setFormData({ ...formData, subcategoriaId: value })}
+              disabled={!formData.categoriaId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccionar subcategoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {subcategorias.map((subcategoria) => (
+                  <SelectItem key={subcategoria.id} value={String(subcategoria.id)}>
+                    {subcategoria.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>URL de Imagen (opcional)</Label>
+            <Input
+              placeholder="https://..."
+              value={formData.imgUrl}
+              onChange={(e) => setFormData({ ...formData, imgUrl: e.target.value })}
+            />
+          </div>
+        </div>
       </GenericModal>
 
       <ConfirmModal
-        open={!!deleteProducto}
-        onOpenChange={() => setDeleteProducto(null)}
+        open={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
         title="Eliminar Producto"
-        description={`¿Estás seguro de que deseas eliminar "${deleteProducto?.name}" del catálogo? Esta acción no se puede deshacer.`}
+        description={`¿Estás seguro de eliminar el producto "${selectedProduct?.name}"?`}
         onConfirm={handleDeleteProduct}
-        confirmText="Eliminar"
         variant="destructive"
+        loading={isSubmitting}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
       />
     </AppLayout>
   );
 }
-
-import { Input } from "@/components/ui/input";
