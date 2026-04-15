@@ -19,6 +19,8 @@ interface ProductCardProps {
   sinStock?: boolean;
 }
 
+const PLACEHOLDER_IMAGE = "/assets/images/placeholder-product.png";
+
 export function ProductCard({
   id,
   name,
@@ -31,19 +33,25 @@ export function ProductCard({
   sinStock = false,
 }: ProductCardProps) {
   const formattedPrice = formatCurrency(price);
+  const imageSrc = imgUrl || PLACEHOLDER_IMAGE;
 
   return (
     <motion.div
       whileHover={sinStock ? {} : { y: -4, scale: 1.02 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={cn("group flex h-full", sinStock && "opacity-50 grayscale pointer-events-none", className)}
+      className={cn(
+        "group flex h-full",
+        sinStock && "opacity-50 grayscale pointer-events-none",
+        className,
+      )}
     >
       <Card className="relative flex h-full w-full flex-col overflow-hidden p-0 transition-all duration-300 hover:shadow-[0_12px_48px_rgba(29,53,87,0.12)]">
         <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-br from-cerulean-400 to-cerulean-600">
           <Image
-            src={imgUrl}
+            src={imageSrc}
             alt={name}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </div>

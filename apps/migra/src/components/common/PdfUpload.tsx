@@ -20,7 +20,10 @@ interface PdfUploadProps {
   variant?: "compact" | "full";
 }
 
-export function PdfUpload({ onUploadComplete, variant = "compact" }: PdfUploadProps) {
+export function PdfUpload({
+  onUploadComplete,
+  variant = "compact",
+}: PdfUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -117,7 +120,8 @@ export function PdfUpload({ onUploadComplete, variant = "compact" }: PdfUploadPr
             className="mt-1 text-sm text-[#3d4a3d]"
             style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
           >
-            Subí el PDF del catálogo de productos para actualizar automáticamente
+            Subí el PDF del catálogo de productos para actualizar
+            automáticamente
           </p>
         )}
       </div>
@@ -153,7 +157,9 @@ export function PdfUpload({ onUploadComplete, variant = "compact" }: PdfUploadPr
             </div>
             <p
               className={`${isFull ? "text-sm" : "text-xs"} font-semibold text-[#161d16] text-center`}
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
             >
               {isDragging
                 ? "Soltá el archivo acá"
@@ -197,7 +203,9 @@ export function PdfUpload({ onUploadComplete, variant = "compact" }: PdfUploadPr
                 }`}
               >
                 {uploadSuccess ? (
-                  <CheckmarkCircle01Icon className={isFull ? "size-6" : "size-4"} />
+                  <CheckmarkCircle01Icon
+                    className={isFull ? "size-6" : "size-4"}
+                  />
                 ) : (
                   <File01Icon className={isFull ? "size-6" : "size-4"} />
                 )}
@@ -205,11 +213,15 @@ export function PdfUpload({ onUploadComplete, variant = "compact" }: PdfUploadPr
               <div className="min-w-0 flex-1">
                 <p
                   className={`${isFull ? "text-sm" : "text-xs"} font-semibold text-[#161d16] truncate`}
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {selectedFile.name}
                 </p>
-                <p className={`${isFull ? "text-xs" : "text-[10px]"} text-[#3d4a3d]`}>
+                <p
+                  className={`${isFull ? "text-xs" : "text-[10px]"} text-[#3d4a3d]`}
+                >
                   {formatFileSize(selectedFile.size)}
                   {isUploading && " · Procesando..."}
                 </p>
@@ -232,7 +244,9 @@ export function PdfUpload({ onUploadComplete, variant = "compact" }: PdfUploadPr
                 className={`mt-4 w-full rounded-[2rem] ${isFull ? "text-base" : "text-xs"}`}
                 onClick={handleUpload}
               >
-                <Upload01Icon className={`mr-2 ${isFull ? "size-5" : "size-3.5"}`} />
+                <Upload01Icon
+                  className={`mr-2 ${isFull ? "size-5" : "size-3.5"}`}
+                />
                 {isFull ? "Procesar Catálogo" : "Procesar"}
               </Button>
             )}

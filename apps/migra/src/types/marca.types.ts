@@ -8,3 +8,9 @@ export interface CreateMarcaDto {
 }
 
 export interface UpdateMarcaDto extends Partial<CreateMarcaDto> {}
+
+export interface MarcaWithCategorias extends Marca {
+  categorias: CategoriaWithSubcategorias[];
+}
+
+import { CategoriaWithSubcategorias } from "./categoria.types";

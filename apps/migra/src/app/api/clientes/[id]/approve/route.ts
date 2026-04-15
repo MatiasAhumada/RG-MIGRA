@@ -6,7 +6,8 @@ import { sendCredentialsEmail } from "@/services/email.service";
 import httpStatus from "http-status";
 
 function generatePassword(): string {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   const length = 12;
   const array = new Uint8Array(length);
   crypto.getRandomValues(array);

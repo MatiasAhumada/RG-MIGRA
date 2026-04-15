@@ -7,3 +7,4 @@ export * from "./pedido.types";
 export * from "./categoria.types";
 export * from "./subcategoria.types";
 export * from "./marca.types";
+export * from "./form.types";

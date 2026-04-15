@@ -97,6 +97,8 @@ model Address {
 model Categoria {
   id            Int            @id @default(autoincrement())
   name          String
+  marcaId       Int
+  marca         Marca          @relation(fields: [marcaId], references: [id])
   empresaId     Int
   empresa       Empresa        @relation(fields: [empresaId], references: [id])
   subcategorias Subcategoria[]
@@ -124,14 +126,15 @@ model Subcategoria {
 }
 
 model Marca {
-  id        Int        @id @default(autoincrement())
-  name      String
-  empresaId Int
-  empresa   Empresa    @relation(fields: [empresaId], references: [id])
-  productos Producto[]
-  deletedAt DateTime?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id         Int         @id @default(autoincrement())
+  name       String
+  empresaId  Int
+  empresa    Empresa     @relation(fields: [empresaId], references: [id])
+  categorias Categoria[]
+  productos  Producto[]
+  deletedAt  DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@map("marcas")
 }

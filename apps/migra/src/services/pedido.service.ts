@@ -43,23 +43,32 @@ export const pedidoService = {
     const params: Record<string, string> = {};
     if (clienteId) params.clienteId = String(clienteId);
 
-    const { data } = await clientAxios.get<PedidoWithRelations[]>(API_ROUTES.PEDIDOS, {
-      params,
-    });
+    const { data } = await clientAxios.get<PedidoWithRelations[]>(
+      API_ROUTES.PEDIDOS,
+      {
+        params,
+      },
+    );
     return data;
   },
 
   async findByClienteId(clienteId: number) {
-    const { data } = await clientAxios.get<PedidoWithRelations[]>(API_ROUTES.PEDIDOS, {
-      params: { clienteId: String(clienteId) },
-    });
+    const { data } = await clientAxios.get<PedidoWithRelations[]>(
+      API_ROUTES.PEDIDOS,
+      {
+        params: { clienteId: String(clienteId) },
+      },
+    );
     return data;
   },
 
   async findByStatus(status: PedidoStatus) {
-    const { data } = await clientAxios.get<PedidoWithRelations[]>(API_ROUTES.PEDIDOS, {
-      params: { status },
-    });
+    const { data } = await clientAxios.get<PedidoWithRelations[]>(
+      API_ROUTES.PEDIDOS,
+      {
+        params: { status },
+      },
+    );
     return data;
   },
 };

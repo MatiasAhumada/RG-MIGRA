@@ -58,9 +58,14 @@ const orderStepsMap: Record<string, NurtureBarStep[]> = {
 export default function AdminPedidosPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [selectedPedido, setSelectedPedido] = useState<PedidoWithRelations | null>(null);
+  const [selectedPedido, setSelectedPedido] =
+    useState<PedidoWithRelations | null>(null);
 
-  const { data: pedidos, isLoading, refetch } = useDataQuery<PedidoWithRelations[]>({
+  const {
+    data: pedidos,
+    isLoading,
+    refetch,
+  } = useDataQuery<PedidoWithRelations[]>({
     fetcher: () => pedidoService.findAll(),
   });
 
@@ -76,7 +81,9 @@ export default function AdminPedidosPage() {
   const filteredOrders = (pedidos || []).filter(
     (o) =>
       o.id.toString().toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      o.cliente.razonSocial.toLowerCase().includes(debouncedSearch.toLowerCase()),
+      o.cliente.razonSocial
+        .toLowerCase()
+        .includes(debouncedSearch.toLowerCase()),
   );
 
   return (
@@ -129,7 +136,9 @@ export default function AdminPedidosPage() {
               render: (item) => (
                 <p
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {formatCurrency(item.totalPedido)}
                 </p>
@@ -186,7 +195,9 @@ export default function AdminPedidosPage() {
                 disabled={isLoading}
                 title="Actualizar ahora"
               >
-                <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
+                <Refresh01Icon
+                  className={`size-4 ${isLoading ? "animate-spin" : ""}`}
+                />
               </Button>
             </div>
           }
@@ -206,7 +217,9 @@ export default function AdminPedidosPage() {
             <div>
               <h3
                 className="mb-3 text-sm font-bold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
               >
                 Seguimiento
               </h3>
@@ -216,7 +229,9 @@ export default function AdminPedidosPage() {
             <div>
               <h3
                 className="mb-3 text-sm font-bold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
               >
                 Items del Pedido
               </h3>
@@ -229,7 +244,10 @@ export default function AdminPedidosPage() {
                     <div>
                       <p
                         className="text-sm font-semibold text-[#161d16]"
-                        style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                        style={{
+                          fontFamily:
+                            "'Manrope', 'Inter', system-ui, sans-serif",
+                        }}
                       >
                         {detalle.producto.name}
                       </p>
@@ -239,11 +257,15 @@ export default function AdminPedidosPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-[#3d4a3d]">
-                        {detalle.cantidad} x {formatCurrency(detalle.producto.price)}
+                        {detalle.cantidad} x{" "}
+                        {formatCurrency(detalle.producto.price)}
                       </p>
                       <p
                         className="text-sm font-bold text-[#161d16]"
-                        style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                        style={{
+                          fontFamily:
+                            "'Manrope', 'Inter', system-ui, sans-serif",
+                        }}
                       >
                         {formatCurrency(detalle.total)}
                       </p>
@@ -258,7 +280,9 @@ export default function AdminPedidosPage() {
                 <p className="text-sm text-[#3d4a3d]">Cliente</p>
                 <p
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {selectedPedido.cliente.razonSocial}
                 </p>
@@ -267,7 +291,9 @@ export default function AdminPedidosPage() {
                 <p className="text-sm text-[#3d4a3d]">Total</p>
                 <p
                   className="text-xl font-bold text-[#b7102a]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {formatCurrency(selectedPedido.totalPedido)}
                 </p>

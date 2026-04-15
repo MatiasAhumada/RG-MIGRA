@@ -15,7 +15,10 @@ import {
 } from "hugeicons-react";
 import { clienteService, productoService, pedidoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
-import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 import type { PedidoWithRelations } from "@/types/pedido.types";
 
 const statusStyles: Record<string, string> = {
@@ -56,10 +59,7 @@ export default function AdminPage() {
       setClientCount(clientes.length);
       setPedidos(allPedidos.slice(0, 5));
 
-      const revenue = allPedidos.reduce(
-        (sum, p) => sum + p.totalPedido,
-        0,
-      );
+      const revenue = allPedidos.reduce((sum, p) => sum + p.totalPedido, 0);
       setTotalRevenue(revenue);
     } catch (error) {
       clientErrorHandler(error);

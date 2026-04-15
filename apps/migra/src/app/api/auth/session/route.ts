@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { userRepository } from "@/server/repository/user.repository";
-import { apiErrorHandler, type ApiError } from "@/utils/handlers/apiError.handler";
+import {
+  apiErrorHandler,
+  type ApiError,
+} from "@/utils/handlers/apiError.handler";
 import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {

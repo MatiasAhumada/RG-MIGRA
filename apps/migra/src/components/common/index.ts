@@ -7,3 +7,4 @@ export { NurtureBar } from "./nurture-bar";
 export type { NurtureBarStep } from "./nurture-bar";
 export { PdfUpload } from "./PdfUpload";
 export { WhatsAppButton } from "./WhatsAppButton";
+export { TableSkeleton } from "./table-skeleton";

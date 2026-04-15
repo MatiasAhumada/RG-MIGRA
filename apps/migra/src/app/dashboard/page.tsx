@@ -46,11 +46,17 @@ const orderSteps: NurtureBarStep[] = [
 ];
 
 export default function DashboardPage() {
-  const { data: pedidos, isLoading: pedidosLoading, refetch: refetchPedidos } = useDataQuery<PedidoWithRelations[]>({
+  const {
+    data: pedidos,
+    isLoading: pedidosLoading,
+    refetch: refetchPedidos,
+  } = useDataQuery<PedidoWithRelations[]>({
     fetcher: () => pedidoService.findAll(),
   });
 
-  const { data: productos, isLoading: productosLoading } = useDataQuery<ProductoWithRelations[]>({
+  const { data: productos, isLoading: productosLoading } = useDataQuery<
+    ProductoWithRelations[]
+  >({
     fetcher: () => productoService.findAll(),
   });
 
@@ -60,7 +66,10 @@ export default function DashboardPage() {
 
   const pendingCount = pedidosList.filter((p) => p.status === "PENDING").length;
   const confirmedCount = pedidosList.filter(
-    (p) => p.status === "CONFIRMED" || p.status === "DOWNLOADED" || p.status === "SHIPPED",
+    (p) =>
+      p.status === "CONFIRMED" ||
+      p.status === "DOWNLOADED" ||
+      p.status === "SHIPPED",
   ).length;
 
   return (
@@ -77,7 +86,9 @@ export default function DashboardPage() {
             disabled={isLoading}
             title="Actualizar ahora"
           >
-            <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
+            <Refresh01Icon
+              className={`size-4 ${isLoading ? "animate-spin" : ""}`}
+            />
           </Button>
         }
       />
@@ -118,19 +129,25 @@ export default function DashboardPage() {
               transition={{ delay: 0.1 + index * 0.05 }}
             >
               <Card className="rounded-[2rem] gap-4 p-6">
-                <div className={`flex size-12 items-center justify-center rounded-2xl ${stat.color}`}>
+                <div
+                  className={`flex size-12 items-center justify-center rounded-2xl ${stat.color}`}
+                >
                   <Icon className="size-6" />
                 </div>
                 <div>
                   <p
                     className="text-2xl font-bold text-[#161d16]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
                   >
                     {isLoading ? "..." : stat.value}
                   </p>
                   <p
                     className="text-sm text-[#3d4a3d]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
                   >
                     {stat.label}
                   </p>
@@ -152,7 +169,9 @@ export default function DashboardPage() {
             <div className="mb-4 flex items-center justify-between">
               <h3
                 className="text-base font-bold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
               >
                 Pedido Reciente - PED-{pedidosList[0].id}
               </h3>
@@ -205,7 +224,9 @@ export default function DashboardPage() {
                 <div>
                   <p
                     className="text-sm text-[#161d16]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
                   >
                     {order.detalles.length} items
                   </p>
@@ -217,7 +238,9 @@ export default function DashboardPage() {
               <div className="flex items-center gap-4">
                 <span
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {formatCurrency(order.totalPedido)}
                 </span>
@@ -232,9 +255,7 @@ export default function DashboardPage() {
 
           {pedidosList.length === 0 && !isLoading && (
             <div className="py-12 text-center">
-              <p className="text-sm text-[#3d4a3d]">
-                No tenés pedidos todavía
-              </p>
+              <p className="text-sm text-[#3d4a3d]">No tenés pedidos todavía</p>
             </div>
           )}
         </Card>

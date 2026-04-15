@@ -18,7 +18,9 @@ export const userRepository = {
     return prisma.user.create({
       data: {
         ...rest,
-        ...(empresaId !== undefined && empresaId !== null ? { empresa: { connect: { id: empresaId } } } : {}),
+        ...(empresaId !== undefined && empresaId !== null
+          ? { empresa: { connect: { id: empresaId } } }
+          : {}),
       },
     });
   },

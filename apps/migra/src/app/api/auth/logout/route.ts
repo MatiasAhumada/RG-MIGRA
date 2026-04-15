@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { apiErrorHandler, type ApiError } from "@/utils/handlers/apiError.handler";
+import {
+  apiErrorHandler,
+  type ApiError,
+} from "@/utils/handlers/apiError.handler";
 
 export async function POST(request: NextRequest) {
   try {

@@ -88,7 +88,11 @@ export default function DashboardPedidoPage() {
         description={`Realizado el ${new Date(pedido.fecha).toLocaleDateString("es-AR")}`}
         action={
           <Link href="/dashboard/ordenes">
-            <Button variant="outline" size="sm" className="gap-2 rounded-[2rem]">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 rounded-[2rem]"
+            >
               <ArrowLeft01Icon className="size-4" />
               Volver a Pedidos
             </Button>
@@ -124,7 +128,9 @@ export default function DashboardPedidoPage() {
             <div className="border-b border-[#161d16]/10 px-6 py-4">
               <h3
                 className="text-base font-bold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
               >
                 Detalle del Pedido
               </h3>
@@ -141,7 +147,9 @@ export default function DashboardPedidoPage() {
                   <div>
                     <p
                       className="text-sm font-semibold text-[#161d16]"
-                      style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
                     >
                       {item.producto.name}
                     </p>
@@ -152,13 +160,17 @@ export default function DashboardPedidoPage() {
                   <div className="text-right">
                     <p
                       className="text-sm text-[#3d4a3d]"
-                      style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
                     >
                       {item.cantidad} x {formatCurrency(item.producto.price)}
                     </p>
                     <p
                       className="text-sm font-bold text-[#161d16]"
-                      style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                      style={{
+                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                      }}
                     >
                       {formatCurrency(item.total)}
                     </p>
@@ -172,13 +184,17 @@ export default function DashboardPedidoPage() {
                 <div className="text-right">
                   <p
                     className="text-sm text-[#3d4a3d]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
                   >
                     Total del Pedido
                   </p>
                   <p
                     className="text-2xl font-bold text-[#b7102a]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
                   >
                     {formatCurrency(pedido.totalPedido)}
                   </p>
@@ -192,7 +208,9 @@ export default function DashboardPedidoPage() {
           <Card className="rounded-[2rem] p-6">
             <h3
               className="mb-4 text-base font-bold text-[#161d16]"
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
             >
               Dirección de Envío
             </h3>
@@ -200,25 +218,33 @@ export default function DashboardPedidoPage() {
               <div className="rounded-xl bg-[#f3fcf0]/60 p-4">
                 <p
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {pedido.direccion.direccion}
                 </p>
                 <p
                   className="text-sm text-[#3d4a3d]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {pedido.direccion.localidad}
                 </p>
                 <p
                   className="text-sm text-[#3d4a3d]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {pedido.direccion.provincia}
                 </p>
                 <p
                   className="text-sm text-[#3d4a3d]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   CP: {pedido.direccion.codPostal}
                 </p>

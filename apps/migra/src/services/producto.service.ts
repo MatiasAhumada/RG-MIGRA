@@ -57,9 +57,12 @@ export const productoService = {
     if (search) params.search = search;
     if (empresaId) params.empresaId = String(empresaId);
 
-    const { data } = await clientAxios.get<ProductoWithRelations[]>(API_ROUTES.PRODUCTOS, {
-      params,
-    });
+    const { data } = await clientAxios.get<ProductoWithRelations[]>(
+      API_ROUTES.PRODUCTOS,
+      {
+        params,
+      },
+    );
     return data;
   },
 

@@ -3,32 +3,51 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { AppLayout } from "@/components/layout";
-import { PageHeader, DataTable, GenericModal, ConfirmModal } from "@/components/common";
+import {
+  PageHeader,
+  DataTable,
+  GenericModal,
+  ConfirmModal,
+  TableSkeleton,
+} from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Add01Icon, PencilEdit01Icon, Delete02Icon, EyeIcon } from "hugeicons-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Add01Icon,
+  PencilEdit01Icon,
+  Delete02Icon,
+  ViewIcon,
+  ViewOffSlashIcon,
+} from "hugeicons-react";
 import { productoService, categoriaService, marcaService } from "@/services";
-import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 import { formatCurrency } from "@/utils/formatters";
-import type { ProductoWithRelations, CreateProductoDto, UpdateProductoDto } from "@/types/producto.types";
-import type { Categoria } from "@/types/categoria.types";
-import type { Subcategoria } from "@/types/subcategoria.types";
-import type { Marca } from "@/types/marca.types";
-
-interface CategoriaWithSubcategorias extends Categoria {
-  subcategorias: Subcategoria[];
-}
+import type {
+  ProductoWithRelations,
+  CreateProductoDto,
+  UpdateProductoDto,
+} from "@/types/producto.types";
+import type { MarcaWithCategorias } from "@/types";
 
 interface ProductFormData {
   name: string;
   sku: string;
   price: string;
   imgUrl: string;
+  marcaId: string;
   categoriaId: string;
   subcategoriaId: string;
-  marcaId: string;
 }
 
 const INITIAL_FORM_DATA: ProductFormData = {
@@ -36,20 +55,21 @@ const INITIAL_FORM_DATA: ProductFormData = {
   sku: "",
   price: "",
   imgUrl: "",
+  marcaId: "",
   categoriaId: "",
   subcategoriaId: "",
-  marcaId: "",
 };
 
 export default function AdminProductosPage() {
   const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
-  const [categorias, setCategorias] = useState<CategoriaWithSubcategorias[]>([]);
-  const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [marcas, setMarcas] = useState<MarcaWithCategorias[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ProductoWithRelations | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductoWithRelations | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(INITIAL_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -60,13 +80,11 @@ export default function AdminProductosPage() {
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const [productosData, categoriasData, marcasData] = await Promise.all([
+      const [productosData, marcasData] = await Promise.all([
         productoService.findAll(),
-        categoriaService.findAll(1),
         marcaService.findAll(1),
       ]);
       setProductos(productosData);
-      setCategorias(categoriasData);
       setMarcas(marcasData);
     } catch (error) {
       clientErrorHandler(error);
@@ -87,9 +105,9 @@ export default function AdminProductosPage() {
       sku: product.sku,
       price: String(product.price),
       imgUrl: product.imgUrl || "",
+      marcaId: String(product.marcaId),
       categoriaId: String(product.categoriaId),
       subcategoriaId: String(product.subcategoriaId),
-      marcaId: String(product.marcaId),
     });
     setIsEditModalOpen(true);
   };
@@ -100,7 +118,14 @@ export default function AdminProductosPage() {
   };
 
   const handleCreateProduct = async () => {
-    if (!formData.name || !formData.sku || !formData.price || !formData.categoriaId || !formData.subcategoriaId || !formData.marcaId) {
+    if (
+      !formData.name ||
+      !formData.sku ||
+      !formData.price ||
+      !formData.marcaId ||
+      !formData.categoriaId ||
+      !formData.subcategoriaId
+    ) {
       clientErrorHandler(new Error("Todos los campos son obligatorios"));
       return;
     }
@@ -132,7 +157,14 @@ export default function AdminProductosPage() {
   const handleEditProduct = async () => {
     if (!selectedProduct) return;
 
-    if (!formData.name || !formData.sku || !formData.price || !formData.categoriaId || !formData.subcategoriaId || !formData.marcaId) {
+    if (
+      !formData.name ||
+      !formData.sku ||
+      !formData.price ||
+      !formData.marcaId ||
+      !formData.categoriaId ||
+      !formData.subcategoriaId
+    ) {
       clientErrorHandler(new Error("Todos los campos son obligatorios"));
       return;
     }
@@ -178,20 +210,144 @@ export default function AdminProductosPage() {
 
   const handleToggleSinStock = async (product: ProductoWithRelations) => {
     try {
+      setIsRefreshing(true);
       await productoService.toggleSinStock(product.id, !product.sinStock);
       clientSuccessHandler(
         product.sinStock
           ? "Producto marcado como disponible"
-          : "Producto marcado sin stock"
+          : "Producto marcado sin stock",
       );
       await loadData();
     } catch (error) {
       clientErrorHandler(error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
-  const selectedCategoria = categorias.find((c) => c.id === Number(formData.categoriaId));
+  const selectedMarca = marcas.find((m) => m.id === Number(formData.marcaId));
+  const categorias = selectedMarca?.categorias || [];
+  const selectedCategoria = categorias.find(
+    (c) => c.id === Number(formData.categoriaId),
+  );
   const subcategorias = selectedCategoria?.subcategorias || [];
+
+  const renderForm = () => (
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label>Nombre</Label>
+          <Input
+            placeholder="Nombre del producto"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label>SKU</Label>
+          <Input
+            placeholder="Código SKU"
+            value={formData.sku}
+            onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>Precio</Label>
+        <Input
+          type="number"
+          placeholder="0.00"
+          value={formData.price}
+          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          className="w-full"
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>Marca</Label>
+        <Select
+          value={formData.marcaId}
+          onValueChange={(value) =>
+            setFormData({
+              ...formData,
+              marcaId: value,
+              categoriaId: "",
+              subcategoriaId: "",
+            })
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Seleccionar marca" />
+          </SelectTrigger>
+          <SelectContent>
+            {marcas.map((marca) => (
+              <SelectItem key={marca.id} value={String(marca.id)}>
+                {marca.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>Categoría</Label>
+        <Select
+          value={formData.categoriaId}
+          onValueChange={(value) =>
+            setFormData({ ...formData, categoriaId: value, subcategoriaId: "" })
+          }
+          disabled={!formData.marcaId}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Seleccionar categoría" />
+          </SelectTrigger>
+          <SelectContent>
+            {categorias.map((categoria) => (
+              <SelectItem key={categoria.id} value={String(categoria.id)}>
+                {categoria.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>Subcategoría</Label>
+        <Select
+          value={formData.subcategoriaId}
+          onValueChange={(value) =>
+            setFormData({ ...formData, subcategoriaId: value })
+          }
+          disabled={!formData.categoriaId}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Seleccionar subcategoría" />
+          </SelectTrigger>
+          <SelectContent>
+            {subcategorias.map((subcategoria) => (
+              <SelectItem key={subcategoria.id} value={String(subcategoria.id)}>
+                {subcategoria.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>URL de Imagen (opcional)</Label>
+        <Input
+          placeholder="https://..."
+          value={formData.imgUrl}
+          onChange={(e) => setFormData({ ...formData, imgUrl: e.target.value })}
+          className="w-full"
+        />
+      </div>
+    </div>
+  );
 
   return (
     <AppLayout variant="admin">
@@ -201,7 +357,8 @@ export default function AdminProductosPage() {
         action={
           <Button size="lg" onClick={handleOpenCreateModal} className="gap-2">
             <Add01Icon className="size-5" />
-            Nuevo Producto
+            <span className="hidden sm:inline">Nuevo Producto</span>
+            <span className="sm:hidden">Nuevo</span>
           </Button>
         }
       />
@@ -218,6 +375,7 @@ export default function AdminProductosPage() {
             {
               key: "sku",
               label: "SKU",
+              className: "text-center",
               render: (item) => (
                 <span className="font-mono text-sm font-semibold text-[#2b6485]">
                   {item.sku}
@@ -227,27 +385,33 @@ export default function AdminProductosPage() {
             {
               key: "name",
               label: "Nombre",
+              className: "text-center",
               render: (item) => (
-                <p className="text-sm font-medium text-[#161d16]">{item.name}</p>
-              ),
-            },
-            {
-              key: "categoria",
-              label: "Categoría",
-              render: (item) => (
-                <p className="text-sm text-[#3d4a3d]">{item.categoria.name}</p>
+                <p className="text-sm font-medium text-[#161d16]">
+                  {item.name}
+                </p>
               ),
             },
             {
               key: "marca",
               label: "Marca",
+              className: "text-center",
               render: (item) => (
                 <p className="text-sm text-[#3d4a3d]">{item.marca.name}</p>
               ),
             },
             {
+              key: "categoria",
+              label: "Categoría",
+              className: "text-center",
+              render: (item) => (
+                <p className="text-sm text-[#3d4a3d]">{item.categoria.name}</p>
+              ),
+            },
+            {
               key: "price",
               label: "Precio",
+              className: "text-center",
               render: (item) => (
                 <p className="text-sm font-semibold text-[#161d16]">
                   {formatCurrency(item.price)}
@@ -257,30 +421,40 @@ export default function AdminProductosPage() {
             {
               key: "sinStock",
               label: "Stock",
+              className: "text-center",
               render: (item) => (
-                <span
-                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
-                    item.sinStock
-                      ? "bg-[#b7102a]/15 text-[#b7102a]"
-                      : "bg-[#7cb56e]/15 text-[#5a9a4e]"
-                  }`}
-                >
-                  {item.sinStock ? "Sin Stock" : "Disponible"}
-                </span>
+                <div className="flex justify-center">
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${
+                      item.sinStock
+                        ? "bg-[#b7102a]/15 text-[#b7102a]"
+                        : "bg-[#7cb56e]/15 text-[#5a9a4e]"
+                    }`}
+                  >
+                    {item.sinStock ? "Sin Stock" : "Disponible"}
+                  </span>
+                </div>
               ),
             },
             {
               key: "actions",
               label: "Acciones",
+              className: "text-center",
               render: (item) => (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <Button
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => handleToggleSinStock(item)}
-                    title={item.sinStock ? "Marcar disponible" : "Marcar sin stock"}
+                    title={
+                      item.sinStock ? "Marcar disponible" : "Marcar sin stock"
+                    }
                   >
-                    <EyeIcon className="size-4" />
+                    {item.sinStock ? (
+                      <ViewOffSlashIcon className="size-4" />
+                    ) : (
+                      <ViewIcon className="size-4" />
+                    )}
                   </Button>
                   <Button
                     variant="ghost"
@@ -302,7 +476,7 @@ export default function AdminProductosPage() {
           ]}
           data={productos}
           keyExtractor={(item) => String(item.id)}
-          loading={isLoading}
+          loading={isLoading || isRefreshing}
           emptyMessage="No hay productos registrados"
           totalLabel={`${productos.length} productos`}
         />
@@ -316,7 +490,11 @@ export default function AdminProductosPage() {
         size="lg"
         footer={
           <>
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} disabled={isSubmitting}>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateModalOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
             <Button onClick={handleCreateProduct} disabled={isSubmitting}>
@@ -325,104 +503,7 @@ export default function AdminProductosPage() {
           </>
         }
       >
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label>Nombre</Label>
-            <Input
-              placeholder="Nombre del producto"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>SKU</Label>
-            <Input
-              placeholder="Código SKU"
-              value={formData.sku}
-              onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Precio</Label>
-            <Input
-              type="number"
-              placeholder="0.00"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Marca</Label>
-            <Select
-              value={formData.marcaId}
-              onValueChange={(value) => setFormData({ ...formData, marcaId: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar marca" />
-              </SelectTrigger>
-              <SelectContent>
-                {marcas.map((marca) => (
-                  <SelectItem key={marca.id} value={String(marca.id)}>
-                    {marca.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Categoría</Label>
-            <Select
-              value={formData.categoriaId}
-              onValueChange={(value) =>
-                setFormData({ ...formData, categoriaId: value, subcategoriaId: "" })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {categorias.map((categoria) => (
-                  <SelectItem key={categoria.id} value={String(categoria.id)}>
-                    {categoria.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Subcategoría</Label>
-            <Select
-              value={formData.subcategoriaId}
-              onValueChange={(value) => setFormData({ ...formData, subcategoriaId: value })}
-              disabled={!formData.categoriaId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar subcategoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {subcategorias.map((subcategoria) => (
-                  <SelectItem key={subcategoria.id} value={String(subcategoria.id)}>
-                    {subcategoria.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>URL de Imagen (opcional)</Label>
-            <Input
-              placeholder="https://..."
-              value={formData.imgUrl}
-              onChange={(e) => setFormData({ ...formData, imgUrl: e.target.value })}
-            />
-          </div>
-        </div>
+        {renderForm()}
       </GenericModal>
 
       <GenericModal
@@ -433,7 +514,11 @@ export default function AdminProductosPage() {
         size="lg"
         footer={
           <>
-            <Button variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={isSubmitting}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditModalOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
             <Button onClick={handleEditProduct} disabled={isSubmitting}>
@@ -442,104 +527,7 @@ export default function AdminProductosPage() {
           </>
         }
       >
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label>Nombre</Label>
-            <Input
-              placeholder="Nombre del producto"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>SKU</Label>
-            <Input
-              placeholder="Código SKU"
-              value={formData.sku}
-              onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Precio</Label>
-            <Input
-              type="number"
-              placeholder="0.00"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Marca</Label>
-            <Select
-              value={formData.marcaId}
-              onValueChange={(value) => setFormData({ ...formData, marcaId: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar marca" />
-              </SelectTrigger>
-              <SelectContent>
-                {marcas.map((marca) => (
-                  <SelectItem key={marca.id} value={String(marca.id)}>
-                    {marca.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Categoría</Label>
-            <Select
-              value={formData.categoriaId}
-              onValueChange={(value) =>
-                setFormData({ ...formData, categoriaId: value, subcategoriaId: "" })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {categorias.map((categoria) => (
-                  <SelectItem key={categoria.id} value={String(categoria.id)}>
-                    {categoria.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>Subcategoría</Label>
-            <Select
-              value={formData.subcategoriaId}
-              onValueChange={(value) => setFormData({ ...formData, subcategoriaId: value })}
-              disabled={!formData.categoriaId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar subcategoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {subcategorias.map((subcategoria) => (
-                  <SelectItem key={subcategoria.id} value={String(subcategoria.id)}>
-                    {subcategoria.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label>URL de Imagen (opcional)</Label>
-            <Input
-              placeholder="https://..."
-              value={formData.imgUrl}
-              onChange={(e) => setFormData({ ...formData, imgUrl: e.target.value })}
-            />
-          </div>
-        </div>
+        {renderForm()}
       </GenericModal>
 
       <ConfirmModal
