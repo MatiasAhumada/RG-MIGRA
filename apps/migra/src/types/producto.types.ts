@@ -12,10 +12,19 @@ export interface CreateProductoDto {
   subcategoriaId: number;
   marcaId: number;
   sinStock?: boolean;
-  variantes?: CreateProductoVarianteDto[];
+  variantes?: Omit<CreateProductoVarianteDto, "productoId">[];
 }
 
-export interface UpdateProductoDto extends Partial<CreateProductoDto> {}
+export interface UpdateProductoDto {
+  name?: string;
+  sku?: string;
+  price?: number;
+  imgUrl?: string;
+  categoriaId?: number;
+  subcategoriaId?: number;
+  marcaId?: number;
+  sinStock?: boolean;
+}
 
 export interface BulkCreateProductoDto {
   pdfBuffer: Buffer;

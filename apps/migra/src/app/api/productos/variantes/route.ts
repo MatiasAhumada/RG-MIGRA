@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { productoVarianteService } from "@/server/services/producto-variante.service";
-import { apiErrorHandler } from "@/utils/handlers/apiError.handler";
-import { httpStatus } from "@/constants/http-status.constant";
+import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
+import httpStatus from "http-status";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(variantes, { status: httpStatus.OK });
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }
 
@@ -25,6 +25,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(variante, { status: httpStatus.CREATED });
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }

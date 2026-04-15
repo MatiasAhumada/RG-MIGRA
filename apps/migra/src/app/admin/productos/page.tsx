@@ -106,6 +106,10 @@ export default function AdminProductosPage() {
       marcaId: String(product.marcaId),
       categoriaId: String(product.categoriaId),
       subcategoriaId: String(product.subcategoriaId),
+      variantes: product.variantes.map((v) => ({
+        color: v.color || "",
+        talle: v.talle ? String(v.talle) : "",
+      })),
     });
     setIsEditModalOpen(true);
   };
@@ -133,6 +137,17 @@ export default function AdminProductosPage() {
       return;
     }
 
+    const hasInvalidVariante = formData.variantes.some(
+      (v) => !v.color && !v.talle,
+    );
+
+    if (hasInvalidVariante) {
+      clientErrorHandler(
+        new Error("Cada variante debe tener al menos color o talle"),
+      );
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const dto: CreateProductoDto = {
@@ -145,8 +160,8 @@ export default function AdminProductosPage() {
         subcategoriaId: Number(formData.subcategoriaId),
         marcaId: Number(formData.marcaId),
         variantes: formData.variantes.map((v) => ({
-          color: v.color as ColorProducto,
-          talle: Number(v.talle),
+          color: v.color ? (v.color as ColorProducto) : undefined,
+          talle: v.talle ? Number(v.talle) : undefined,
         })),
       };
 
@@ -405,7 +420,7 @@ export default function AdminProductosPage() {
                 className="grid grid-cols-1 gap-3 rounded-lg border p-3 sm:grid-cols-[1fr_1fr_auto]"
               >
                 <div className="flex flex-col gap-1">
-                  <Label className="text-xs">Color</Label>
+                  <Label className="text-xs">Color (opcional)</Label>
                   <Select
                     value={variante.color}
                     onValueChange={(value) =>
@@ -426,7 +441,7 @@ export default function AdminProductosPage() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <Label className="text-xs">Talle</Label>
+                  <Label className="text-xs">Talle (opcional)</Label>
                   <Input
                     type="number"
                     placeholder="Ej: 1, 2, 3..."

@@ -1,6 +1,6 @@
 import { productoVarianteRepository } from "@/server/repository/producto-variante.repository";
 import { ApiError } from "@/utils/handlers/apiError.handler";
-import { httpStatus } from "@/constants/http-status.constant";
+import httpStatus from "http-status";
 import {
   PRODUCTO_VARIANTE_NOT_FOUND,
   PRODUCTO_VARIANTE_ALREADY_EXISTS,
@@ -38,7 +38,10 @@ export const productoVarianteService = {
     );
 
     const duplicate = existingVariantes.find(
-      (v) => v.color === dto.color && v.talle === dto.talle,
+      (v) =>
+        v.color === dto.color &&
+        v.talle === dto.talle &&
+        (dto.color || dto.talle),
     );
 
     if (duplicate) {

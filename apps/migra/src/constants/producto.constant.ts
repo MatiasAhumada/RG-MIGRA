@@ -1,4 +1,4 @@
-import { ColorProducto } from "@/types/producto-variante.types";
+import { ColorProducto } from "@prisma/client";
 
 export const COLORES_PRODUCTO = [
   { value: ColorProducto.BLANCO, label: "Blanco" },

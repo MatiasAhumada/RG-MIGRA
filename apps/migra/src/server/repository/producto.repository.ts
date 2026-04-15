@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { CreateProductoDto, UpdateProductoDto } from "@/types/producto.types";
 
 export const productoRepository = {
-  async create(dto: CreateProductoDto) {
+  async create(dto: Omit<CreateProductoDto, "variantes">) {
     return prisma.producto.create({
       data: dto,
     });

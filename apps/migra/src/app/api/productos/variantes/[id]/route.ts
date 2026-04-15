@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { productoVarianteService } from "@/server/services/producto-variante.service";
-import { apiErrorHandler } from "@/utils/handlers/apiError.handler";
-import { httpStatus } from "@/constants/http-status.constant";
+import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
+import httpStatus from "http-status";
 
 export async function GET(
   request: NextRequest,
@@ -13,7 +13,7 @@ export async function GET(
 
     return NextResponse.json(variante, { status: httpStatus.OK });
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }
 
@@ -28,7 +28,7 @@ export async function PATCH(
 
     return NextResponse.json(variante, { status: httpStatus.OK });
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }
 
@@ -45,6 +45,6 @@ export async function DELETE(
       { status: httpStatus.OK },
     );
   } catch (error) {
-    return apiErrorHandler(error);
+    return apiErrorHandler({ error: error as ApiError, request });
   }
 }
