@@ -6,4 +6,10 @@ export interface ProductFormData {
   marcaId: string;
   categoriaId: string;
   subcategoriaId: string;
+  variantes: ProductoVarianteFormData[];
+}
+
+export interface ProductoVarianteFormData {
+  color: string;
+  talle: string;
 }

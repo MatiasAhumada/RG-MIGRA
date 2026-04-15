@@ -38,6 +38,7 @@ export const API_ROUTES = {
   USERS: "/api/users",
   CLIENTES: "/api/clientes",
   PRODUCTOS: "/api/productos",
+  PRODUCTO_VARIANTES: "/api/productos/variantes",
   PEDIDOS: "/api/pedidos",
   ADDRESSES: "/api/addresses",
   DETALLE_PEDIDOS: "/api/detalle-pedidos",

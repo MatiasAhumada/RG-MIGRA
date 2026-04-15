@@ -3,6 +3,7 @@ export * from "./empresa.types";
 export * from "./cliente.types";
 export * from "./address.types";
 export * from "./producto.types";
+export * from "./producto-variante.types";
 export * from "./pedido.types";
 export * from "./categoria.types";
 export * from "./subcategoria.types";

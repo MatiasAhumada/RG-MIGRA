@@ -16,6 +16,10 @@ export const productoRepository = {
         categoria: true,
         subcategoria: true,
         marca: true,
+        variantes: {
+          where: { deletedAt: null },
+          orderBy: [{ color: "asc" }, { talle: "asc" }],
+        },
       },
     });
   },
@@ -101,6 +105,10 @@ export const productoRepository = {
         categoria: true,
         subcategoria: true,
         marca: true,
+        variantes: {
+          where: { deletedAt: null },
+          orderBy: [{ color: "asc" }, { talle: "asc" }],
+        },
       },
       orderBy: { createdAt: "desc" },
     });

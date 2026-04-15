@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ColorProducto } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -202,6 +202,56 @@ async function main() {
           console.log(`      Subcategoría creada: "${subName}"`);
         }
       }
+    }
+  }
+
+  console.log("\n=== PRODUCTOS CON VARIANTES ===");
+
+  const primeraCategoria = await prisma.categoria.findFirst({
+    where: { empresaId: empresa.id },
+    include: { subcategorias: true },
+  });
+
+  if (primeraCategoria && primeraCategoria.subcategorias.length > 0) {
+    const productoEjemplo = await prisma.producto.findFirst({
+      where: { sku: "PROD-001" },
+    });
+
+    if (!productoEjemplo) {
+      const nuevoProducto = await prisma.producto.create({
+        data: {
+          name: "Producto Ejemplo",
+          sku: "PROD-001",
+          price: 1500.0,
+          empresaId: empresa.id,
+          categoriaId: primeraCategoria.id,
+          subcategoriaId: primeraCategoria.subcategorias[0].id,
+          marcaId: primeraCategoria.marcaId,
+        },
+      });
+
+      const colores: ColorProducto[] = [
+        ColorProducto.BLANCO,
+        ColorProducto.CELESTE,
+        ColorProducto.ROSA,
+      ];
+      const talles = [1, 2];
+
+      for (const color of colores) {
+        for (const talle of talles) {
+          await prisma.productoVariante.create({
+            data: {
+              color,
+              talle,
+              productoId: nuevoProducto.id,
+            },
+          });
+        }
+      }
+
+      console.log(`Producto "${nuevoProducto.name}" creado con 6 variantes`);
+    } else {
+      console.log(`Producto "PROD-001" ya existe`);
     }
   }
 

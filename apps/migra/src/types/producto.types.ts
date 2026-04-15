@@ -38,6 +38,7 @@ export interface ProductoWithRelations extends Producto {
   categoria: Categoria;
   subcategoria: Subcategoria;
   marca: Marca;
+  variantes: ProductoVariante[];
 }
 
 export interface ParsedProduct {
@@ -50,3 +51,4 @@ import { Empresa } from "./empresa.types";
 import { Categoria } from "./categoria.types";
 import { Subcategoria } from "./subcategoria.types";
 import { Marca } from "./marca.types";
+import { ProductoVariante } from "./producto-variante.types";
