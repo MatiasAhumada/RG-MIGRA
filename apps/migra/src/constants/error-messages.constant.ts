@@ -12,7 +12,8 @@ export const ERROR_MESSAGES = {
   PRODUCTO_NOT_FOUND: "Producto no encontrado",
   PRODUCTO_SKU_EXISTS: "El SKU ya está registrado",
   PRODUCTO_VARIANTE_NOT_FOUND: "Variante de producto no encontrada",
-  PRODUCTO_VARIANTE_ALREADY_EXISTS: "Ya existe una variante con ese color y talle",
+  PRODUCTO_VARIANTE_ALREADY_EXISTS:
+    "Ya existe una variante con ese color y talle",
   PEDIDO_NOT_FOUND: "Pedido no encontrado",
   ADDRESS_NOT_FOUND: "Dirección no encontrada",
   DETALLE_PEDIDO_NOT_FOUND: "Detalle de pedido no encontrado",

@@ -14,8 +14,7 @@ export interface CreateProductoVarianteDto {
   productoId: number;
 }
 
-export interface UpdateProductoVarianteDto
-  extends Partial<CreateProductoVarianteDto> {}
+export interface UpdateProductoVarianteDto extends Partial<CreateProductoVarianteDto> {}
 
 export interface ProductoVarianteWithProducto extends ProductoVariante {
   producto: Producto;

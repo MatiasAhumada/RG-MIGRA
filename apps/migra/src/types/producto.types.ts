@@ -12,6 +12,7 @@ export interface CreateProductoDto {
   subcategoriaId: number;
   marcaId: number;
   sinStock?: boolean;
+  variantes?: CreateProductoVarianteDto[];
 }
 
 export interface UpdateProductoDto extends Partial<CreateProductoDto> {}
@@ -51,4 +52,7 @@ import { Empresa } from "./empresa.types";
 import { Categoria } from "./categoria.types";
 import { Subcategoria } from "./subcategoria.types";
 import { Marca } from "./marca.types";
-import { ProductoVariante } from "./producto-variante.types";
+import {
+  ProductoVariante,
+  CreateProductoVarianteDto,
+} from "./producto-variante.types";

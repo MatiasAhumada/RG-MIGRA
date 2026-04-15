@@ -26,6 +26,7 @@ import {
   Delete02Icon,
   ViewIcon,
   ViewOffSlashIcon,
+  Delete01Icon,
 } from "hugeicons-react";
 import { productoService, categoriaService, marcaService } from "@/services";
 import {
@@ -38,17 +39,13 @@ import type {
   CreateProductoDto,
   UpdateProductoDto,
 } from "@/types/producto.types";
-import type { MarcaWithCategorias } from "@/types";
-
-interface ProductFormData {
-  name: string;
-  sku: string;
-  price: string;
-  imgUrl: string;
-  marcaId: string;
-  categoriaId: string;
-  subcategoriaId: string;
-}
+import type {
+  MarcaWithCategorias,
+  ProductFormData,
+  ProductoVarianteFormData,
+  ColorProducto,
+} from "@/types";
+import { COLORES_PRODUCTO } from "@/constants/producto.constant";
 
 const INITIAL_FORM_DATA: ProductFormData = {
   name: "",
@@ -58,6 +55,7 @@ const INITIAL_FORM_DATA: ProductFormData = {
   marcaId: "",
   categoriaId: "",
   subcategoriaId: "",
+  variantes: [],
 };
 
 export default function AdminProductosPage() {
@@ -130,6 +128,11 @@ export default function AdminProductosPage() {
       return;
     }
 
+    if (formData.variantes.length === 0) {
+      clientErrorHandler(new Error("Debe agregar al menos una variante"));
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       const dto: CreateProductoDto = {
@@ -141,6 +144,10 @@ export default function AdminProductosPage() {
         categoriaId: Number(formData.categoriaId),
         subcategoriaId: Number(formData.subcategoriaId),
         marcaId: Number(formData.marcaId),
+        variantes: formData.variantes.map((v) => ({
+          color: v.color as ColorProducto,
+          talle: Number(v.talle),
+        })),
       };
 
       await productoService.create(dto);
@@ -223,6 +230,30 @@ export default function AdminProductosPage() {
     } finally {
       setIsRefreshing(false);
     }
+  };
+
+  const handleAddVariante = () => {
+    setFormData({
+      ...formData,
+      variantes: [...formData.variantes, { color: "", talle: "" }],
+    });
+  };
+
+  const handleRemoveVariante = (index: number) => {
+    setFormData({
+      ...formData,
+      variantes: formData.variantes.filter((_, i) => i !== index),
+    });
+  };
+
+  const handleVarianteChange = (
+    index: number,
+    field: keyof ProductoVarianteFormData,
+    value: string,
+  ) => {
+    const newVariantes = [...formData.variantes];
+    newVariantes[index] = { ...newVariantes[index], [field]: value };
+    setFormData({ ...formData, variantes: newVariantes });
   };
 
   const selectedMarca = marcas.find((m) => m.id === Number(formData.marcaId));
@@ -345,6 +376,83 @@ export default function AdminProductosPage() {
           onChange={(e) => setFormData({ ...formData, imgUrl: e.target.value })}
           className="w-full"
         />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <Label>Variantes (Color y Talle)</Label>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleAddVariante}
+            className="gap-2"
+          >
+            <Add01Icon className="size-4" />
+            Agregar Variante
+          </Button>
+        </div>
+
+        {formData.variantes.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No hay variantes agregadas
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {formData.variantes.map((variante, index) => (
+              <div
+                key={index}
+                className="grid grid-cols-1 gap-3 rounded-lg border p-3 sm:grid-cols-[1fr_1fr_auto]"
+              >
+                <div className="flex flex-col gap-1">
+                  <Label className="text-xs">Color</Label>
+                  <Select
+                    value={variante.color}
+                    onValueChange={(value) =>
+                      handleVarianteChange(index, "color", value)
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Seleccionar color" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COLORES_PRODUCTO.map((color) => (
+                        <SelectItem key={color.value} value={color.value}>
+                          {color.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <Label className="text-xs">Talle</Label>
+                  <Input
+                    type="number"
+                    placeholder="Ej: 1, 2, 3..."
+                    value={variante.talle}
+                    onChange={(e) =>
+                      handleVarianteChange(index, "talle", e.target.value)
+                    }
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="flex items-end">
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => handleRemoveVariante(index)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Delete01Icon className="size-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

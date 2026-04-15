@@ -1,4 +1,5 @@
 import { productoRepository } from "@/server/repository/producto.repository";
+import { productoVarianteRepository } from "@/server/repository/producto-variante.repository";
 import { r2StorageService } from "@/server/services/r2-storage.service";
 import { pdfParserService } from "@/server/services/pdf-parser.service";
 import { ApiError } from "@/utils/handlers/apiError.handler";
@@ -21,7 +22,19 @@ export const productoService = {
       });
     }
 
-    return productoRepository.create(dto);
+    const { variantes, ...productoData } = dto;
+    const producto = await productoRepository.create(productoData);
+
+    if (variantes && variantes.length > 0) {
+      for (const variante of variantes) {
+        await productoVarianteRepository.create({
+          ...variante,
+          productoId: producto.id,
+        });
+      }
+    }
+
+    return productoRepository.findById(producto.id);
   },
 
   async findById(id: number) {
