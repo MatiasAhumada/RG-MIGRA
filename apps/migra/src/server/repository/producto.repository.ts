@@ -87,7 +87,55 @@ export const productoRepository = {
     });
   },
 
+  async restore(id: number) {
+    return prisma.producto.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+  },
+
+  async findByIdIncludingDeleted(id: number) {
+    return prisma.producto.findUnique({
+      where: { id },
+      include: {
+        empresa: true,
+        categoria: true,
+        subcategoria: true,
+        marca: true,
+        variantes: {
+          orderBy: [{ color: "asc" }, { talle: "asc" }],
+        },
+      },
+    });
+  },
+
   async findAll(search?: string, empresaId?: number) {
+    const where = {
+      ...(empresaId && { empresaId }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" as const } },
+          { sku: { contains: search, mode: "insensitive" as const } },
+        ],
+      }),
+    };
+
+    return prisma.producto.findMany({
+      where,
+      include: {
+        categoria: true,
+        subcategoria: true,
+        marca: true,
+        variantes: {
+          where: { deletedAt: null },
+          orderBy: [{ color: "asc" }, { talle: "asc" }],
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  async findAllActive(search?: string, empresaId?: number) {
     const where = {
       deletedAt: null,
       ...(empresaId && { empresaId }),

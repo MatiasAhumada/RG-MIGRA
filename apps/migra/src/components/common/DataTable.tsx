@@ -27,6 +27,7 @@ interface DataTableProps<T> {
   totalLabel?: string;
   onRowClick?: (item: T) => void;
   expandedContent?: (item: T) => ReactNode;
+  getRowClassName?: (item: T) => string;
 }
 
 export function DataTable<T>({
@@ -43,6 +44,7 @@ export function DataTable<T>({
   totalLabel,
   onRowClick,
   expandedContent,
+  getRowClassName,
 }: DataTableProps<T>) {
   const shouldReduceMotion = useReducedMotion();
 
@@ -137,7 +139,7 @@ export function DataTable<T>({
                         onClick={() => onRowClick?.(item)}
                         className={`border-b border-[#161d16]/5 hover:bg-[#f3fcf0]/30 transition-colors ${
                           onRowClick ? "cursor-pointer" : ""
-                        }`}
+                        } ${getRowClassName?.(item) || ""}`}
                       >
                         {columns.map((column) => (
                           <td

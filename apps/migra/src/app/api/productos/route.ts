@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const marcaId = searchParams.get("marcaId");
     const categoriaId = searchParams.get("categoriaId");
     const subcategoriaId = searchParams.get("subcategoriaId");
+    const includeDeleted = searchParams.get("includeDeleted") === "true";
 
     if (marcaId && empresaId) {
       const productos = await productoService.findByMarca(
@@ -43,10 +44,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(productos, { status: httpStatus.OK });
     }
 
-    const productos = await productoService.findAll(
-      search,
-      empresaId ? Number(empresaId) : undefined,
-    );
+    const productos = includeDeleted
+      ? await productoService.findAll(
+          search,
+          empresaId ? Number(empresaId) : undefined,
+        )
+      : await productoService.findAllActive(
+          search,
+          empresaId ? Number(empresaId) : undefined,
+        );
 
     return NextResponse.json(productos, { status: httpStatus.OK });
   } catch (error) {

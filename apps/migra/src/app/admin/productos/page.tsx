@@ -27,6 +27,7 @@ import {
   ViewIcon,
   ViewOffSlashIcon,
   Delete01Icon,
+  CheckmarkCircle01Icon,
 } from "hugeicons-react";
 import { productoService, categoriaService, marcaService } from "@/services";
 import {
@@ -79,7 +80,7 @@ export default function AdminProductosPage() {
     try {
       setIsLoading(true);
       const [productosData, marcasData] = await Promise.all([
-        productoService.findAll(),
+        productoService.findAllWithDeleted(),
         marcaService.findAll(1),
       ]);
       setProductos(productosData);
@@ -227,6 +228,19 @@ export default function AdminProductosPage() {
       clientErrorHandler(error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleRestoreProduct = async (product: ProductoWithRelations) => {
+    try {
+      setIsRefreshing(true);
+      await productoService.restore(product.id);
+      clientSuccessHandler("Producto restaurado exitosamente");
+      await loadData();
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -494,6 +508,9 @@ export default function AdminProductosPage() {
       >
         <DataTable<ProductoWithRelations>
           title="Productos"
+          getRowClassName={(item) =>
+            item.deletedAt ? "bg-gray-100/60 opacity-70" : ""
+          }
           columns={[
             {
               key: "sku",
@@ -563,38 +580,58 @@ export default function AdminProductosPage() {
               key: "actions",
               label: "Acciones",
               className: "text-center",
-              render: (item) => (
-                <div className="flex items-center justify-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleToggleSinStock(item)}
-                    title={
-                      item.sinStock ? "Marcar disponible" : "Marcar sin stock"
-                    }
-                  >
-                    {item.sinStock ? (
-                      <ViewOffSlashIcon className="size-4" />
-                    ) : (
-                      <ViewIcon className="size-4" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleOpenEditModal(item)}
-                  >
-                    <PencilEdit01Icon className="size-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => handleOpenDeleteModal(item)}
-                  >
-                    <Delete02Icon className="size-4" />
-                  </Button>
-                </div>
-              ),
+              render: (item) => {
+                const isDeleted = !!item.deletedAt;
+
+                if (isDeleted) {
+                  return (
+                    <div className="flex items-center justify-center">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => handleRestoreProduct(item)}
+                        title="Reactivar producto"
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        <CheckmarkCircle01Icon className="size-4" />
+                      </Button>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="flex items-center justify-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => handleToggleSinStock(item)}
+                      title={
+                        item.sinStock ? "Marcar disponible" : "Marcar sin stock"
+                      }
+                    >
+                      {item.sinStock ? (
+                        <ViewOffSlashIcon className="size-4" />
+                      ) : (
+                        <ViewIcon className="size-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => handleOpenEditModal(item)}
+                    >
+                      <PencilEdit01Icon className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => handleOpenDeleteModal(item)}
+                    >
+                      <Delete02Icon className="size-4" />
+                    </Button>
+                  </div>
+                );
+              },
             },
           ]}
           data={productos}

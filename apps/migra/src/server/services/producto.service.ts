@@ -113,8 +113,25 @@ export const productoService = {
     return productoRepository.softDelete(id);
   },
 
+  async restore(id: number) {
+    const producto = await productoRepository.findByIdIncludingDeleted(id);
+
+    if (!producto) {
+      throw new ApiError({
+        status: httpStatus.NOT_FOUND,
+        message: ERROR_MESSAGES.PRODUCTO_NOT_FOUND,
+      });
+    }
+
+    return productoRepository.restore(id);
+  },
+
   async findAll(search?: string, empresaId?: number) {
     return productoRepository.findAll(search, empresaId);
+  },
+
+  async findAllActive(search?: string, empresaId?: number) {
+    return productoRepository.findAllActive(search, empresaId);
   },
 
   async toggleSinStock(id: number) {

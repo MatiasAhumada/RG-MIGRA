@@ -25,6 +25,11 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
+    if (body.action === "restore") {
+      const producto = await productoService.restore(Number(id));
+      return NextResponse.json(producto, { status: httpStatus.OK });
+    }
+
     if (body.imageBase64) {
       const producto = await productoService.updateImage(
         Number(id),
@@ -48,7 +53,7 @@ export async function DELETE(
     const { id } = await params;
     await productoService.delete(Number(id));
 
-    return NextResponse.json(null, { status: httpStatus.NO_CONTENT });
+    return new NextResponse(null, { status: httpStatus.NO_CONTENT });
   } catch (error) {
     return apiErrorHandler({ error: error as ApiError, request });
   }

@@ -414,7 +414,8 @@ export default function HomePage() {
                     className="flex flex-col items-center justify-center py-20 text-center"
                   >
                     <p className="text-lg text-[#161d16]/70">
-                      No encontramos productos que coincidan con &quot;{query}&quot;
+                      No encontramos productos que coincidan con &quot;{query}
+                      &quot;
                     </p>
                     <p className="mt-2 text-sm text-[#161d16]/50">
                       Probá con otro término de búsqueda
