@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -29,9 +30,12 @@ export function ProductCard({
   price,
   imgUrl,
   className,
-  showPrice = true,
+  showPrice: showPriceProp,
   sinStock = false,
 }: ProductCardProps) {
+  const { isAuthenticated } = useAuth();
+
+  const showPrice = showPriceProp ?? isAuthenticated;
   const formattedPrice = formatCurrency(price);
   const imageSrc = imgUrl || PLACEHOLDER_IMAGE;
 

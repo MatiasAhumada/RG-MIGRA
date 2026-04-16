@@ -94,7 +94,7 @@ export default function HomePage() {
 
   return (
     <PublicLayout>
-      <div
+      <motion.div
         className={
           isSearching
             ? "pointer-events-none opacity-20 blur-[2px] transition-all duration-500"
@@ -344,14 +344,13 @@ export default function HomePage() {
                   sku={product.sku}
                   price={product.price}
                   imgUrl={product.imgUrl || ""}
-                  showPrice={false}
                   sinStock={product.sinStock}
                 />
               ))}
             </motion.div>
           )}
         </section>
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {isSearching && (
@@ -404,7 +403,6 @@ export default function HomePage() {
                         sku={product.sku}
                         price={product.price}
                         imgUrl={product.imgUrl || ""}
-                        showPrice={false}
                         sinStock={product.sinStock}
                       />
                     ))}
@@ -415,21 +413,10 @@ export default function HomePage() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-20 text-center"
                   >
-                    <p
-                      className="text-lg text-[#161d16]/70"
-                      style={{
-                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                      }}
-                    >
-                      No encontramos productos que coincidan con &quot;{query}
-                      &quot;
+                    <p className="text-lg text-[#161d16]/70">
+                      No encontramos productos que coincidan con &quot;{query}&quot;
                     </p>
-                    <p
-                      className="mt-2 text-sm text-[#161d16]/50"
-                      style={{
-                        fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                      }}
-                    >
+                    <p className="mt-2 text-sm text-[#161d16]/50">
                       Probá con otro término de búsqueda
                     </p>
                   </motion.div>
