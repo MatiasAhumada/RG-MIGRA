@@ -18,7 +18,10 @@ import {
   CheckmarkCircle01Icon,
 } from "hugeicons-react";
 import { authService } from "@/services";
-import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -81,7 +84,8 @@ export default function RegisterPage() {
             <h1
               className="text-[1.75rem] font-extrabold text-[#161d16] md:text-[2.25rem]"
               style={{
-                fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
+                fontFamily:
+                  "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
                 letterSpacing: "-0.02em",
               }}
             >
@@ -89,7 +93,9 @@ export default function RegisterPage() {
             </h1>
             <p
               className="mt-3 text-sm text-[#3d4a3d]"
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
             >
               Tu solicitud de registro para{" "}
               <strong className="font-semibold text-[#161d16]">
@@ -131,7 +137,9 @@ export default function RegisterPage() {
             </h1>
             <p
               className="mt-3 text-sm text-[#3d4a3d]"
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
             >
               Completá el formulario para solicitar acceso al catálogo
             </p>
@@ -142,7 +150,9 @@ export default function RegisterPage() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   Razón Social
                 </label>
@@ -161,7 +171,9 @@ export default function RegisterPage() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   Titular
                 </label>
@@ -181,7 +193,9 @@ export default function RegisterPage() {
                 <div className="flex flex-col gap-2">
                   <label
                     className="text-sm font-semibold text-[#161d16]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
                   >
                     C.U.I.T
                   </label>
@@ -200,7 +214,9 @@ export default function RegisterPage() {
                 <div className="flex flex-col gap-2">
                   <label
                     className="text-sm font-semibold text-[#161d16]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
                   >
                     Teléfono
                   </label>
@@ -219,7 +235,9 @@ export default function RegisterPage() {
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   Correo electrónico
                 </label>
@@ -248,9 +266,7 @@ export default function RegisterPage() {
                     Enviando...
                   </span>
                 ) : (
-                  <>
-                    Enviar Solicitud
-                  </>
+                  <>Enviar Solicitud</>
                 )}
               </Button>
             </form>
@@ -258,7 +274,9 @@ export default function RegisterPage() {
             <div className="mt-6 border-t border-[#161d16]/5 pt-6 text-center">
               <p
                 className="text-sm text-[#3d4a3d]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
               >
                 ¿Ya tenés cuenta?{" "}
                 <Link

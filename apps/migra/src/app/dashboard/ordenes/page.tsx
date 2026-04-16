@@ -57,9 +57,14 @@ const orderStepsMap: Record<string, NurtureBarStep[]> = {
 };
 
 export default function DashboardOrdenesPage() {
-  const [selectedPedido, setSelectedPedido] = useState<PedidoWithRelations | null>(null);
+  const [selectedPedido, setSelectedPedido] =
+    useState<PedidoWithRelations | null>(null);
 
-  const { data: pedidos, isLoading, refetch } = useDataQuery<PedidoWithRelations[]>({
+  const {
+    data: pedidos,
+    isLoading,
+    refetch,
+  } = useDataQuery<PedidoWithRelations[]>({
     fetcher: () => pedidoService.findAll(),
   });
 
@@ -78,10 +83,16 @@ export default function DashboardOrdenesPage() {
               disabled={isLoading}
               title="Actualizar ahora"
             >
-              <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
+              <Refresh01Icon
+                className={`size-4 ${isLoading ? "animate-spin" : ""}`}
+              />
             </Button>
             <Link href="/dashboard">
-              <Button variant="outline" size="sm" className="gap-2 rounded-[2rem]">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 rounded-[2rem]"
+              >
                 <ArrowLeft01Icon className="size-4" />
                 Volver al Panel
               </Button>
@@ -133,7 +144,9 @@ export default function DashboardOrdenesPage() {
               render: (item) => (
                 <p
                   className="text-sm font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {formatCurrency(item.totalPedido)}
                 </p>
@@ -165,7 +178,7 @@ export default function DashboardOrdenesPage() {
               ),
             },
           ]}
-          data={isLoading ? [] : (pedidos || [])}
+          data={isLoading ? [] : pedidos || []}
           keyExtractor={(item) => String(item.id)}
           emptyMessage="No hay pedidos en el historial"
           totalLabel={`${(pedidos || []).length} pedidos`}
@@ -184,7 +197,9 @@ export default function DashboardOrdenesPage() {
             <div>
               <h3
                 className="mb-3 text-sm font-bold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
               >
                 Seguimiento
               </h3>
@@ -194,7 +209,9 @@ export default function DashboardOrdenesPage() {
             <div>
               <h3
                 className="mb-3 text-sm font-bold text-[#161d16]"
-                style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
               >
                 Items del Pedido
               </h3>
@@ -207,7 +224,10 @@ export default function DashboardOrdenesPage() {
                     <div>
                       <p
                         className="text-sm font-semibold text-[#161d16]"
-                        style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                        style={{
+                          fontFamily:
+                            "'Manrope', 'Inter', system-ui, sans-serif",
+                        }}
                       >
                         {detalle.producto.name}
                       </p>
@@ -217,11 +237,15 @@ export default function DashboardOrdenesPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-[#3d4a3d]">
-                        {detalle.cantidad} x {formatCurrency(detalle.producto.price)}
+                        {detalle.cantidad} x{" "}
+                        {formatCurrency(detalle.producto.price)}
                       </p>
                       <p
                         className="text-sm font-bold text-[#161d16]"
-                        style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                        style={{
+                          fontFamily:
+                            "'Manrope', 'Inter', system-ui, sans-serif",
+                        }}
                       >
                         {formatCurrency(detalle.total)}
                       </p>
@@ -244,7 +268,9 @@ export default function DashboardOrdenesPage() {
                 <p className="text-sm text-[#3d4a3d]">Total</p>
                 <p
                   className="text-xl font-bold text-[#b7102a]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {formatCurrency(selectedPedido.totalPedido)}
                 </p>

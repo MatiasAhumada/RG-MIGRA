@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Search01Icon } from "hugeicons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Column<T> {
   key: string;
@@ -26,6 +27,7 @@ interface DataTableProps<T> {
   totalLabel?: string;
   onRowClick?: (item: T) => void;
   expandedContent?: (item: T) => ReactNode;
+  getRowClassName?: (item: T) => string;
 }
 
 export function DataTable<T>({
@@ -42,6 +44,7 @@ export function DataTable<T>({
   totalLabel,
   onRowClick,
   expandedContent,
+  getRowClassName,
 }: DataTableProps<T>) {
   const shouldReduceMotion = useReducedMotion();
 
@@ -90,11 +93,11 @@ export function DataTable<T>({
           <div className="w-full overflow-x-auto overflow-y-visible">
             <table className="w-full min-w-[600px]">
               <thead>
-                <tr className="border-b border-[#161d16]/5 text-left text-xs font-semibold uppercase tracking-wider text-[#3d4a3d]">
+                <tr className="border-b border-[#161d16]/5 text-xs font-semibold uppercase tracking-wider text-[#3d4a3d]">
                   {columns.map((column) => (
                     <th
                       key={column.key}
-                      className={`pb-3 ${column.className || ""}`}
+                      className={`pb-3 text-center ${column.className || ""}`}
                     >
                       {column.label}
                     </th>
@@ -103,17 +106,17 @@ export function DataTable<T>({
               </thead>
               <tbody>
                 {loading ? (
-                  <tr>
-                    <td
-                      colSpan={columns.length}
-                      className="py-8 text-center text-[#3d4a3d] font-medium"
-                    >
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="size-5 animate-spin rounded-full border-2 border-[#b7102a] border-t-transparent" />
-                        Cargando...
-                      </div>
-                    </td>
-                  </tr>
+                  Array.from({ length: 5 }).map((_, index) => (
+                    <tr key={index} className="border-b border-[#161d16]/5">
+                      {columns.map((column) => (
+                        <td key={column.key} className="py-4 text-center">
+                          <div className="flex justify-center">
+                            <Skeleton className="h-6 w-24" />
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))
                 ) : data.length === 0 ? (
                   <tr>
                     <td
@@ -136,12 +139,12 @@ export function DataTable<T>({
                         onClick={() => onRowClick?.(item)}
                         className={`border-b border-[#161d16]/5 hover:bg-[#f3fcf0]/30 transition-colors ${
                           onRowClick ? "cursor-pointer" : ""
-                        }`}
+                        } ${getRowClassName?.(item) || ""}`}
                       >
                         {columns.map((column) => (
                           <td
                             key={column.key}
-                            className="py-4 text-sm font-medium text-[#161d16]"
+                            className={`py-4 text-sm font-medium text-[#161d16] text-center ${column.className || ""}`}
                           >
                             {column.render
                               ? column.render(item)

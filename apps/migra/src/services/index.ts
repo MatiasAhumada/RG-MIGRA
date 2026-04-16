@@ -2,6 +2,7 @@ export { authService } from "./auth.service";
 export { userService } from "./user.service";
 export { clienteService } from "./cliente.service";
 export { productoService } from "./producto.service";
+export { productoVarianteService } from "./producto-variante.service";
 export { pedidoService } from "./pedido.service";
 export { addressService } from "./address.service";
 export { detallePedidoService } from "./detalle-pedido.service";

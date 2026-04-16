@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { productoService } from "@/server/services";
+import { productoVarianteService } from "@/server/services/producto-variante.service";
 import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
 import httpStatus from "http-status";
 
@@ -9,9 +9,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const producto = await productoService.findById(Number(id));
+    const variante = await productoVarianteService.findById(Number(id));
 
-    return NextResponse.json(producto, { status: httpStatus.OK });
+    return NextResponse.json(variante, { status: httpStatus.OK });
   } catch (error) {
     return apiErrorHandler({ error: error as ApiError, request });
   }
@@ -24,22 +24,9 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
+    const variante = await productoVarianteService.update(Number(id), body);
 
-    if (body.action === "restore") {
-      const producto = await productoService.restore(Number(id));
-      return NextResponse.json(producto, { status: httpStatus.OK });
-    }
-
-    if (body.imageBase64) {
-      const producto = await productoService.updateImage(
-        Number(id),
-        body.imageBase64,
-      );
-      return NextResponse.json(producto, { status: httpStatus.OK });
-    }
-
-    const producto = await productoService.update(Number(id), body);
-    return NextResponse.json(producto, { status: httpStatus.OK });
+    return NextResponse.json(variante, { status: httpStatus.OK });
   } catch (error) {
     return apiErrorHandler({ error: error as ApiError, request });
   }
@@ -51,9 +38,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    await productoService.delete(Number(id));
+    await productoVarianteService.delete(Number(id));
 
-    return new NextResponse(null, { status: httpStatus.NO_CONTENT });
+    return NextResponse.json(
+      { message: "Variante eliminada" },
+      { status: httpStatus.OK },
+    );
   } catch (error) {
     return apiErrorHandler({ error: error as ApiError, request });
   }

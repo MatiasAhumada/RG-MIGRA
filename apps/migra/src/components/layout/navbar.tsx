@@ -64,7 +64,10 @@ export function Navbar() {
         <div className="flex flex-1 items-center justify-end gap-2">
           {isAuthenticated ? (
             <div className="relative">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+              >
                 <Button
                   variant="ghost"
                   size="lg"

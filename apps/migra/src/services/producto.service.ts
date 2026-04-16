@@ -57,9 +57,26 @@ export const productoService = {
     if (search) params.search = search;
     if (empresaId) params.empresaId = String(empresaId);
 
-    const { data } = await clientAxios.get<ProductoWithRelations[]>(API_ROUTES.PRODUCTOS, {
-      params,
-    });
+    const { data } = await clientAxios.get<ProductoWithRelations[]>(
+      API_ROUTES.PRODUCTOS,
+      {
+        params,
+      },
+    );
+    return data;
+  },
+
+  async findAllWithDeleted(search?: string, empresaId?: number) {
+    const params: Record<string, string> = { includeDeleted: "true" };
+    if (search) params.search = search;
+    if (empresaId) params.empresaId = String(empresaId);
+
+    const { data } = await clientAxios.get<ProductoWithRelations[]>(
+      API_ROUTES.PRODUCTOS,
+      {
+        params,
+      },
+    );
     return data;
   },
 
@@ -105,6 +122,14 @@ export const productoService = {
     const { data } = await clientAxios.patch<Producto>(
       `${API_ROUTES.PRODUCTOS}/${id}`,
       { sinStock },
+    );
+    return data;
+  },
+
+  async restore(id: number) {
+    const { data } = await clientAxios.patch<Producto>(
+      `${API_ROUTES.PRODUCTOS}/${id}`,
+      { action: "restore" },
     );
     return data;
   },

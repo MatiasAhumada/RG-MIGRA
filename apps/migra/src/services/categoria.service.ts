@@ -8,11 +8,15 @@ interface CategoriaWithSubcategorias extends Categoria {
 }
 
 export const categoriaService = {
-  async findAll(empresaId?: number) {
+  async findAll(empresaId?: number, marcaId?: number) {
     const params: Record<string, string> = {};
     if (empresaId) params.empresaId = String(empresaId);
+    if (marcaId) params.marcaId = String(marcaId);
 
-    const { data } = await clientAxios.get<CategoriaWithSubcategorias[]>(API_ROUTES.CATEGORIAS, { params });
+    const { data } = await clientAxios.get<CategoriaWithSubcategorias[]>(
+      API_ROUTES.CATEGORIAS,
+      { params },
+    );
     return data;
   },
 };

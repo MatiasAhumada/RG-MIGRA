@@ -8,3 +8,9 @@ export interface CreateCategoriaDto {
 }
 
 export interface UpdateCategoriaDto extends Partial<CreateCategoriaDto> {}
+
+export interface CategoriaWithSubcategorias extends Categoria {
+  subcategorias: Subcategoria[];
+}
+
+import { Subcategoria } from "./subcategoria.types";

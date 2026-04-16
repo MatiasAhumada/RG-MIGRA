@@ -25,6 +25,14 @@ enum PedidoStatus {
   SHIPPED
 }
 
+enum ColorProducto {
+  BLANCO
+  CELESTE
+  ROSA
+  VERDE
+  NEGRO
+}
+
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
@@ -97,6 +105,8 @@ model Address {
 model Categoria {
   id            Int            @id @default(autoincrement())
   name          String
+  marcaId       Int
+  marca         Marca          @relation(fields: [marcaId], references: [id])
   empresaId     Int
   empresa       Empresa        @relation(fields: [empresaId], references: [id])
   subcategorias Subcategoria[]
@@ -124,39 +134,56 @@ model Subcategoria {
 }
 
 model Marca {
-  id        Int        @id @default(autoincrement())
-  name      String
-  empresaId Int
-  empresa   Empresa    @relation(fields: [empresaId], references: [id])
-  productos Producto[]
-  deletedAt DateTime?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id         Int         @id @default(autoincrement())
+  name       String
+  empresaId  Int
+  empresa    Empresa     @relation(fields: [empresaId], references: [id])
+  categorias Categoria[]
+  productos  Producto[]
+  deletedAt  DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@map("marcas")
 }
 
 model Producto {
-  id             Int             @id @default(autoincrement())
+  id             Int                @id @default(autoincrement())
   name           String
-  sku            String          @unique
+  sku            String             @unique
   price          Float
   imgUrl         String?
-  sinStock       Boolean         @default(false)
+  sinStock       Boolean            @default(false)
   empresaId      Int
-  empresa        Empresa         @relation(fields: [empresaId], references: [id])
+  empresa        Empresa            @relation(fields: [empresaId], references: [id])
   categoriaId    Int
-  categoria      Categoria       @relation(fields: [categoriaId], references: [id])
+  categoria      Categoria          @relation(fields: [categoriaId], references: [id])
   subcategoriaId Int
-  subcategoria   Subcategoria    @relation(fields: [subcategoriaId], references: [id])
+  subcategoria   Subcategoria       @relation(fields: [subcategoriaId], references: [id])
   marcaId        Int
-  marca          Marca           @relation(fields: [marcaId], references: [id])
+  marca          Marca              @relation(fields: [marcaId], references: [id])
+  variantes      ProductoVariante[]
   detallesPedido DetallePedido[]
   deletedAt      DateTime?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 
   @@map("productos")
+}
+
+model ProductoVariante {
+  id         Int            @id @default(autoincrement())
+  color      ColorProducto?
+  talle      Int?
+  sinStock   Boolean        @default(false)
+  productoId Int
+  producto   Producto       @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  deletedAt  DateTime?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([productoId, color, talle])
+  @@map("producto_variantes")
 }
 
 model Pedido {

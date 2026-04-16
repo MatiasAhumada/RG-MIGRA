@@ -1,13 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { categoriaService } from "@/server/services/categoria.service";
-import { apiErrorHandler, type ApiError } from "@/utils/handlers/apiError.handler";
+import {
+  apiErrorHandler,
+  type ApiError,
+} from "@/utils/handlers/apiError.handler";
 
 export async function GET(request: NextRequest) {
   try {
     const empresaId = request.nextUrl.searchParams.get("empresaId");
+    const marcaId = request.nextUrl.searchParams.get("marcaId");
 
     const categorias = await categoriaService.findAll(
-      empresaId ? Number(empresaId) : undefined
+      empresaId ? Number(empresaId) : undefined,
+      marcaId ? Number(marcaId) : undefined,
     );
 
     return NextResponse.json(categorias);

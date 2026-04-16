@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,6 +20,8 @@ interface ProductCardProps {
   sinStock?: boolean;
 }
 
+const PLACEHOLDER_IMAGE = "/assets/images/placeholder-product.png";
+
 export function ProductCard({
   id,
   name,
@@ -27,25 +30,47 @@ export function ProductCard({
   price,
   imgUrl,
   className,
-  showPrice = true,
+  showPrice: showPriceProp,
   sinStock = false,
 }: ProductCardProps) {
+  const { isAuthenticated } = useAuth();
+
+  const showPrice = showPriceProp ?? isAuthenticated;
   const formattedPrice = formatCurrency(price);
+  const imageSrc = imgUrl || PLACEHOLDER_IMAGE;
 
   return (
     <motion.div
       whileHover={sinStock ? {} : { y: -4, scale: 1.02 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className={cn("group flex h-full", sinStock && "opacity-50 grayscale pointer-events-none", className)}
+      className={cn(
+        "group flex h-full relative",
+        sinStock && "pointer-events-none",
+        className,
+      )}
     >
-      <Card className="relative flex h-full w-full flex-col overflow-hidden p-0 transition-all duration-300 hover:shadow-[0_12px_48px_rgba(29,53,87,0.12)]">
+      <Card
+        className={cn(
+          "relative flex h-full w-full flex-col overflow-hidden p-0 transition-all duration-300 hover:shadow-[0_12px_48px_rgba(29,53,87,0.12)]",
+          sinStock && "opacity-60",
+        )}
+      >
         <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-br from-cerulean-400 to-cerulean-600">
           <Image
-            src={imgUrl}
+            src={imageSrc}
             alt={name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className={cn(
+              "object-cover transition-transform duration-500 group-hover:scale-105",
+              sinStock && "grayscale",
+            )}
           />
+          {sinStock && (
+            <span className="absolute right-3 top-3 z-10 rounded-full bg-[#b7102a] px-3 py-1 text-xs font-bold text-white shadow-lg">
+              Sin Stock
+            </span>
+          )}
         </div>
 
         <div className="flex flex-1 flex-col gap-4 p-5">
@@ -70,15 +95,20 @@ export function ProductCard({
                 <Button
                   size="icon-sm"
                   className="gradient-primary text-white shadow-ambient"
+                  disabled={sinStock}
                 >
                   <ShoppingCart01Icon className="size-5" />
                 </Button>
               </div>
             ) : (
-              <Link href="/login">
+              <Link
+                href="/login"
+                className={cn(sinStock && "pointer-events-none")}
+              >
                 <Button
                   size="lg"
                   className="w-full bg-cerulean-500 text-base font-bold text-white hover:bg-cerulean-400 shadow-sm"
+                  disabled={sinStock}
                 >
                   Ver precio
                 </Button>

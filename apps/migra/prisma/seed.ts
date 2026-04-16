@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ColorProducto } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -45,7 +45,6 @@ const brandData = [
 ];
 
 async function main() {
-  // ==================== CREAR EMPRESA Y ADMIN ====================
   console.log("\n=== EMPRESA Y USUARIO ADMIN ===");
   console.log("Buscando o creando empresa MIGRA...");
 
@@ -65,7 +64,6 @@ async function main() {
       : `Empresa creada con ID: ${empresa.id}`,
   );
 
-  // Crear usuario admin de la empresa
   const adminEmail = "admin@migra.com";
   const foundAdminUser = await prisma.user.findUnique({
     where: { email: adminEmail },
@@ -87,7 +85,6 @@ async function main() {
     console.log(`✓ Usuario admin ya existe: ${adminEmail}`);
   }
 
-  // ==================== CREAR CLIENTE Y USUARIO CLIENTE ====================
   console.log("\n=== CLIENTE Y USUARIO CLIENTE ===");
   console.log("Buscando o creando cliente...");
 
@@ -115,7 +112,6 @@ async function main() {
       : `Cliente creado con ID: ${cliente.id}`,
   );
 
-  // Crear usuario del cliente
   const clienteEmail = "cliente@ejemplo.com";
   const foundClienteUser = await prisma.user.findUnique({
     where: { email: clienteEmail },
@@ -138,6 +134,8 @@ async function main() {
   } else {
     console.log(`✓ Usuario cliente ya existe: ${clienteEmail}`);
   }
+
+  console.log("\n=== MARCAS, CATEGORÍAS Y SUBCATEGORÍAS ===");
 
   for (const brand of brandData) {
     console.log(`Procesando marca: ${brand.name}`);
@@ -163,7 +161,11 @@ async function main() {
 
     for (const category of brand.categories) {
       const foundCategoria = await prisma.categoria.findFirst({
-        where: { name: category.name, empresaId: empresa.id },
+        where: { 
+          name: category.name, 
+          empresaId: empresa.id,
+          marcaId: marca.id,
+        },
       });
 
       const categoria = foundCategoria
@@ -172,6 +174,7 @@ async function main() {
             data: {
               name: category.name,
               empresaId: empresa.id,
+              marcaId: marca.id,
             },
           });
 
@@ -202,7 +205,57 @@ async function main() {
     }
   }
 
-  console.log("Seed completado exitosamente.");
+  console.log("\n=== PRODUCTOS CON VARIANTES ===");
+
+  const primeraCategoria = await prisma.categoria.findFirst({
+    where: { empresaId: empresa.id },
+    include: { subcategorias: true },
+  });
+
+  if (primeraCategoria && primeraCategoria.subcategorias.length > 0) {
+    const productoEjemplo = await prisma.producto.findFirst({
+      where: { sku: "PROD-001" },
+    });
+
+    if (!productoEjemplo) {
+      const nuevoProducto = await prisma.producto.create({
+        data: {
+          name: "Producto Ejemplo",
+          sku: "PROD-001",
+          price: 1500.0,
+          empresaId: empresa.id,
+          categoriaId: primeraCategoria.id,
+          subcategoriaId: primeraCategoria.subcategorias[0].id,
+          marcaId: primeraCategoria.marcaId,
+        },
+      });
+
+      const colores: ColorProducto[] = [
+        ColorProducto.BLANCO,
+        ColorProducto.CELESTE,
+        ColorProducto.ROSA,
+      ];
+      const talles = [1, 2];
+
+      for (const color of colores) {
+        for (const talle of talles) {
+          await prisma.productoVariante.create({
+            data: {
+              color,
+              talle,
+              productoId: nuevoProducto.id,
+            },
+          });
+        }
+      }
+
+      console.log(`Producto "${nuevoProducto.name}" creado con 6 variantes`);
+    } else {
+      console.log(`Producto "PROD-001" ya existe`);
+    }
+  }
+
+  console.log("\nSeed completado exitosamente.");
 }
 
 main()

@@ -29,7 +29,10 @@ export default function CatalogPage() {
     return () => clearTimeout(timeout);
   };
 
-  const categories = ["Todos", ...new Set((productos || []).map((p) => p.categoria.name))];
+  const categories = [
+    "Todos",
+    ...new Set((productos || []).map((p) => p.categoria.name)),
+  ];
 
   const filteredProducts = (productos || []).filter((product) => {
     const matchesSearch =
@@ -95,7 +98,9 @@ export default function CatalogPage() {
                   ? "bg-[#2b6485] text-white shadow-lg"
                   : "bg-[#f3fcf0]/60 text-[#3d4a3d] hover:bg-[#f3fcf0]"
               }`}
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
             >
               {category}
             </button>
@@ -117,7 +122,6 @@ export default function CatalogPage() {
                 sku={product.sku}
                 price={product.price}
                 imgUrl={product.imgUrl || ""}
-                showPrice={false}
                 sinStock={product.sinStock}
               />
             </motion.div>
@@ -132,7 +136,9 @@ export default function CatalogPage() {
           >
             <p
               className="text-lg text-[#3d4a3d]"
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+              style={{
+                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+              }}
             >
               No se encontraron productos con esos criterios.
             </p>

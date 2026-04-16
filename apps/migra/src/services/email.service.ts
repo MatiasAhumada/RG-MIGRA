@@ -16,7 +16,11 @@ export interface SendCredentialsOptions {
   password: string;
 }
 
-export async function sendCredentialsEmail({ to, name, password }: SendCredentialsOptions) {
+export async function sendCredentialsEmail({
+  to,
+  name,
+  password,
+}: SendCredentialsOptions) {
   const mailOptions = {
     from: process.env.SMTP_FROM,
     to,

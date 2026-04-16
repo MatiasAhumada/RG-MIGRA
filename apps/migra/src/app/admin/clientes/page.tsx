@@ -13,7 +13,10 @@ import {
   Refresh01Icon,
 } from "hugeicons-react";
 import { clienteService } from "@/services";
-import { clientSuccessHandler, clientErrorHandler } from "@/utils/handlers/clientHandler";
+import {
+  clientSuccessHandler,
+  clientErrorHandler,
+} from "@/utils/handlers/clientHandler";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import type { Cliente, ClienteStatus } from "@/types/cliente.types";
 
@@ -36,7 +39,11 @@ export default function AdminClientesPage() {
   const [approveCliente, setApproveCliente] = useState<Cliente | null>(null);
   const [rejectCliente, setRejectCliente] = useState<Cliente | null>(null);
 
-  const { data: clientes, isLoading, refetch } = useDataQuery<Cliente[]>({
+  const {
+    data: clientes,
+    isLoading,
+    refetch,
+  } = useDataQuery<Cliente[]>({
     fetcher: () => clienteService.findAll(debouncedSearch),
   });
 
@@ -70,9 +77,7 @@ export default function AdminClientesPage() {
     try {
       await clienteService.reject(rejectCliente.id);
 
-      clientSuccessHandler(
-        `Cliente "${rejectCliente.razonSocial}" rechazado.`,
-      );
+      clientSuccessHandler(`Cliente "${rejectCliente.razonSocial}" rechazado.`);
 
       setRejectCliente(null);
       refetch();
@@ -115,7 +120,9 @@ export default function AdminClientesPage() {
               render: (item) => (
                 <p
                   className="font-semibold text-[#161d16]"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
                 >
                   {item.razonSocial}
                 </p>
@@ -205,7 +212,9 @@ export default function AdminClientesPage() {
               disabled={isLoading}
               title="Actualizar ahora"
             >
-              <Refresh01Icon className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
+              <Refresh01Icon
+                className={`size-4 ${isLoading ? "animate-spin" : ""}`}
+              />
             </Button>
           }
           totalLabel={`${filteredClients.length} clientes (${pendingCount} pendientes)`}
@@ -228,13 +237,18 @@ export default function AdminClientesPage() {
                 { label: "Correo", value: viewCliente.correo },
                 { label: "Teléfono", value: viewCliente.telefono },
               ].map((field) => (
-                <div key={field.label} className="rounded-xl bg-[#f3fcf0]/60 p-4">
+                <div
+                  key={field.label}
+                  className="rounded-xl bg-[#f3fcf0]/60 p-4"
+                >
                   <p className="text-xs font-semibold uppercase tracking-wider text-[#3d4a3d]">
                     {field.label}
                   </p>
                   <p
                     className="mt-1 text-sm font-semibold text-[#161d16]"
-                    style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
+                    style={{
+                      fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                    }}
                   >
                     {field.value}
                   </p>

@@ -1,4 +1,5 @@
 import { productoRepository } from "@/server/repository/producto.repository";
+import { productoVarianteRepository } from "@/server/repository/producto-variante.repository";
 import { r2StorageService } from "@/server/services/r2-storage.service";
 import { pdfParserService } from "@/server/services/pdf-parser.service";
 import { ApiError } from "@/utils/handlers/apiError.handler";
@@ -21,7 +22,19 @@ export const productoService = {
       });
     }
 
-    return productoRepository.create(dto);
+    const { variantes, ...productoData } = dto;
+    const producto = await productoRepository.create(productoData);
+
+    if (variantes && variantes.length > 0) {
+      for (const variante of variantes) {
+        await productoVarianteRepository.create({
+          ...variante,
+          productoId: producto.id,
+        });
+      }
+    }
+
+    return productoRepository.findById(producto.id);
   },
 
   async findById(id: number) {
@@ -100,8 +113,25 @@ export const productoService = {
     return productoRepository.softDelete(id);
   },
 
+  async restore(id: number) {
+    const producto = await productoRepository.findByIdIncludingDeleted(id);
+
+    if (!producto) {
+      throw new ApiError({
+        status: httpStatus.NOT_FOUND,
+        message: ERROR_MESSAGES.PRODUCTO_NOT_FOUND,
+      });
+    }
+
+    return productoRepository.restore(id);
+  },
+
   async findAll(search?: string, empresaId?: number) {
     return productoRepository.findAll(search, empresaId);
+  },
+
+  async findAllActive(search?: string, empresaId?: number) {
+    return productoRepository.findAllActive(search, empresaId);
   },
 
   async toggleSinStock(id: number) {

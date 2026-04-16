@@ -12,9 +12,19 @@ export interface CreateProductoDto {
   subcategoriaId: number;
   marcaId: number;
   sinStock?: boolean;
+  variantes?: Omit<CreateProductoVarianteDto, "productoId">[];
 }
 
-export interface UpdateProductoDto extends Partial<CreateProductoDto> {}
+export interface UpdateProductoDto {
+  name?: string;
+  sku?: string;
+  price?: number;
+  imgUrl?: string;
+  categoriaId?: number;
+  subcategoriaId?: number;
+  marcaId?: number;
+  sinStock?: boolean;
+}
 
 export interface BulkCreateProductoDto {
   pdfBuffer: Buffer;
@@ -38,6 +48,7 @@ export interface ProductoWithRelations extends Producto {
   categoria: Categoria;
   subcategoria: Subcategoria;
   marca: Marca;
+  variantes: ProductoVariante[];
 }
 
 export interface ParsedProduct {
@@ -50,3 +61,7 @@ import { Empresa } from "./empresa.types";
 import { Categoria } from "./categoria.types";
 import { Subcategoria } from "./subcategoria.types";
 import { Marca } from "./marca.types";
+import {
+  ProductoVariante,
+  CreateProductoVarianteDto,
+} from "./producto-variante.types";
