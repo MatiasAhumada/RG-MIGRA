@@ -27,7 +27,8 @@ export interface UpdateProductoDto {
 }
 
 export interface BulkCreateProductoDto {
-  pdfBuffer: Buffer;
+  excelBuffer?: Buffer;
+  pdfBuffer?: Buffer;
   defaultPrice: number;
   empresaId: number;
   categoriaId: number;
@@ -55,6 +56,16 @@ export interface ParsedProduct {
   sku: string;
   name: string;
   presentacion?: string;
+}
+
+export interface ParsedProductExcel {
+  marca: string;
+  categoria: string;
+  subcategoria: string;
+  sku: string;
+  name: string;
+  colorTalle: string;
+  price: number;
 }
 
 import { Empresa } from "./empresa.types";

@@ -2,6 +2,10 @@ import { productoRepository } from "@/server/repository/producto.repository";
 import { productoVarianteRepository } from "@/server/repository/producto-variante.repository";
 import { r2StorageService } from "@/server/services/r2-storage.service";
 import { pdfParserService } from "@/server/services/pdf-parser.service";
+import { excelParserService } from "@/server/services/excel-parser.service";
+import { marcaService } from "@/server/services/marca.service";
+import { categoriaService } from "@/server/services/categoria.service";
+import { subcategoriaService } from "@/server/services/subcategoria.service";
 import { ApiError } from "@/utils/handlers/apiError.handler";
 import { ERROR_MESSAGES } from "@/constants/error-messages.constant";
 import httpStatus from "http-status";
@@ -141,6 +145,13 @@ export const productoService = {
   },
 
   async bulkCreateFromPdf(dto: BulkCreateProductoDto) {
+    if (!dto.pdfBuffer) {
+      throw new ApiError({
+        status: httpStatus.BAD_REQUEST,
+        message: "pdfBuffer es requerido para carga masiva desde PDF",
+      });
+    }
+
     const parsedProducts = await pdfParserService.parseProductCatalog(
       dto.pdfBuffer,
     );
@@ -169,6 +180,85 @@ export const productoService = {
           subcategoriaId: dto.subcategoriaId,
           marcaId: dto.marcaId,
         });
+
+        created.push(producto);
+      } catch (error) {
+        errors.push({ sku: parsed.sku, error: (error as Error).message });
+      }
+    }
+
+    return { created, errors, total: parsedProducts.length };
+  },
+
+  async bulkCreateFromExcel(dto: BulkCreateProductoDto) {
+    const parsedProducts = await excelParserService.parseProductCatalog(
+      dto.excelBuffer!,
+    );
+
+    const created = [];
+    const errors = [];
+    const empresaId = dto.empresaId;
+
+    for (const parsed of parsedProducts) {
+      try {
+        const marca = await marcaService.findByName(parsed.marca, empresaId);
+        const categoria = await categoriaService.findByName(
+          parsed.categoria,
+          empresaId,
+          marca.id,
+        );
+        const subcategoria = await subcategoriaService.findByName(
+          parsed.subcategoria,
+          categoria.id,
+          empresaId,
+        );
+
+        const existing = await productoRepository.findBySku(parsed.sku);
+
+        let producto;
+
+        if (existing) {
+          producto = await productoRepository.update(existing.id, {
+            name: parsed.name,
+            price: parsed.price,
+            categoriaId: categoria.id,
+            subcategoriaId: subcategoria.id,
+            marcaId: marca.id,
+          });
+        } else {
+          producto = await productoRepository.create({
+            sku: parsed.sku,
+            name: parsed.name,
+            price: parsed.price,
+            empresaId,
+            categoriaId: categoria.id,
+            subcategoriaId: subcategoria.id,
+            marcaId: marca.id,
+          });
+        }
+
+        if (parsed.colorTalle) {
+          const variantesData = excelParserService.parseColorTalle(
+            parsed.colorTalle,
+          );
+
+          for (const vd of variantesData) {
+            const existingVariante =
+              await productoVarianteRepository.findByColorAndTalleIfExists(
+                producto.id,
+                vd.color,
+                vd.talle,
+              );
+
+            if (!existingVariante && (vd.color || vd.talle)) {
+              await productoVarianteRepository.create({
+                color: vd.color,
+                talle: vd.talle,
+                productoId: producto.id,
+              });
+            }
+          }
+        }
 
         created.push(producto);
       } catch (error) {

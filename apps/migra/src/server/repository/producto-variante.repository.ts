@@ -67,4 +67,19 @@ export const productoVarianteRepository = {
       data: { sinStock },
     });
   },
+
+  async findByColorAndTalleIfExists(
+    productoId: number,
+    color?: string,
+    talle?: number,
+  ) {
+    return prisma.productoVariante.findFirst({
+      where: {
+        productoId,
+        color: color as never,
+        talle,
+        deletedAt: null,
+      },
+    });
+  },
 };
