@@ -1,5 +1,13 @@
 import { ColorProducto } from "@prisma/client";
 
+export const COLOR_LETTER_MAP: Record<string, ColorProducto> = {
+  b: ColorProducto.BLANCO,
+  c: ColorProducto.CELESTE,
+  r: ColorProducto.ROSA,
+  v: ColorProducto.VERDE,
+  n: ColorProducto.NEGRO,
+};
+
 export const COLORES_PRODUCTO = [
   { value: ColorProducto.BLANCO, label: "Blanco" },
   { value: ColorProducto.CELESTE, label: "Celeste" },

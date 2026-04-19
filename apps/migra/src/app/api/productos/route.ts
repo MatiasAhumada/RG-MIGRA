@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const bulk = searchParams.get("bulk");
 
-    // Carga masiva desde PDF
+    // Carga masiva desde Excel o PDF
     if (bulk === "true" && contentType?.includes("multipart/form-data")) {
       const formData = await request.formData();
       const file = formData.get("file") as File;
@@ -76,23 +76,42 @@ export async function POST(request: NextRequest) {
       const subcategoriaId = formData.get("subcategoriaId") as string;
       const marcaId = formData.get("marcaId") as string;
 
-      if (
-        !file ||
-        !defaultPrice ||
-        !empresaId ||
-        !categoriaId ||
-        !subcategoriaId ||
-        !marcaId
-      ) {
+      if (!file || !empresaId) {
         throw new ApiError({
           status: httpStatus.BAD_REQUEST,
-          message:
-            "Faltan campos requeridos: file, defaultPrice, empresaId, categoriaId, subcategoriaId, marcaId",
+          message: "Faltan campos requeridos: file, empresaId",
         });
       }
 
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
+      const fileName = (file as File).name.toLowerCase();
+      const isExcel =
+        fileName.endsWith(".xlsx") ||
+        fileName.endsWith(".xls") ||
+        file.type.includes("spreadsheet") ||
+        file.type.includes("excel");
+
+      if (isExcel) {
+        const result = await productoService.bulkCreateFromExcel({
+          excelBuffer: buffer,
+          defaultPrice: Number(defaultPrice) || 0,
+          empresaId: Number(empresaId),
+          categoriaId: Number(categoriaId) || 0,
+          subcategoriaId: Number(subcategoriaId) || 0,
+          marcaId: Number(marcaId) || 0,
+        });
+
+        return NextResponse.json(result, { status: httpStatus.CREATED });
+      }
+
+      if (!defaultPrice || !categoriaId || !subcategoriaId || !marcaId) {
+        throw new ApiError({
+          status: httpStatus.BAD_REQUEST,
+          message:
+            "Para PDF se requieren: defaultPrice, categoriaId, subcategoriaId, marcaId",
+        });
+      }
 
       const result = await productoService.bulkCreateFromPdf({
         pdfBuffer: buffer,

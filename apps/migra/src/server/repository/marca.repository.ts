@@ -1,6 +1,16 @@
 import { prisma } from "@/lib/prisma";
 
 export const marcaRepository = {
+  async findByName(name: string, empresaId: number) {
+    return prisma.marca.findFirst({
+      where: { name: { equals: name, mode: "insensitive" }, empresaId },
+    });
+  },
+
+  async create(data: { name: string; empresaId: number }) {
+    return prisma.marca.create({ data });
+  },
+
   async findAll(empresaId?: number) {
     const where = empresaId
       ? { empresaId, deletedAt: null }
