@@ -9,6 +9,7 @@ import {
   GenericModal,
   ConfirmModal,
   TableSkeleton,
+  PdfUpload,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,6 +96,10 @@ export default function AdminProductosPage() {
   const handleOpenCreateModal = () => {
     setFormData(INITIAL_FORM_DATA);
     setIsCreateModalOpen(true);
+  };
+
+  const handleUploadComplete = () => {
+    loadData();
   };
 
   const handleOpenEditModal = (product: ProductoWithRelations) => {
@@ -499,6 +504,19 @@ export default function AdminProductosPage() {
           </Button>
         }
       />
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="mt-8"
+      >
+        <PdfUpload
+          onUploadComplete={handleUploadComplete}
+          variant="full"
+          empresaId={1}
+        />
+      </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

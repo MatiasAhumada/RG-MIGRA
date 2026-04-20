@@ -14,32 +14,63 @@ import {
   clientSuccessHandler,
   clientErrorHandler,
 } from "@/utils/handlers/clientHandler";
+import { productoService } from "@/services";
+
+interface BulkUploadResult {
+  created: unknown[];
+  errors: unknown[];
+  total: number;
+}
 
 interface PdfUploadProps {
-  onUploadComplete?: (fileName: string, fileSize: number) => void;
+  onUploadComplete?: (fileName: string, result?: BulkUploadResult) => void;
   variant?: "compact" | "full";
+  empresaId?: number;
+}
+
+const EXCEL_MIME_TYPES = [
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+  "application/excel",
+];
+
+const EXCEL_EXTENSIONS = [".xlsx", ".xls"];
+
+function isExcelFile(file: File): boolean {
+  const fileName = file.name.toLowerCase();
+  return (
+    EXCEL_MIME_TYPES.some((type) => file.type.includes(type)) ||
+    EXCEL_EXTENSIONS.some((ext) => fileName.endsWith(ext))
+  );
 }
 
 export function PdfUpload({
   onUploadComplete,
   variant = "compact",
+  empresaId = 1,
 }: PdfUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadResult, setUploadResult] = useState<BulkUploadResult | null>(
+    null,
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isFull = variant === "full";
 
   const handleFileSelect = (file: File) => {
-    if (file.type !== "application/pdf") {
-      clientErrorHandler(new Error("Solo se permiten archivos PDF"));
+    if (!isExcelFile(file) && file.type !== "application/pdf") {
+      clientErrorHandler(
+        new Error("Solo se permiten archivos Excel (.xlsx, .xls) o PDF"),
+      );
       return;
     }
 
     setSelectedFile(file);
     setUploadSuccess(false);
+    setUploadResult(null);
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -79,14 +110,34 @@ export function PdfUpload({
     setIsUploading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const isExcel = isExcelFile(selectedFile);
+      let result: BulkUploadResult;
+
+      if (isExcel) {
+        result = await productoService.bulkCreateFromExcel(
+          selectedFile,
+          empresaId,
+        );
+      } else {
+        result = await productoService.bulkCreateFromPdf(
+          selectedFile,
+          "default",
+          0,
+          empresaId,
+        );
+      }
+
+      setUploadResult(result);
+
+      const successCount = result.created?.length || 0;
+      const errorCount = result.errors?.length || 0;
 
       clientSuccessHandler(
-        `Catálogo "${selectedFile.name}" procesado exitosamente.\nProductos importados al catálogo.`,
+        `Catálogo "${selectedFile.name}" procesado.\n${successCount} productos creados/actualizados, ${errorCount} errores.`,
       );
 
       setUploadSuccess(true);
-      onUploadComplete?.(selectedFile.name, selectedFile.size);
+      onUploadComplete?.(selectedFile.name, result);
     } catch (error) {
       clientErrorHandler(error);
     } finally {
@@ -97,6 +148,7 @@ export function PdfUpload({
   const handleClear = () => {
     setSelectedFile(null);
     setUploadSuccess(false);
+    setUploadResult(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -106,6 +158,11 @@ export function PdfUpload({
     return `${(bytes / 1048576).toFixed(1)} MB`;
   };
 
+  const getFileTypeLabel = () => {
+    if (!selectedFile) return "";
+    return isExcelFile(selectedFile) ? "Excel" : "PDF";
+  };
+
   return (
     <Card className="rounded-[2rem] overflow-hidden">
       <div className={`border-b border-[#161d16]/5 ${isFull ? "p-6" : "p-4"}`}>
@@ -113,14 +170,14 @@ export function PdfUpload({
           className={`${isFull ? "text-base" : "text-sm"} font-bold text-[#161d16]`}
           style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
         >
-          Cargar Catálogo desde PDF
+          Cargar Catálogo desde Excel
         </h2>
         {isFull && (
           <p
             className="mt-1 text-sm text-[#3d4a3d]"
             style={{ fontFamily: "'Manrope', 'Inter', system-ui, sans-serif" }}
           >
-            Subí el PDF del catálogo de productos para actualizar
+            Subí el Excel del catálogo de productos para actualizar
             automáticamente
           </p>
         )}
@@ -164,18 +221,18 @@ export function PdfUpload({
               {isDragging
                 ? "Soltá el archivo acá"
                 : isFull
-                  ? "Arrastrá el PDF acá o hacé clic"
+                  ? "Arrastrá el Excel acá o hacé clic"
                   : "Arrastrá o hacé clic"}
             </p>
             <p
               className={`mt-0.5 text-[#3d4a3d]/60 ${isFull ? "text-xs" : "text-[10px]"}`}
             >
-              Solo archivos PDF
+              Solo archivos Excel (.xlsx, .xls)
             </p>
             <input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,application/pdf"
+              accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
               onChange={handleInputChange}
               className="hidden"
             />
@@ -224,6 +281,9 @@ export function PdfUpload({
                 >
                   {formatFileSize(selectedFile.size)}
                   {isUploading && " · Procesando..."}
+                  {!isUploading &&
+                    getFileTypeLabel() &&
+                    ` · ${getFileTypeLabel()}`}
                 </p>
               </div>
               {!isUploading && (
@@ -251,12 +311,21 @@ export function PdfUpload({
               </Button>
             )}
 
-            {uploadSuccess && (
-              <p
-                className={`mt-3 text-center font-medium text-[#5a9a4e] ${isFull ? "text-sm" : "text-[10px]"}`}
+            {uploadSuccess && uploadResult && (
+              <div
+                className={`mt-3 text-center ${isFull ? "text-sm" : "text-[10px]"}`}
               >
-                Catálogo procesado correctamente
-              </p>
+                <p className="font-medium text-[#5a9a4e]">
+                  Catálogo procesado correctamente
+                </p>
+                <p className="text-[#3d4a3d] mt-1">
+                  {uploadResult.created?.length || 0} productos
+                  creados/actualizados
+                  {uploadResult.errors?.length
+                    ? `, ${uploadResult.errors.length} errores`
+                    : ""}
+                </p>
+              </div>
             )}
           </motion.div>
         )}
