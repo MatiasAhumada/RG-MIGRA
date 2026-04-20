@@ -118,6 +118,23 @@ export const productoService = {
     return data;
   },
 
+  async bulkCreateFromExcel(file: File, empresaId: number) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("empresaId", String(empresaId));
+
+    const { data } = await clientAxios.post(
+      `${API_ROUTES.PRODUCTOS}?bulk=true`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return data;
+  },
+
   async toggleSinStock(id: number, sinStock: boolean) {
     const { data } = await clientAxios.patch<Producto>(
       `${API_ROUTES.PRODUCTOS}/${id}`,
