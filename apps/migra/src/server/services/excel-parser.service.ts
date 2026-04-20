@@ -21,56 +21,97 @@ export const excelParserService = {
     for (let i = 0; i < jsonData.length; i++) {
       const row = jsonData[i];
 
-      if (!row || row.length === 0) continue;
-
-      const firstCell = String(row[0] || "").trim();
-
-      if (!firstCell) continue;
-
-      if (i === 0 && firstCell) {
-        currentMarca = firstCell.toUpperCase();
+      if (!row || row.length === 0) {
         continue;
       }
 
-      if (firstCell.startsWith("*")) {
-        currentSubcategoria = firstCell.substring(1).trim().toUpperCase();
+      const firstCell = String(row[0] || "").trim();
+
+      if (!firstCell) {
+        if (!currentMarca || !currentCategoria || !currentSubcategoria) {
+          continue;
+        }
+
+        const sku = String(row[1] || "").trim();
+        const name = String(row[2] || "").trim();
+        const color = String(row[3] || "").trim();
+        const talle = String(row[4] || "").trim();
+        const priceStr = String(row[5] || "").trim();
+
+        if (!sku || !name) {
+          continue;
+        }
+
+        const price = parseFloat(String(priceStr).replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
+        const colorTalle = [color, talle].filter(Boolean).join("-");
+
+        products.push({
+          marca: currentMarca,
+          categoria: currentCategoria,
+          subcategoria: currentSubcategoria,
+          sku,
+          name,
+          colorTalle,
+          price,
+        });
+
         continue;
       }
 
       if (firstCell === "CATEGORIA") {
-        currentCategoria = String(row[1] || "")
-          .trim()
-          .toUpperCase();
+        const nextRow = jsonData[i + 1];
+        if (nextRow && nextRow[0]) {
+          currentCategoria = String(nextRow[0]).trim().toUpperCase();
+        }
+        i++;
         continue;
       }
 
       if (firstCell === "SUBCATEGORIA") {
-        currentSubcategoria = String(row[1] || "")
-          .trim()
-          .toUpperCase();
         continue;
       }
 
-      if (!currentCategoria || !currentSubcategoria) continue;
+      if (firstCell.startsWith("*")) {
+        const hasSku = row[1] && String(row[1]).trim();
+        const hasName = row[2] && String(row[2]).trim();
 
-      const sku = String(row[0] || "").trim();
-      const name = String(row[1] || "").trim();
-      const colorTalle = String(row[2] || "").trim();
-      const priceStr = String(row[3] || "").trim();
+        if (!hasSku || !hasName || hasSku === "SKU" || hasName === "NOMBRE") {
+          currentSubcategoria = firstCell.substring(1).trim().toUpperCase();
+          continue;
+        }
 
-      if (!sku || !name) continue;
+        currentSubcategoria = firstCell.substring(1).trim().toUpperCase();
 
-      const price = parseFloat(priceStr) || 0;
+        const sku = String(row[1]).trim();
+        const name = String(row[2]).trim();
+        const color = String(row[3] || "").trim();
+        const talle = String(row[4] || "").trim();
+        const priceStr = String(row[5] || "").trim();
 
-      products.push({
-        marca: currentMarca,
-        categoria: currentCategoria,
-        subcategoria: currentSubcategoria,
-        sku,
-        name,
-        colorTalle,
-        price,
-      });
+        if (!currentMarca || !currentCategoria) {
+          continue;
+        }
+
+        const price = parseFloat(String(priceStr).replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
+        const colorTalle = [color, talle].filter(Boolean).join("-");
+
+        products.push({
+          marca: currentMarca,
+          categoria: currentCategoria,
+          subcategoria: currentSubcategoria,
+          sku,
+          name,
+          colorTalle,
+          price,
+        });
+
+        continue;
+      }
+
+      if (!currentCategoria) {
+        currentMarca = firstCell.toUpperCase();
+        continue;
+      }
     }
 
     return products;

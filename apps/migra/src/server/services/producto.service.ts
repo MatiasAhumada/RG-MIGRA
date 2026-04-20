@@ -197,6 +197,7 @@ export const productoService = {
 
     const created = [];
     const errors = [];
+    const updated = [];
     const empresaId = dto.empresaId;
 
     for (const parsed of parsedProducts) {
@@ -225,6 +226,7 @@ export const productoService = {
             subcategoriaId: subcategoria.id,
             marcaId: marca.id,
           });
+          updated.push(producto);
         } else {
           producto = await productoRepository.create({
             sku: parsed.sku,
@@ -235,6 +237,7 @@ export const productoService = {
             subcategoriaId: subcategoria.id,
             marcaId: marca.id,
           });
+          created.push(producto);
         }
 
         if (parsed.colorTalle) {
@@ -259,13 +262,20 @@ export const productoService = {
             }
           }
         }
-
-        created.push(producto);
       } catch (error) {
-        errors.push({ sku: parsed.sku, error: (error as Error).message });
+        errors.push({ 
+          sku: parsed.sku, 
+          name: parsed.name,
+          error: (error as Error).message 
+        });
       }
     }
 
-    return { created, errors, total: parsedProducts.length };
+    return { 
+      created: created.length, 
+      updated: updated.length,
+      errors, 
+      total: parsedProducts.length 
+    };
   },
 };
