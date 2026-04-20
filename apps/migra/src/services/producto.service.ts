@@ -130,6 +130,7 @@ export const productoService = {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        timeout: 60000,
       },
     );
     return data;
