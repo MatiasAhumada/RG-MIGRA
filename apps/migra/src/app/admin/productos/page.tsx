@@ -587,6 +587,36 @@ export default function AdminProductosPage() {
               ),
             },
             {
+              key: "variantes",
+              label: "Variantes",
+              className: "text-center",
+              render: (item) => {
+                if (item.variantes.length === 0) {
+                  return (
+                    <span className="text-xs text-[#3d4a3d]/60">
+                      Sin variantes
+                    </span>
+                  );
+                }
+                return (
+                  <div className="flex flex-wrap justify-center gap-1">
+                    {item.variantes.map((v, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex rounded-md bg-[#f3fcf0] px-2 py-0.5 text-xs text-[#2b6485]"
+                      >
+                        {v.color && v.talle
+                          ? `${v.color} - T${v.talle}`
+                          : v.color
+                            ? v.color
+                            : `T${v.talle}`}
+                      </span>
+                    ))}
+                  </div>
+                );
+              },
+            },
+            {
               key: "sinStock",
               label: "Stock",
               className: "text-center",
