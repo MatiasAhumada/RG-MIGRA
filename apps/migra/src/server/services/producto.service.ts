@@ -208,11 +208,13 @@ export const productoService = {
           empresaId,
           marca.id,
         );
-        const subcategoria = await subcategoriaService.findByName(
-          parsed.subcategoria,
-          categoria.id,
-          empresaId,
-        );
+        const subcategoria = parsed.subcategoria
+          ? await subcategoriaService.findByName(
+              parsed.subcategoria,
+              categoria.id,
+              empresaId,
+            )
+          : null;
 
         const existing = await productoRepository.findBySku(parsed.sku);
 
@@ -223,7 +225,7 @@ export const productoService = {
             name: parsed.name,
             price: parsed.price,
             categoriaId: categoria.id,
-            subcategoriaId: subcategoria.id,
+            subcategoriaId: subcategoria?.id,
             marcaId: marca.id,
           });
           updated.push(producto);
@@ -234,7 +236,7 @@ export const productoService = {
             price: parsed.price,
             empresaId,
             categoriaId: categoria.id,
-            subcategoriaId: subcategoria.id,
+            subcategoriaId: subcategoria?.id,
             marcaId: marca.id,
           });
           created.push(producto);
@@ -263,19 +265,19 @@ export const productoService = {
           }
         }
       } catch (error) {
-        errors.push({ 
-          sku: parsed.sku, 
+        errors.push({
+          sku: parsed.sku,
           name: parsed.name,
-          error: (error as Error).message 
+          error: (error as Error).message,
         });
       }
     }
 
-    return { 
-      created: created.length, 
+    return {
+      created: created.length,
       updated: updated.length,
-      errors, 
-      total: parsedProducts.length 
+      errors,
+      total: parsedProducts.length,
     };
   },
 };

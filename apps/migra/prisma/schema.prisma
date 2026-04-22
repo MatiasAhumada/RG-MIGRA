@@ -158,8 +158,8 @@ model Producto {
   empresa        Empresa            @relation(fields: [empresaId], references: [id])
   categoriaId    Int
   categoria      Categoria          @relation(fields: [categoriaId], references: [id])
-  subcategoriaId Int
-  subcategoria   Subcategoria       @relation(fields: [subcategoriaId], references: [id])
+  subcategoriaId Int?
+  subcategoria   Subcategoria?      @relation(fields: [subcategoriaId], references: [id])
   marcaId        Int
   marca          Marca              @relation(fields: [marcaId], references: [id])
   variantes      ProductoVariante[]
