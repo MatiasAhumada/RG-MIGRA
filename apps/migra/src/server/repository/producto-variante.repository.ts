@@ -61,6 +61,13 @@ export const productoVarianteRepository = {
     });
   },
 
+  async deleteAllByProductoId(productoId: number) {
+    return prisma.productoVariante.updateMany({
+      where: { productoId, deletedAt: null },
+      data: { deletedAt: new Date() },
+    });
+  },
+
   async toggleSinStock(id: number, sinStock: boolean) {
     return prisma.productoVariante.update({
       where: { id },

@@ -5,8 +5,16 @@ import { ParsedProductExcel } from "@/types/producto.types";
 
 const isNumeric = (val: string): boolean => {
   if (!val) return false;
+  const hasCurrency = val.includes("$");
+  const hasDecimalSeparators = val.includes(",") || val.includes(".");
   const cleaned = val.replace(/[^0-9.,]/g, "");
-  return Boolean(cleaned && /[0-9]/.test(cleaned));
+
+  if (!cleaned || !/[0-9]/.test(cleaned)) return false;
+
+  if (hasCurrency || hasDecimalSeparators) return true;
+
+  const num = parseFloat(cleaned);
+  return !isNaN(num) && num > 100;
 };
 
 const parsePrice = (val: string): number => {
