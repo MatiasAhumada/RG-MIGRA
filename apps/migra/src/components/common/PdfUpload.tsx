@@ -17,7 +17,8 @@ import {
 import { productoService } from "@/services";
 
 interface BulkUploadResult {
-  created: unknown[];
+  created: number;
+  updated?: number;
   errors: unknown[];
   total: number;
 }
@@ -129,7 +130,7 @@ export function PdfUpload({
 
       setUploadResult(result);
 
-      const successCount = result.created?.length || 0;
+      const successCount = (result.created || 0) + (result.updated || 0);
       const errorCount = result.errors?.length || 0;
 
       clientSuccessHandler(
@@ -319,8 +320,8 @@ export function PdfUpload({
                   Catálogo procesado correctamente
                 </p>
                 <p className="text-[#3d4a3d] mt-1">
-                  {uploadResult.created?.length || 0} productos
-                  creados/actualizados
+                  {(uploadResult.created || 0) + (uploadResult.updated || 0)}{" "}
+                  productos creados/actualizados
                   {uploadResult.errors?.length
                     ? `, ${uploadResult.errors.length} errores`
                     : ""}

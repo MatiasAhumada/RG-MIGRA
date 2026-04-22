@@ -58,12 +58,27 @@ export const excelParserService = {
 
         const sku = String(row[1] || "").trim();
         const name = String(row[2] || "").trim();
-        const color = String(row[3] || "").trim();
-        const talle = String(row[4] || "").trim();
-        const priceStr = String(row[5] || "").trim();
+        const col3 = String(row[3] || "").trim();
+        const col4 = String(row[4] || "").trim();
+        const col5 = String(row[5] || "").trim();
 
         if (!sku || !name) {
           continue;
+        }
+
+        let color = "";
+        let talle = "";
+        let priceStr = "";
+
+        if (col5) {
+          color = col3;
+          talle = col4;
+          priceStr = col5;
+        } else if (col4) {
+          color = col3;
+          priceStr = col4;
+        } else {
+          priceStr = col3;
         }
 
         const price =
@@ -111,12 +126,27 @@ export const excelParserService = {
 
         const sku = String(row[1]).trim();
         const name = String(row[2]).trim();
-        const color = String(row[3] || "").trim();
-        const talle = String(row[4] || "").trim();
-        const priceStr = String(row[5] || "").trim();
+        const col3 = String(row[3] || "").trim();
+        const col4 = String(row[4] || "").trim();
+        const col5 = String(row[5] || "").trim();
 
         if (!currentMarca || !currentCategoria) {
           continue;
+        }
+
+        let color = "";
+        let talle = "";
+        let priceStr = "";
+
+        if (col5) {
+          color = col3;
+          talle = col4;
+          priceStr = col5;
+        } else if (col4) {
+          color = col3;
+          priceStr = col4;
+        } else {
+          priceStr = col3;
         }
 
         const price =
