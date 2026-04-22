@@ -6,6 +6,7 @@ export const COLOR_LETTER_MAP: Record<string, ColorProducto> = {
   r: ColorProducto.ROSA,
   v: ColorProducto.VERDE,
   n: ColorProducto.NEGRO,
+  gris: ColorProducto.GRIS,
 };
 
 export const COLORES_PRODUCTO = [
@@ -14,6 +15,7 @@ export const COLORES_PRODUCTO = [
   { value: ColorProducto.ROSA, label: "Rosa" },
   { value: ColorProducto.VERDE, label: "Verde" },
   { value: ColorProducto.NEGRO, label: "Negro" },
+  { value: ColorProducto.GRIS, label: "Gris" },
 ] as const;
 
 export const TALLES_PRODUCTO = [

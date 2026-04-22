@@ -220,31 +220,44 @@ export const excelParserService = {
 
     if (!normalized) return result;
 
+    if (normalized === "s/col" || normalized.startsWith("s/col")) {
+      const talleMatch = normalized.match(/talle\s*(\d+)/);
+      if (talleMatch) {
+        result.push({
+          color: undefined,
+          talle: parseInt(talleMatch[1], 10),
+        });
+      }
+      return result;
+    }
+
     let colorPart = normalized;
     let talle: number | undefined = undefined;
 
-    if (normalized.includes("talle")) {
-      const parts = normalized.split(/talle\s*/);
-      colorPart = parts[0].trim();
-      const talleStr = parts[1]?.trim();
-      if (talleStr) {
-        talle = parseInt(talleStr, 10);
-      }
+    const talleMatch = normalized.match(/talle\s*(\d+)/);
+    if (talleMatch) {
+      talle = parseInt(talleMatch[1], 10);
+      colorPart = normalized.split(/talle/)[0].trim();
     }
 
     colorPart = colorPart.replace(/-$/, "").trim();
 
+    if (!colorPart) {
+      if (talle) {
+        result.push({ color: undefined, talle });
+      }
+      return result;
+    }
+
     const colorCodes = colorPart.split("-").filter(Boolean);
 
-    if (colorCodes.length > 0) {
-      for (const code of colorCodes) {
-        const cleanCode = code.trim().toLowerCase();
-        if (COLOR_LETTER_MAP[cleanCode]) {
-          result.push({
-            color: COLOR_LETTER_MAP[cleanCode],
-            talle,
-          });
-        }
+    for (const code of colorCodes) {
+      const cleanCode = code.trim().toLowerCase();
+      if (COLOR_LETTER_MAP[cleanCode]) {
+        result.push({
+          color: COLOR_LETTER_MAP[cleanCode],
+          talle,
+        });
       }
     }
 
