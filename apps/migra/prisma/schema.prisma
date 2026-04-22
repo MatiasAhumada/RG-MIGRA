@@ -31,6 +31,7 @@ enum ColorProducto {
   ROSA
   VERDE
   NEGRO
+  GRIS
 }
 
 model User {
