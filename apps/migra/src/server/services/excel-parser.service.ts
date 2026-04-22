@@ -3,6 +3,29 @@ import { COLOR_LETTER_MAP } from "@/constants/producto.constant";
 import { ColorProducto } from "@prisma/client";
 import { ParsedProductExcel } from "@/types/producto.types";
 
+const isNumeric = (val: string): boolean => {
+  if (!val) return false;
+  const cleaned = val.replace(/[^0-9.,]/g, "");
+  return Boolean(cleaned && /[0-9]/.test(cleaned));
+};
+
+const parsePrice = (val: string): number => {
+  if (!val) return 0;
+  let cleaned = val.replace(/[^0-9.,]/g, "");
+
+  if (cleaned.includes(",") && cleaned.includes(".")) {
+    if (cleaned.lastIndexOf(".") > cleaned.lastIndexOf(",")) {
+      cleaned = cleaned.replace(/,/g, "");
+    } else {
+      cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+    }
+  } else if (cleaned.includes(",")) {
+    cleaned = cleaned.replace(",", ".");
+  }
+
+  return parseFloat(cleaned) || 0;
+};
+
 export const excelParserService = {
   async parseProductCatalog(buffer: Buffer): Promise<ParsedProductExcel[]> {
     const workbook = XLSX.read(buffer, { type: "buffer" });
@@ -70,23 +93,22 @@ export const excelParserService = {
         let talle = "";
         let priceStr = "";
 
-        if (col5) {
+        if (col5 && isNumeric(col5)) {
           color = col3;
           talle = col4;
           priceStr = col5;
-        } else if (col4) {
-          color = col3;
-          priceStr = col4;
-        } else {
+        } else if (col4 && isNumeric(col4)) {
+          if (isNumeric(col3)) {
+            priceStr = col3;
+          } else {
+            color = col3;
+            priceStr = col4;
+          }
+        } else if (col3 && isNumeric(col3)) {
           priceStr = col3;
         }
 
-        const price =
-          parseFloat(
-            String(priceStr)
-              .replace(/[^0-9.,]/g, "")
-              .replace(",", "."),
-          ) || 0;
+        const price = parsePrice(priceStr);
         const colorTalle = [color, talle].filter(Boolean).join("-");
 
         products.push({
@@ -138,23 +160,22 @@ export const excelParserService = {
         let talle = "";
         let priceStr = "";
 
-        if (col5) {
+        if (col5 && isNumeric(col5)) {
           color = col3;
           talle = col4;
           priceStr = col5;
-        } else if (col4) {
-          color = col3;
-          priceStr = col4;
-        } else {
+        } else if (col4 && isNumeric(col4)) {
+          if (isNumeric(col3)) {
+            priceStr = col3;
+          } else {
+            color = col3;
+            priceStr = col4;
+          }
+        } else if (col3 && isNumeric(col3)) {
           priceStr = col3;
         }
 
-        const price =
-          parseFloat(
-            String(priceStr)
-              .replace(/[^0-9.,]/g, "")
-              .replace(",", "."),
-          ) || 0;
+        const price = parsePrice(priceStr);
         const colorTalle = [color, talle].filter(Boolean).join("-");
 
         products.push({
@@ -191,12 +212,23 @@ export const excelParserService = {
 
     if (!normalized) return result;
 
-    const talleMatch = normalized.match(/(\d+)$/);
-    const talle = talleMatch ? parseInt(talleMatch[1], 10) : undefined;
+    const parts = normalized.split("-");
 
-    const colorPart = normalized.replace(/\d+$/, "").trim();
+    let colorPart = "";
+    let tallePart = "";
 
-    const colorCodes = colorPart.split(/[-/]/).filter(Boolean);
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (trimmed.startsWith("talle")) {
+        tallePart = trimmed.replace("talle", "").trim();
+      } else {
+        colorPart = trimmed;
+      }
+    }
+
+    const talle = tallePart ? parseInt(tallePart, 10) : undefined;
+
+    const colorCodes = colorPart.split(/[/]/).filter(Boolean);
 
     for (const code of colorCodes) {
       const cleanCode = code.trim().toLowerCase();
