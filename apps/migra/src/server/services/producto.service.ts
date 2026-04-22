@@ -221,6 +221,8 @@ export const productoService = {
         let producto;
 
         if (existing) {
+          await productoVarianteRepository.deleteAllByProductoId(existing.id);
+
           producto = await productoRepository.update(existing.id, {
             name: parsed.name,
             price: parsed.price,

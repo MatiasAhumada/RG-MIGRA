@@ -8,11 +8,11 @@ const isNumeric = (val: string): boolean => {
   const hasCurrency = val.includes("$");
   const hasDecimalSeparators = val.includes(",") || val.includes(".");
   const cleaned = val.replace(/[^0-9.,]/g, "");
-  
+
   if (!cleaned || !/[0-9]/.test(cleaned)) return false;
-  
+
   if (hasCurrency || hasDecimalSeparators) return true;
-  
+
   const num = parseFloat(cleaned);
   return !isNaN(num) && num > 100;
 };
