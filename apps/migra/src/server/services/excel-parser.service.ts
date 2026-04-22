@@ -117,7 +117,15 @@ export const excelParserService = {
         }
 
         const price = parsePrice(priceStr);
-        const colorTalle = [color, talle].filter(Boolean).join("-");
+
+        let colorTalle = "";
+        if (color && talle) {
+          colorTalle = `${color}-${talle}`;
+        } else if (color) {
+          colorTalle = color;
+        } else if (talle) {
+          colorTalle = talle;
+        }
 
         products.push({
           marca: currentMarca,
@@ -184,7 +192,15 @@ export const excelParserService = {
         }
 
         const price = parsePrice(priceStr);
-        const colorTalle = [color, talle].filter(Boolean).join("-");
+
+        let colorTalle = "";
+        if (color && talle) {
+          colorTalle = `${color}-${talle}`;
+        } else if (color) {
+          colorTalle = color;
+        } else if (talle) {
+          colorTalle = talle;
+        }
 
         products.push({
           marca: currentMarca,
