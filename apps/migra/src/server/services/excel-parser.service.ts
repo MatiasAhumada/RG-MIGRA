@@ -220,31 +220,31 @@ export const excelParserService = {
 
     if (!normalized) return result;
 
-    const parts = normalized.split("-");
+    let colorPart = normalized;
+    let talle: number | undefined = undefined;
 
-    let colorPart = "";
-    let tallePart = "";
-
-    for (const part of parts) {
-      const trimmed = part.trim();
-      if (trimmed.startsWith("talle")) {
-        tallePart = trimmed.replace("talle", "").trim();
-      } else {
-        colorPart = trimmed;
+    if (normalized.includes("talle")) {
+      const parts = normalized.split(/talle\s*/);
+      colorPart = parts[0].trim();
+      const talleStr = parts[1]?.trim();
+      if (talleStr) {
+        talle = parseInt(talleStr, 10);
       }
     }
 
-    const talle = tallePart ? parseInt(tallePart, 10) : undefined;
+    colorPart = colorPart.replace(/-$/, "").trim();
 
-    const colorCodes = colorPart.split(/[/]/).filter(Boolean);
+    const colorCodes = colorPart.split("-").filter(Boolean);
 
-    for (const code of colorCodes) {
-      const cleanCode = code.trim().toLowerCase();
-      if (COLOR_LETTER_MAP[cleanCode]) {
-        result.push({
-          color: COLOR_LETTER_MAP[cleanCode],
-          talle,
-        });
+    if (colorCodes.length > 0) {
+      for (const code of colorCodes) {
+        const cleanCode = code.trim().toLowerCase();
+        if (COLOR_LETTER_MAP[cleanCode]) {
+          result.push({
+            color: COLOR_LETTER_MAP[cleanCode],
+            talle,
+          });
+        }
       }
     }
 
