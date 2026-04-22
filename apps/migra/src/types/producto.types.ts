@@ -9,7 +9,7 @@ export interface CreateProductoDto {
   imgUrl?: string;
   empresaId: number;
   categoriaId: number;
-  subcategoriaId: number;
+  subcategoriaId?: number;
   marcaId: number;
   sinStock?: boolean;
   variantes?: Omit<CreateProductoVarianteDto, "productoId">[];
@@ -47,7 +47,7 @@ export interface ProductoWithEmpresa extends Producto {
 export interface ProductoWithRelations extends Producto {
   empresa: Empresa;
   categoria: Categoria;
-  subcategoria: Subcategoria;
+  subcategoria: Subcategoria | null;
   marca: Marca;
   variantes: ProductoVariante[];
 }
@@ -61,7 +61,7 @@ export interface ParsedProduct {
 export interface ParsedProductExcel {
   marca: string;
   categoria: string;
-  subcategoria: string;
+  subcategoria: string | null;
   sku: string;
   name: string;
   colorTalle: string;

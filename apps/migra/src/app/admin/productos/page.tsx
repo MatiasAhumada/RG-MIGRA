@@ -111,7 +111,9 @@ export default function AdminProductosPage() {
       imgUrl: product.imgUrl || "",
       marcaId: String(product.marcaId),
       categoriaId: String(product.categoriaId),
-      subcategoriaId: String(product.subcategoriaId),
+      subcategoriaId: product.subcategoriaId
+        ? String(product.subcategoriaId)
+        : "",
       variantes: product.variantes.map((v) => ({
         color: v.color || "",
         talle: v.talle ? String(v.talle) : "",
@@ -131,8 +133,7 @@ export default function AdminProductosPage() {
       !formData.sku ||
       !formData.price ||
       !formData.marcaId ||
-      !formData.categoriaId ||
-      !formData.subcategoriaId
+      !formData.categoriaId
     ) {
       clientErrorHandler(new Error("Todos los campos son obligatorios"));
       return;
@@ -163,7 +164,9 @@ export default function AdminProductosPage() {
         imgUrl: formData.imgUrl || undefined,
         empresaId: 1,
         categoriaId: Number(formData.categoriaId),
-        subcategoriaId: Number(formData.subcategoriaId),
+        subcategoriaId: formData.subcategoriaId
+          ? Number(formData.subcategoriaId)
+          : undefined,
         marcaId: Number(formData.marcaId),
         variantes: formData.variantes.map((v) => ({
           color: v.color ? (v.color as ColorProducto) : undefined,
@@ -190,8 +193,7 @@ export default function AdminProductosPage() {
       !formData.sku ||
       !formData.price ||
       !formData.marcaId ||
-      !formData.categoriaId ||
-      !formData.subcategoriaId
+      !formData.categoriaId
     ) {
       clientErrorHandler(new Error("Todos los campos son obligatorios"));
       return;
@@ -205,7 +207,9 @@ export default function AdminProductosPage() {
         price: Number(formData.price),
         imgUrl: formData.imgUrl || undefined,
         categoriaId: Number(formData.categoriaId),
-        subcategoriaId: Number(formData.subcategoriaId),
+        subcategoriaId: formData.subcategoriaId
+          ? Number(formData.subcategoriaId)
+          : undefined,
         marcaId: Number(formData.marcaId),
       };
 
@@ -381,16 +385,24 @@ export default function AdminProductosPage() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>Subcategoría</Label>
+        <Label>
+          Subcategoría {subcategorias.length === 0 && "(No disponible)"}
+        </Label>
         <Select
           value={formData.subcategoriaId}
           onValueChange={(value) =>
             setFormData({ ...formData, subcategoriaId: value })
           }
-          disabled={!formData.categoriaId}
+          disabled={!formData.categoriaId || subcategorias.length === 0}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Seleccionar subcategoría" />
+            <SelectValue
+              placeholder={
+                subcategorias.length === 0
+                  ? "Sin subcategorías"
+                  : "Seleccionar subcategoría"
+              }
+            />
           </SelectTrigger>
           <SelectContent>
             {subcategorias.map((subcategoria) => (

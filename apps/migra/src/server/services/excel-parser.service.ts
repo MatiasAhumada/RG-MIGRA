@@ -6,17 +6,28 @@ import { ParsedProductExcel } from "@/types/producto.types";
 export const excelParserService = {
   async parseProductCatalog(buffer: Buffer): Promise<ParsedProductExcel[]> {
     const workbook = XLSX.read(buffer, { type: "buffer" });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-      header: 1,
-    }) as string[][];
+    const allProducts: ParsedProductExcel[] = [];
 
+    for (const sheetName of workbook.SheetNames) {
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+      }) as string[][];
+
+      const products = this.parseSheet(jsonData);
+      allProducts.push(...products);
+    }
+
+    return allProducts;
+  },
+
+  parseSheet(jsonData: string[][]): ParsedProductExcel[] {
     const products: ParsedProductExcel[] = [];
 
     let currentMarca = "";
     let currentCategoria = "";
-    let currentSubcategoria = "";
+    let currentSubcategoria: string | null = null;
+    let afterHeaders = false;
 
     for (let i = 0; i < jsonData.length; i++) {
       const row = jsonData[i];
@@ -27,8 +38,21 @@ export const excelParserService = {
 
       const firstCell = String(row[0] || "").trim();
 
+      if (firstCell === "SUBCATEGORIA") {
+        afterHeaders = true;
+        continue;
+      }
+
       if (!firstCell) {
-        if (!currentMarca || !currentCategoria || !currentSubcategoria) {
+        if (!currentMarca || !currentCategoria) {
+          continue;
+        }
+
+        if (afterHeaders && currentSubcategoria === null) {
+          currentSubcategoria = "";
+        }
+
+        if (currentSubcategoria === null) {
           continue;
         }
 
@@ -42,13 +66,18 @@ export const excelParserService = {
           continue;
         }
 
-        const price = parseFloat(String(priceStr).replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
+        const price =
+          parseFloat(
+            String(priceStr)
+              .replace(/[^0-9.,]/g, "")
+              .replace(",", "."),
+          ) || 0;
         const colorTalle = [color, talle].filter(Boolean).join("-");
 
         products.push({
           marca: currentMarca,
           categoria: currentCategoria,
-          subcategoria: currentSubcategoria,
+          subcategoria: currentSubcategoria || null,
           sku,
           name,
           colorTalle,
@@ -62,12 +91,10 @@ export const excelParserService = {
         const nextRow = jsonData[i + 1];
         if (nextRow && nextRow[0]) {
           currentCategoria = String(nextRow[0]).trim().toUpperCase();
+          currentSubcategoria = null;
+          afterHeaders = false;
         }
         i++;
-        continue;
-      }
-
-      if (firstCell === "SUBCATEGORIA") {
         continue;
       }
 
@@ -92,7 +119,12 @@ export const excelParserService = {
           continue;
         }
 
-        const price = parseFloat(String(priceStr).replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
+        const price =
+          parseFloat(
+            String(priceStr)
+              .replace(/[^0-9.,]/g, "")
+              .replace(",", "."),
+          ) || 0;
         const colorTalle = [color, talle].filter(Boolean).join("-");
 
         products.push({
