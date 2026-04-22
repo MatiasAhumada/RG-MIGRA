@@ -139,11 +139,6 @@ export default function AdminProductosPage() {
       return;
     }
 
-    if (formData.variantes.length === 0) {
-      clientErrorHandler(new Error("Debe agregar al menos una variante"));
-      return;
-    }
-
     const hasInvalidVariante = formData.variantes.some(
       (v) => !v.color && !v.talle,
     );
@@ -168,10 +163,13 @@ export default function AdminProductosPage() {
           ? Number(formData.subcategoriaId)
           : undefined,
         marcaId: Number(formData.marcaId),
-        variantes: formData.variantes.map((v) => ({
-          color: v.color ? (v.color as ColorProducto) : undefined,
-          talle: v.talle ? Number(v.talle) : undefined,
-        })),
+        variantes:
+          formData.variantes.length > 0
+            ? formData.variantes.map((v) => ({
+                color: v.color ? (v.color as ColorProducto) : undefined,
+                talle: v.talle ? Number(v.talle) : undefined,
+              }))
+            : undefined,
       };
 
       await productoService.create(dto);
@@ -426,7 +424,7 @@ export default function AdminProductosPage() {
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <Label>Variantes (Color y Talle)</Label>
+          <Label>Variantes (Color y Talle) - Opcional</Label>
           <Button
             type="button"
             size="sm"
