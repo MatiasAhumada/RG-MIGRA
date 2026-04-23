@@ -66,17 +66,35 @@ export const productoService = {
     return data;
   },
 
-  async findAllWithDeleted(search?: string, empresaId?: number) {
+  async findAllWithDeleted(
+    search?: string,
+    empresaId?: number,
+    marcaId?: number,
+    categoriaId?: number,
+    subcategoriaId?: number,
+    page?: number,
+    limit?: number,
+  ) {
     const params: Record<string, string> = { includeDeleted: "true" };
     if (search) params.search = search;
     if (empresaId) params.empresaId = String(empresaId);
+    if (marcaId) params.marcaId = String(marcaId);
+    if (categoriaId) params.categoriaId = String(categoriaId);
+    if (subcategoriaId) params.subcategoriaId = String(subcategoriaId);
+    if (page) params.page = String(page);
+    if (limit) params.limit = String(limit);
 
-    const { data } = await clientAxios.get<ProductoWithRelations[]>(
-      API_ROUTES.PRODUCTOS,
-      {
-        params,
-      },
-    );
+    const { data } = await clientAxios.get<{
+      data: ProductoWithRelations[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+      };
+    }>(API_ROUTES.PRODUCTOS, {
+      params,
+    });
     return data;
   },
 

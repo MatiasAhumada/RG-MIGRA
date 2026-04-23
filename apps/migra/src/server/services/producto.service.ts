@@ -130,8 +130,24 @@ export const productoService = {
     return productoRepository.restore(id);
   },
 
-  async findAll(search?: string, empresaId?: number) {
-    return productoRepository.findAll(search, empresaId);
+  async findAll(
+    search?: string,
+    empresaId?: number,
+    marcaId?: number,
+    categoriaId?: number,
+    subcategoriaId?: number,
+    page?: number,
+    limit?: number,
+  ) {
+    return productoRepository.findAll(
+      search,
+      empresaId,
+      marcaId,
+      categoriaId,
+      subcategoriaId,
+      page,
+      limit,
+    );
   },
 
   async findAllActive(search?: string, empresaId?: number) {
