@@ -48,6 +48,7 @@ import type {
   ColorProducto,
 } from "@/types";
 import { COLORES_PRODUCTO } from "@/constants/producto.constant";
+import { getMarcaColor } from "@/constants/marca-colors.constant";
 
 const INITIAL_FORM_DATA: ProductFormData = {
   name: "",
@@ -73,18 +74,39 @@ export default function AdminProductosPage() {
   const [formData, setFormData] = useState<ProductFormData>(INITIAL_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [search, setSearch] = useState("");
+  const [filterMarcaId, setFilterMarcaId] = useState("");
+  const [filterCategoriaId, setFilterCategoriaId] = useState("");
+  const [filterSubcategoriaId, setFilterSubcategoriaId] = useState("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 50,
+    total: 0,
+    totalPages: 0,
+  });
+
   useEffect(() => {
     loadData();
-  }, []);
+  }, [search, filterMarcaId, filterCategoriaId, filterSubcategoriaId, page]);
 
   const loadData = async () => {
     try {
       setIsLoading(true);
-      const [productosData, marcasData] = await Promise.all([
-        productoService.findAllWithDeleted(),
+      const [result, marcasData] = await Promise.all([
+        productoService.findAllWithDeleted(
+          search || undefined,
+          1,
+          filterMarcaId ? Number(filterMarcaId) : undefined,
+          filterCategoriaId ? Number(filterCategoriaId) : undefined,
+          filterSubcategoriaId ? Number(filterSubcategoriaId) : undefined,
+          page,
+          50,
+        ),
         marcaService.findAll(1),
       ]);
-      setProductos(productosData);
+      setProductos(result.data);
+      setPagination(result.pagination);
       setMarcas(marcasData);
     } catch (error) {
       clientErrorHandler(error);
@@ -298,6 +320,13 @@ export default function AdminProductosPage() {
     (c) => c.id === Number(formData.categoriaId),
   );
   const subcategorias = selectedCategoria?.subcategorias || [];
+
+  const filterMarca = marcas.find((m) => m.id === Number(filterMarcaId));
+  const filterCategorias = filterMarca?.categorias || [];
+  const filterCategoria = filterCategorias.find(
+    (c) => c.id === Number(filterCategoriaId),
+  );
+  const filterSubcategorias = filterCategoria?.subcategorias || [];
 
   const renderForm = () => (
     <div className="flex flex-col gap-4">
@@ -531,8 +560,89 @@ export default function AdminProductosPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.4 }}
-        className="mt-8"
+        transition={{ delay: 0.15, duration: 0.4 }}
+        className="mt-6"
+      >
+        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <Input
+            placeholder="Buscar por nombre o SKU..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="lg:col-span-2"
+          />
+          <Select
+            value={filterMarcaId}
+            onValueChange={(value) => {
+              setFilterMarcaId(value);
+              setFilterCategoriaId("");
+              setFilterSubcategoriaId("");
+              setPage(1);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Todas las marcas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas las marcas</SelectItem>
+              {marcas.map((marca) => (
+                <SelectItem key={marca.id} value={String(marca.id)}>
+                  {marca.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={filterCategoriaId}
+            onValueChange={(value) => {
+              setFilterCategoriaId(value);
+              setFilterSubcategoriaId("");
+              setPage(1);
+            }}
+            disabled={!filterMarcaId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Todas las categorías" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas las categorías</SelectItem>
+              {filterCategorias.map((cat) => (
+                <SelectItem key={cat.id} value={String(cat.id)}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={filterSubcategoriaId}
+            onValueChange={(value) => {
+              setFilterSubcategoriaId(value);
+              setPage(1);
+            }}
+            disabled={!filterCategoriaId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Todas las subcategorías" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas las subcategorías</SelectItem>
+              {filterSubcategorias.map((sub) => (
+                <SelectItem key={sub.id} value={String(sub.id)}>
+                  {sub.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.4 }}
+        className="mt-4"
       >
         <DataTable<ProductoWithRelations>
           title="Productos"
@@ -564,9 +674,16 @@ export default function AdminProductosPage() {
               key: "marca",
               label: "Marca",
               className: "text-center",
-              render: (item) => (
-                <p className="text-sm text-[#3d4a3d]">{item.marca.name}</p>
-              ),
+              render: (item) => {
+                const marcaColor = getMarcaColor(item.marca.name);
+                return (
+                  <span
+                    className={`inline-flex rounded-md px-2 py-1 text-sm ${marcaColor.bg} ${marcaColor.text} ${marcaColor.fontWeight || ""}`}
+                  >
+                    {item.marca.name}
+                  </span>
+                );
+              },
             },
             {
               key: "categoria",
@@ -599,11 +716,11 @@ export default function AdminProductosPage() {
                   );
                 }
                 return (
-                  <div className="flex flex-wrap justify-center gap-1">
+                  <div className="flex flex-wrap justify-center gap-1 max-w-xs mx-auto">
                     {item.variantes.map((v, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex rounded-md bg-[#f3fcf0] px-2 py-0.5 text-xs text-[#2b6485]"
+                        className="inline-flex whitespace-nowrap rounded-md bg-[#f3fcf0] px-2 py-0.5 text-xs text-[#2b6485]"
                       >
                         {v.color && v.talle
                           ? `${v.color} - T${v.talle}`
@@ -696,8 +813,37 @@ export default function AdminProductosPage() {
           keyExtractor={(item) => String(item.id)}
           loading={isLoading || isRefreshing}
           emptyMessage="No hay productos registrados"
-          totalLabel={`${productos.length} productos`}
+          totalLabel={`${pagination.total} productos`}
         />
+        {pagination.totalPages > 1 && (
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-sm text-[#3d4a3d]">
+              Página {pagination.page} de {pagination.totalPages}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={pagination.page === 1 || isLoading}
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setPage((p) => Math.min(pagination.totalPages, p + 1))
+                }
+                disabled={
+                  pagination.page === pagination.totalPages || isLoading
+                }
+              >
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       <GenericModal

@@ -12,49 +12,28 @@ export async function GET(request: NextRequest) {
     const categoriaId = searchParams.get("categoriaId");
     const subcategoriaId = searchParams.get("subcategoriaId");
     const includeDeleted = searchParams.get("includeDeleted") === "true";
+    const page = searchParams.get("page");
+    const limit = searchParams.get("limit");
 
-    if (marcaId && empresaId) {
-      const productos = await productoService.findByMarca(
-        Number(marcaId),
-        Number(empresaId),
+    if (includeDeleted) {
+      const result = await productoService.findAll(
+        search,
+        empresaId ? Number(empresaId) : undefined,
+        marcaId ? Number(marcaId) : undefined,
+        categoriaId ? Number(categoriaId) : undefined,
+        subcategoriaId ? Number(subcategoriaId) : undefined,
+        page ? Number(page) : undefined,
+        limit ? Number(limit) : undefined,
       );
-      return NextResponse.json(productos, { status: httpStatus.OK });
+      return NextResponse.json(result, { status: httpStatus.OK });
     }
 
-    if (categoriaId && empresaId) {
-      const productos = await productoService.findByCategoria(
-        Number(categoriaId),
-        Number(empresaId),
-      );
-      return NextResponse.json(productos, { status: httpStatus.OK });
-    }
+    const result = await productoService.findAllActive(
+      search,
+      empresaId ? Number(empresaId) : undefined,
+    );
 
-    if (subcategoriaId && empresaId) {
-      const productos = await productoService.findBySubcategoria(
-        Number(subcategoriaId),
-        Number(empresaId),
-      );
-      return NextResponse.json(productos, { status: httpStatus.OK });
-    }
-
-    if (empresaId) {
-      const productos = await productoService.findByEmpresaId(
-        Number(empresaId),
-      );
-      return NextResponse.json(productos, { status: httpStatus.OK });
-    }
-
-    const productos = includeDeleted
-      ? await productoService.findAll(
-          search,
-          empresaId ? Number(empresaId) : undefined,
-        )
-      : await productoService.findAllActive(
-          search,
-          empresaId ? Number(empresaId) : undefined,
-        );
-
-    return NextResponse.json(productos, { status: httpStatus.OK });
+    return NextResponse.json(result, { status: httpStatus.OK });
   } catch (error) {
     return apiErrorHandler({ error: error as ApiError, request });
   }

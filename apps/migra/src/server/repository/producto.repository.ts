@@ -109,9 +109,20 @@ export const productoRepository = {
     });
   },
 
-  async findAll(search?: string, empresaId?: number) {
+  async findAll(
+    search?: string,
+    empresaId?: number,
+    marcaId?: number,
+    categoriaId?: number,
+    subcategoriaId?: number,
+    page: number = 1,
+    limit: number = 50,
+  ) {
     const where = {
       ...(empresaId && { empresaId }),
+      ...(marcaId && { marcaId }),
+      ...(categoriaId && { categoriaId }),
+      ...(subcategoriaId && { subcategoriaId }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: "insensitive" as const } },
@@ -120,19 +131,34 @@ export const productoRepository = {
       }),
     };
 
-    return prisma.producto.findMany({
-      where,
-      include: {
-        categoria: true,
-        subcategoria: true,
-        marca: true,
-        variantes: {
-          where: { deletedAt: null },
-          orderBy: [{ color: "asc" }, { talle: "asc" }],
+    const [data, total] = await Promise.all([
+      prisma.producto.findMany({
+        where,
+        include: {
+          categoria: true,
+          subcategoria: true,
+          marca: true,
+          variantes: {
+            where: { deletedAt: null },
+            orderBy: [{ color: "asc" }, { talle: "asc" }],
+          },
         },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.producto.count({ where }),
+    ]);
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { createdAt: "desc" },
-    });
+    };
   },
 
   async findAllActive(search?: string, empresaId?: number) {
