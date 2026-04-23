@@ -10,6 +10,7 @@ import {
   ConfirmModal,
   TableSkeleton,
   PdfUpload,
+  ImageBulkUpload,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,9 +76,9 @@ export default function AdminProductosPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [search, setSearch] = useState("");
-  const [filterMarcaId, setFilterMarcaId] = useState("");
-  const [filterCategoriaId, setFilterCategoriaId] = useState("");
-  const [filterSubcategoriaId, setFilterSubcategoriaId] = useState("");
+  const [filterMarcaId, setFilterMarcaId] = useState("all");
+  const [filterCategoriaId, setFilterCategoriaId] = useState("all");
+  const [filterSubcategoriaId, setFilterSubcategoriaId] = useState("all");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -97,9 +98,11 @@ export default function AdminProductosPage() {
         productoService.findAllWithDeleted(
           search || undefined,
           1,
-          filterMarcaId ? Number(filterMarcaId) : undefined,
-          filterCategoriaId ? Number(filterCategoriaId) : undefined,
-          filterSubcategoriaId ? Number(filterSubcategoriaId) : undefined,
+          filterMarcaId !== "all" ? Number(filterMarcaId) : undefined,
+          filterCategoriaId !== "all" ? Number(filterCategoriaId) : undefined,
+          filterSubcategoriaId !== "all"
+            ? Number(filterSubcategoriaId)
+            : undefined,
           page,
           50,
         ),
@@ -379,7 +382,7 @@ export default function AdminProductosPage() {
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Seleccionar marca" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             {marcas.map((marca) => (
               <SelectItem key={marca.id} value={String(marca.id)}>
                 {marca.name}
@@ -401,7 +404,7 @@ export default function AdminProductosPage() {
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Seleccionar categoría" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             {categorias.map((categoria) => (
               <SelectItem key={categoria.id} value={String(categoria.id)}>
                 {categoria.name}
@@ -431,7 +434,7 @@ export default function AdminProductosPage() {
               }
             />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             {subcategorias.map((subcategoria) => (
               <SelectItem key={subcategoria.id} value={String(subcategoria.id)}>
                 {subcategoria.name}
@@ -488,7 +491,7 @@ export default function AdminProductosPage() {
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Seleccionar color" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       {COLORES_PRODUCTO.map((color) => (
                         <SelectItem key={color.value} value={color.value}>
                           {color.label}
@@ -535,35 +538,29 @@ export default function AdminProductosPage() {
       <PageHeader
         title="Gestión de Productos"
         description="Administración del catálogo de productos"
-        action={
-          <Button size="lg" onClick={handleOpenCreateModal} className="gap-2">
-            <Add01Icon className="size-5" />
-            <span className="hidden sm:inline">Nuevo Producto</span>
-            <span className="sm:hidden">Nuevo</span>
-          </Button>
-        }
       />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1, duration: 0.4 }}
-        className="mt-8"
+        className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2"
       >
         <PdfUpload
           onUploadComplete={handleUploadComplete}
           variant="full"
           empresaId={1}
         />
+        <ImageBulkUpload variant="full" />
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.4 }}
-        className="mt-6"
+        className="mt-8"
       >
-        <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center">
           <Input
             placeholder="Buscar por nombre o SKU..."
             value={search}
@@ -571,70 +568,81 @@ export default function AdminProductosPage() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="lg:col-span-2"
+            className="lg:flex-[2]"
           />
-          <Select
-            value={filterMarcaId}
-            onValueChange={(value) => {
-              setFilterMarcaId(value);
-              setFilterCategoriaId("");
-              setFilterSubcategoriaId("");
-              setPage(1);
-            }}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-1">
+            <Select
+              value={filterMarcaId}
+              onValueChange={(value) => {
+                setFilterMarcaId(value);
+                setFilterCategoriaId("all");
+                setFilterSubcategoriaId("all");
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Todas las marcas" />
+              </SelectTrigger>
+              <SelectContent position="popper" side="bottom" align="start">
+                <SelectItem value="all">Todas las marcas</SelectItem>
+                {marcas.map((marca) => (
+                  <SelectItem key={marca.id} value={String(marca.id)}>
+                    {marca.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filterCategoriaId}
+              onValueChange={(value) => {
+                setFilterCategoriaId(value);
+                setFilterSubcategoriaId("all");
+                setPage(1);
+              }}
+              disabled={filterMarcaId === "all"}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Todas las categorías" />
+              </SelectTrigger>
+              <SelectContent position="popper" side="bottom" align="start">
+                <SelectItem value="all">Todas las categorías</SelectItem>
+                {filterCategorias.map((cat) => (
+                  <SelectItem key={cat.id} value={String(cat.id)}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={filterSubcategoriaId}
+              onValueChange={(value) => {
+                setFilterSubcategoriaId(value);
+                setPage(1);
+              }}
+              disabled={filterCategoriaId === "all"}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Todas las subcategorías" />
+              </SelectTrigger>
+              <SelectContent position="popper" side="bottom" align="start">
+                <SelectItem value="all">Todas las subcategorías</SelectItem>
+                {filterSubcategorias.map((sub) => (
+                  <SelectItem key={sub.id} value={String(sub.id)}>
+                    {sub.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            size="lg"
+            onClick={handleOpenCreateModal}
+            className="gap-2 whitespace-nowrap lg:ml-2"
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Todas las marcas" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todas las marcas</SelectItem>
-              {marcas.map((marca) => (
-                <SelectItem key={marca.id} value={String(marca.id)}>
-                  {marca.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={filterCategoriaId}
-            onValueChange={(value) => {
-              setFilterCategoriaId(value);
-              setFilterSubcategoriaId("");
-              setPage(1);
-            }}
-            disabled={!filterMarcaId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Todas las categorías" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todas las categorías</SelectItem>
-              {filterCategorias.map((cat) => (
-                <SelectItem key={cat.id} value={String(cat.id)}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={filterSubcategoriaId}
-            onValueChange={(value) => {
-              setFilterSubcategoriaId(value);
-              setPage(1);
-            }}
-            disabled={!filterCategoriaId}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Todas las subcategorías" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Todas las subcategorías</SelectItem>
-              {filterSubcategorias.map((sub) => (
-                <SelectItem key={sub.id} value={String(sub.id)}>
-                  {sub.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Add01Icon className="size-5" />
+            <span className="hidden xl:inline">Nuevo Producto</span>
+            <span className="xl:hidden">Nuevo</span>
+          </Button>
         </div>
       </motion.div>
 
@@ -642,10 +650,9 @@ export default function AdminProductosPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.4 }}
-        className="mt-4"
       >
         <DataTable<ProductoWithRelations>
-          title="Productos"
+          title="Catálogo de Productos"
           getRowClassName={(item) =>
             item.deletedAt ? "bg-gray-100/60 opacity-70" : ""
           }
