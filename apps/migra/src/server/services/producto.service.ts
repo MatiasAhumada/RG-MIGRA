@@ -263,27 +263,34 @@ export const productoService = {
           );
 
           for (const vd of variantesData) {
-            const existingVariante =
-              await productoVarianteRepository.findByColorAndTalleIfExists(
-                producto.id,
-                vd.color,
-                vd.talle,
-              );
+            if (vd.color || vd.talle) {
+              const existingVariante =
+                await productoVarianteRepository.findByColorAndTalleIfExists(
+                  producto.id,
+                  vd.color,
+                  vd.talle,
+                );
 
-            if (!existingVariante && (vd.color || vd.talle)) {
-              await productoVarianteRepository.create({
-                color: vd.color,
-                talle: vd.talle,
-                productoId: producto.id,
-              });
+              if (!existingVariante) {
+                await productoVarianteRepository.create({
+                  color: vd.color,
+                  talle: vd.talle,
+                  productoId: producto.id,
+                });
+              }
             }
           }
         }
       } catch (error) {
+        const errorMessage = (error as Error).message;
+        console.error(
+          `Error procesando producto SKU ${parsed.sku} (${parsed.name}):`,
+          errorMessage,
+        );
         errors.push({
           sku: parsed.sku,
           name: parsed.name,
-          error: (error as Error).message,
+          error: errorMessage,
         });
       }
     }
@@ -303,47 +310,92 @@ export const productoService = {
     let success = 0;
     let failed = 0;
 
+    const validations: Array<{
+      image: (typeof dto.images)[0];
+      producto: Awaited<ReturnType<typeof productoRepository.findBySku>>;
+      variante?: Awaited<
+        ReturnType<typeof productoVarianteRepository.findByColor>
+      >;
+      sku: string;
+      colorLetter?: string;
+      error?: string;
+    }> = [];
+
     for (const image of dto.images) {
+      const fileNameWithoutExt = image.fileName.replace(/\.[^/.]+$/, "");
+      const parts = fileNameWithoutExt.split(/[\s-]+/).filter(Boolean);
+      const sku = parts[0];
+      const colorLetter = parts[1];
+
+      const producto = await productoRepository.findBySku(sku);
+
+      if (!producto) {
+        validations.push({
+          image,
+          producto: null as never,
+          sku: fileNameWithoutExt,
+          error: `${ERROR_MESSAGES.PRODUCTO_NOT_FOUND} (SKU: ${sku})`,
+        });
+        continue;
+      }
+
+      if (colorLetter && COLOR_LETTER_MAP[colorLetter]) {
+        const color = COLOR_LETTER_MAP[colorLetter];
+        const variante = await productoVarianteRepository.findByColor(
+          producto.id,
+          color,
+        );
+
+        if (!variante) {
+          validations.push({
+            image,
+            producto,
+            sku: fileNameWithoutExt,
+            colorLetter,
+            error: `Variante con color ${colorLetter} no encontrada`,
+          });
+          continue;
+        }
+
+        validations.push({
+          image,
+          producto,
+          variante,
+          sku: fileNameWithoutExt,
+          colorLetter,
+        });
+      } else {
+        validations.push({
+          image,
+          producto,
+          sku: fileNameWithoutExt,
+        });
+      }
+    }
+
+    for (const validation of validations) {
+      if (validation.error) {
+        results.push({
+          sku: validation.sku,
+          success: false,
+          error: validation.error,
+        });
+        failed++;
+        continue;
+      }
+
       try {
-        const fileNameWithoutExt = image.fileName.replace(/\.[^/.]+$/, "");
-
-        const parts = fileNameWithoutExt.split(/[\s-]+/).filter(Boolean);
-        const sku = parts[0];
-        const colorLetter = parts[1];
-
-        const producto = await productoRepository.findBySku(sku);
+        const { image, producto, variante, sku, colorLetter } = validation;
 
         if (!producto) {
-          results.push({
-            sku: fileNameWithoutExt,
-            success: false,
-            error: `${ERROR_MESSAGES.PRODUCTO_NOT_FOUND} (SKU: ${sku})`,
-          });
-          failed++;
-          continue;
+          throw new Error(ERROR_MESSAGES.PRODUCTO_NOT_FOUND);
         }
 
         let url: string;
 
-        if (colorLetter && COLOR_LETTER_MAP[colorLetter]) {
-          const color = COLOR_LETTER_MAP[colorLetter];
-          const variante = await productoVarianteRepository.findByColor(
-            producto.id,
-            color,
-          );
-
-          if (!variante) {
-            results.push({
-              sku: fileNameWithoutExt,
-              success: false,
-              error: `Variante con color ${colorLetter} no encontrada`,
-            });
-            failed++;
-            continue;
-          }
-
+        if (colorLetter && variante) {
           const key = r2StorageService.generateProductKey(
-            sku,
+            producto.sku,
             colorLetter.toLowerCase(),
           );
 
@@ -364,7 +416,7 @@ export const productoService = {
 
           await productoVarianteRepository.updateImage(variante.id, url);
         } else {
-          const key = r2StorageService.generateProductKey(sku);
+          const key = r2StorageService.generateProductKey(producto.sku);
 
           if (producto.imgUrl) {
             const uploadResult = await r2StorageService.replaceImage(
@@ -385,7 +437,7 @@ export const productoService = {
         }
 
         results.push({
-          sku: fileNameWithoutExt,
+          sku,
           success: true,
           url,
         });
@@ -397,13 +449,16 @@ export const productoService = {
             : ERROR_MESSAGES.IMAGE_UPLOAD_FAILED;
 
         results.push({
-          sku: image.fileName,
+          sku: validation.sku,
           success: false,
           error: errorMessage,
         });
         failed++;
 
-        console.error(`Error uploading ${image.fileName}:`, errorMessage);
+        console.error(
+          `Error uploading ${validation.image.fileName}:`,
+          errorMessage,
+        );
       }
     }
 

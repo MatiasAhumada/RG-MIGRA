@@ -180,7 +180,6 @@ model ProductoVariante {
   sinStock   Boolean        @default(false)
   productoId Int
   producto   Producto       @relation(fields: [productoId], references: [id], onDelete: Cascade)
-  deletedAt  DateTime?
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 

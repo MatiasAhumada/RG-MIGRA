@@ -106,15 +106,18 @@ export function ImageBulkUpload({
       }
 
       if (result.failed > 0) {
-        const failedSkus = result.results
+        const failedDetails = result.results
           .filter((r) => !r.success)
-          .map((r) => r.sku)
-          .join(", ");
+          .map((r) => `${r.sku}: ${r.error}`)
+          .join("\n");
+
+        console.error("Errores en carga de imágenes:", failedDetails);
 
         toast.error(
-          `${result.failed} imagen${result.failed !== 1 ? "es" : ""} fallaron: ${failedSkus}`,
+          `${result.failed} imagen${result.failed !== 1 ? "es" : ""} fallaron. Ver consola para detalles.`,
           {
             icon: <AlertCircleIcon className="size-5" />,
+            duration: 8000,
           },
         );
       }

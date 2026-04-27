@@ -6,9 +6,7 @@ import type {
 
 export const productoVarianteRepository = {
   async findAll(productoId?: number) {
-    const where = productoId
-      ? { productoId, deletedAt: null }
-      : { deletedAt: null };
+    const where = productoId ? { productoId } : {};
 
     return prisma.productoVariante.findMany({
       where,
@@ -30,7 +28,7 @@ export const productoVarianteRepository = {
 
   async findByProductoId(productoId: number) {
     return prisma.productoVariante.findMany({
-      where: { productoId, deletedAt: null },
+      where: { productoId },
       orderBy: [{ color: "asc" }, { talle: "asc" }],
     });
   },
@@ -62,16 +60,14 @@ export const productoVarianteRepository = {
   },
 
   async delete(id: number) {
-    return prisma.productoVariante.update({
+    return prisma.productoVariante.delete({
       where: { id },
-      data: { deletedAt: new Date() },
     });
   },
 
   async deleteAllByProductoId(productoId: number) {
-    return prisma.productoVariante.updateMany({
-      where: { productoId, deletedAt: null },
-      data: { deletedAt: new Date() },
+    return prisma.productoVariante.deleteMany({
+      where: { productoId },
     });
   },
 
@@ -92,7 +88,28 @@ export const productoVarianteRepository = {
         productoId,
         color: color as never,
         talle,
-        deletedAt: null,
+      },
+    });
+  },
+
+  async upsert(
+    productoId: number,
+    color: string | undefined,
+    talle: number | undefined,
+  ) {
+    return prisma.productoVariante.upsert({
+      where: {
+        productoId_color_talle: {
+          productoId,
+          color: color as never,
+          talle: talle as number,
+        },
+      },
+      update: {},
+      create: {
+        productoId,
+        color: color as never,
+        talle,
       },
     });
   },
@@ -102,7 +119,6 @@ export const productoVarianteRepository = {
       where: {
         productoId,
         color: color as never,
-        deletedAt: null,
       },
     });
   },

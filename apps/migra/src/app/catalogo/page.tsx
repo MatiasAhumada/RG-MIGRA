@@ -121,7 +121,8 @@ export default function CatalogPage() {
                 tipo={product.categoria.name}
                 sku={product.sku}
                 price={product.price}
-                imgUrl={product.imgUrl || ""}
+                imgUrl={product.imgUrl}
+                variantes={product.variantes}
                 sinStock={product.sinStock}
               />
             </motion.div>

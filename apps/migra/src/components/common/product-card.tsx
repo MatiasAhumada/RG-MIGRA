@@ -49,6 +49,13 @@ export function ProductCard({
   const hasVariantImages = variantImages.length > 0;
   const imageSrc = imgUrl || PLACEHOLDER_IMAGE;
 
+  console.log(`Producto ${sku}:`, {
+    imgUrl,
+    variantes: variantes.length,
+    variantImages: variantImages.length,
+    hasVariantImages,
+  });
+
   return (
     <motion.div
       whileHover={sinStock ? {} : { y: -4, scale: 1.02 }}

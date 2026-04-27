@@ -17,7 +17,6 @@ export const productoRepository = {
         subcategoria: true,
         marca: true,
         variantes: {
-          where: { deletedAt: null },
           orderBy: [{ color: "asc" }, { talle: "asc" }],
         },
       },
@@ -139,7 +138,6 @@ export const productoRepository = {
           subcategoria: true,
           marca: true,
           variantes: {
-            where: { deletedAt: null },
             orderBy: [{ color: "asc" }, { talle: "asc" }],
           },
         },
@@ -180,7 +178,6 @@ export const productoRepository = {
         subcategoria: true,
         marca: true,
         variantes: {
-          where: { deletedAt: null },
           orderBy: [{ color: "asc" }, { talle: "asc" }],
         },
       },

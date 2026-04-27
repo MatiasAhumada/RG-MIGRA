@@ -104,9 +104,8 @@ export const r2StorageService = {
   },
 
   generateProductKey(sku: string, colorLetter?: string): string {
-    const env = CONFIG.NODE_ENV || "development";
     const baseKey = colorLetter ? `${sku}-${colorLetter}` : sku;
-    return `${env}/productos/${baseKey}.webp`;
+    return `productos/${baseKey}.webp`;
   },
 
   async deleteImageBySku(sku: string, colorLetter?: string): Promise<void> {
