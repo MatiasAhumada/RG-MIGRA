@@ -89,4 +89,14 @@ export const productoVarianteRepository = {
       },
     });
   },
+
+  async findByColor(productoId: number, color: string) {
+    return prisma.productoVariante.findFirst({
+      where: {
+        productoId,
+        color: color as never,
+        deletedAt: null,
+      },
+    });
+  },
 };

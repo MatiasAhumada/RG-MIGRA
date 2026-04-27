@@ -19,6 +19,9 @@ export const ERROR_MESSAGES = {
   DETALLE_PEDIDO_NOT_FOUND: "Detalle de pedido no encontrado",
   CLIENTE_HAS_PEDIDOS: "No se puede eliminar un cliente con pedidos asociados",
   PRODUCTO_IN_USE: "No se puede eliminar un producto que está en pedidos",
+  IMAGE_UPLOAD_FAILED: "Error al subir la imagen",
+  IMAGE_DELETE_FAILED: "Error al eliminar la imagen",
+  IMAGE_OPTIMIZATION_FAILED: "Error al optimizar la imagen",
 } as const;
 
 export const {
@@ -41,4 +44,7 @@ export const {
   DETALLE_PEDIDO_NOT_FOUND,
   CLIENTE_HAS_PEDIDOS,
   PRODUCTO_IN_USE,
+  IMAGE_UPLOAD_FAILED,
+  IMAGE_DELETE_FAILED,
+  IMAGE_OPTIMIZATION_FAILED,
 } = ERROR_MESSAGES;
