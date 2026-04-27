@@ -170,4 +170,28 @@ export const productoService = {
     );
     return data;
   },
+
+  async bulkUploadImages(files: File[]) {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    const { data } = await clientAxios.post<{
+      success: number;
+      failed: number;
+      results: {
+        sku: string;
+        success: boolean;
+        url?: string;
+        error?: string;
+      }[];
+    }>(`${API_ROUTES.PRODUCTOS}/bulk-upload-images`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      timeout: 300000,
+    });
+    return data;
+  },
 };

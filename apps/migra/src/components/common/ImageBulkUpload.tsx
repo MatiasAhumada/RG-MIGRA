@@ -9,11 +9,15 @@ import {
   Upload01Icon,
   Cancel01Icon,
   FolderOpenIcon,
+  CheckmarkCircle02Icon,
+  AlertCircleIcon,
 } from "hugeicons-react";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import { productoService } from "@/services/producto.service";
+import { toast } from "sonner";
 
 interface ImageBulkUploadProps {
-  onUploadComplete?: (files: File[]) => void;
+  onUploadComplete?: () => void;
   variant?: "compact" | "full";
 }
 
@@ -29,6 +33,7 @@ export function ImageBulkUpload({
 }: ImageBulkUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isFull = variant === "full";
@@ -81,6 +86,49 @@ export function ImageBulkUpload({
   const handleClear = () => {
     setSelectedFiles([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+
+    try {
+      const result = await productoService.bulkUploadImages(selectedFiles);
+
+      if (result.success > 0) {
+        toast.success(
+          `${result.success} imagen${result.success !== 1 ? "es" : ""} subida${result.success !== 1 ? "s" : ""} correctamente`,
+          {
+            icon: <CheckmarkCircle02Icon className="size-5" />,
+          },
+        );
+      }
+
+      if (result.failed > 0) {
+        const failedSkus = result.results
+          .filter((r) => !r.success)
+          .map((r) => r.sku)
+          .join(", ");
+
+        toast.error(
+          `${result.failed} imagen${result.failed !== 1 ? "es" : ""} fallaron: ${failedSkus}`,
+          {
+            icon: <AlertCircleIcon className="size-5" />,
+          },
+        );
+      }
+
+      handleClear();
+      onUploadComplete?.();
+    } catch (error) {
+      clientErrorHandler(error, undefined, {
+        showToast: true,
+        messagePrefix: "Error al subir imágenes: ",
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -202,6 +250,7 @@ export function ImageBulkUpload({
                 size="icon-xs"
                 variant="ghost"
                 onClick={handleClear}
+                disabled={isUploading}
                 className="text-[#3d4a3d] hover:text-[#b7102a] shrink-0"
               >
                 <Cancel01Icon className="size-4" />
@@ -211,12 +260,17 @@ export function ImageBulkUpload({
             <Button
               size={isFull ? "lg" : "sm"}
               className={`mt-4 w-full rounded-[2rem] ${isFull ? "text-base" : "text-xs"}`}
-              disabled
+              onClick={handleUpload}
+              disabled={isUploading}
             >
               <Upload01Icon
                 className={`mr-2 ${isFull ? "size-5" : "size-3.5"}`}
               />
-              {isFull ? "Próximamente disponible" : "Próximamente"}
+              {isUploading
+                ? "Subiendo..."
+                : isFull
+                  ? "Subir Imágenes"
+                  : "Subir"}
             </Button>
           </motion.div>
         )}

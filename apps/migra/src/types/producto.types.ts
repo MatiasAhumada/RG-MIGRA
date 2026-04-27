@@ -40,6 +40,25 @@ export interface UpdateProductoImageDto {
   imageBase64: string;
 }
 
+export interface BulkUploadImagesDto {
+  images: {
+    sku: string;
+    file: Buffer;
+    fileName: string;
+  }[];
+}
+
+export interface BulkUploadImagesResult {
+  success: number;
+  failed: number;
+  results: {
+    sku: string;
+    success: boolean;
+    url?: string;
+    error?: string;
+  }[];
+}
+
 export interface ProductoWithEmpresa extends Producto {
   empresa: Empresa;
 }

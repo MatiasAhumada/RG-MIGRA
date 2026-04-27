@@ -8,11 +8,14 @@ import { categoriaService } from "@/server/services/categoria.service";
 import { subcategoriaService } from "@/server/services/subcategoria.service";
 import { ApiError } from "@/utils/handlers/apiError.handler";
 import { ERROR_MESSAGES } from "@/constants/error-messages.constant";
+import { COLOR_LETTER_MAP } from "@/constants/producto.constant";
 import httpStatus from "http-status";
 import {
   CreateProductoDto,
   UpdateProductoDto,
   BulkCreateProductoDto,
+  BulkUploadImagesDto,
+  BulkUploadImagesResult,
 } from "@/types/producto.types";
 
 export const productoService = {
@@ -297,5 +300,112 @@ export const productoService = {
       errors,
       total: parsedProducts.length,
     };
+  },
+
+  async bulkUploadImages(
+    dto: BulkUploadImagesDto,
+  ): Promise<BulkUploadImagesResult> {
+    const results: BulkUploadImagesResult["results"] = [];
+    let success = 0;
+    let failed = 0;
+
+    for (const image of dto.images) {
+      try {
+        const fileNameWithoutExt = image.fileName.replace(/\.[^/.]+$/, "");
+        
+        const parts = fileNameWithoutExt.split(/[\s-]+/).filter(Boolean);
+        const sku = parts[0];
+        const colorLetter = parts[1]?.toLowerCase();
+
+        const producto = await productoRepository.findBySku(sku);
+
+        if (!producto) {
+          results.push({
+            sku: image.sku,
+            success: false,
+            error: ERROR_MESSAGES.PRODUCTO_NOT_FOUND,
+          });
+          failed++;
+          continue;
+        }
+
+        let varianteId: number | undefined;
+
+        if (colorLetter && COLOR_LETTER_MAP[colorLetter]) {
+          const color = COLOR_LETTER_MAP[colorLetter];
+          const variante = await productoVarianteRepository.findByColor(
+            producto.id,
+            color,
+          );
+
+          if (variante) {
+            varianteId = variante.id;
+          }
+        }
+
+        const key = varianteId
+          ? `productos/${producto.id}-${producto.sku}-${varianteId}.webp`
+          : r2StorageService.generateProductKey(producto.id, producto.sku);
+
+        let url: string;
+
+        if (varianteId) {
+          const variante = await productoVarianteRepository.findById(
+            varianteId,
+          );
+
+          if (variante?.producto.imgUrl) {
+            const uploadResult = await r2StorageService.replaceImage(
+              image.file,
+              variante.producto.imgUrl,
+              key,
+            );
+            url = uploadResult.url;
+          } else {
+            const uploadResult = await r2StorageService.uploadImage(
+              image.file,
+              key,
+            );
+            url = uploadResult.url;
+          }
+        } else {
+          if (producto.imgUrl) {
+            const uploadResult = await r2StorageService.replaceImage(
+              image.file,
+              producto.imgUrl,
+              key,
+            );
+            url = uploadResult.url;
+          } else {
+            const uploadResult = await r2StorageService.uploadImage(
+              image.file,
+              key,
+            );
+            url = uploadResult.url;
+          }
+        }
+
+        await productoRepository.update(producto.id, { imgUrl: url });
+
+        results.push({
+          sku: image.sku,
+          success: true,
+          url,
+        });
+        success++;
+      } catch (error) {
+        results.push({
+          sku: image.sku,
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : ERROR_MESSAGES.IMAGE_UPLOAD_FAILED,
+        });
+        failed++;
+      }
+    }
+
+    return { success, failed, results };
   },
 };

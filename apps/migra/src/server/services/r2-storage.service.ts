@@ -58,6 +58,20 @@ export const r2StorageService = {
     }
   },
 
+  async replaceImage(
+    file: Buffer,
+    oldUrl: string,
+    newKey: string,
+  ): Promise<UploadImageResult> {
+    const oldKey = this.extractKeyFromUrl(oldUrl);
+
+    if (oldKey) {
+      await this.deleteImage(oldKey);
+    }
+
+    return this.uploadImage(file, newKey);
+  },
+
   async deleteImage(key: string): Promise<void> {
     if (!CONFIG.R2_BUCKET_NAME) {
       throw new ApiError({

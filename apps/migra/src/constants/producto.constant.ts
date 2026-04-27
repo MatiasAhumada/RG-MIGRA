@@ -6,6 +6,7 @@ export const COLOR_LETTER_MAP: Record<string, ColorProducto> = {
   r: ColorProducto.ROSA,
   v: ColorProducto.VERDE,
   n: ColorProducto.NEGRO,
+  g: ColorProducto.GRIS,
   gris: ColorProducto.GRIS,
 };
 
