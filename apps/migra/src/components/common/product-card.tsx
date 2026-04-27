@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart01Icon } from "hugeicons-react";
 import { formatCurrency } from "@/utils/formatters";
+import { ProductImageCarousel } from "@/components/common/ProductImageCarousel";
+import type { ProductoVariante } from "@prisma/client";
 
 interface ProductCardProps {
   id: string | number;
@@ -14,7 +16,8 @@ interface ProductCardProps {
   tipo: string;
   sku: string;
   price: number;
-  imgUrl: string;
+  imgUrl?: string | null;
+  variantes?: ProductoVariante[];
   className?: string;
   showPrice?: boolean;
   sinStock?: boolean;
@@ -29,6 +32,7 @@ export function ProductCard({
   sku,
   price,
   imgUrl,
+  variantes = [],
   className,
   showPrice: showPriceProp,
   sinStock = false,
@@ -37,7 +41,20 @@ export function ProductCard({
 
   const showPrice = showPriceProp ?? isAuthenticated;
   const formattedPrice = formatCurrency(price);
+
+  const variantImages = variantes
+    .filter((v) => v.imgUrl)
+    .map((v) => v.imgUrl as string);
+
+  const hasVariantImages = variantImages.length > 0;
   const imageSrc = imgUrl || PLACEHOLDER_IMAGE;
+
+  console.log(`Producto ${sku}:`, {
+    imgUrl,
+    variantes: variantes.length,
+    variantImages: variantImages.length,
+    hasVariantImages,
+  });
 
   return (
     <motion.div
@@ -56,16 +73,25 @@ export function ProductCard({
         )}
       >
         <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-br from-cerulean-400 to-cerulean-600">
-          <Image
-            src={imageSrc}
-            alt={name}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className={cn(
-              "object-cover transition-transform duration-500 group-hover:scale-105",
-              sinStock && "grayscale",
-            )}
-          />
+          {hasVariantImages ? (
+            <ProductImageCarousel
+              images={variantImages}
+              alt={name}
+              sinStock={sinStock}
+              interval={4000}
+            />
+          ) : (
+            <Image
+              src={imageSrc}
+              alt={name}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              className={cn(
+                "object-cover transition-transform duration-500 group-hover:scale-105",
+                sinStock && "grayscale",
+              )}
+            />
+          )}
           {sinStock && (
             <span className="absolute right-3 top-3 z-10 rounded-full bg-[#b7102a] px-3 py-1 text-xs font-bold text-white shadow-lg">
               Sin Stock

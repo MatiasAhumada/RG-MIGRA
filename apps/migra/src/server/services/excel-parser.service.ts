@@ -3,20 +3,6 @@ import { COLOR_LETTER_MAP } from "@/constants/producto.constant";
 import { ColorProducto } from "@prisma/client";
 import { ParsedProductExcel } from "@/types/producto.types";
 
-const isNumeric = (val: string): boolean => {
-  if (!val) return false;
-  const hasCurrency = val.includes("$");
-  const hasDecimalSeparators = val.includes(",") || val.includes(".");
-  const cleaned = val.replace(/[^0-9.,]/g, "");
-
-  if (!cleaned || !/[0-9]/.test(cleaned)) return false;
-
-  if (hasCurrency || hasDecimalSeparators) return true;
-
-  const num = parseFloat(cleaned);
-  return !isNaN(num) && num > 100;
-};
-
 const parsePrice = (val: string): number => {
   if (!val) return 0;
   let cleaned = val.replace(/[^0-9.,]/g, "");
@@ -45,82 +31,82 @@ export const excelParserService = {
         header: 1,
       }) as string[][];
 
-      const products = this.parseSheet(jsonData);
+      const products = this.parseSheet(jsonData, sheetName);
       allProducts.push(...products);
     }
 
     return allProducts;
   },
 
-  parseSheet(jsonData: string[][]): ParsedProductExcel[] {
+  parseSheet(jsonData: string[][], sheetName: string): ParsedProductExcel[] {
     const products: ParsedProductExcel[] = [];
 
     let currentMarca = "";
     let currentCategoria = "";
     let currentSubcategoria: string | null = null;
-    let afterHeaders = false;
 
     for (let i = 0; i < jsonData.length; i++) {
       const row = jsonData[i];
 
-      if (!row || row.length === 0) {
-        continue;
-      }
+      if (!row || row.length === 0) continue;
 
       const firstCell = String(row[0] || "").trim();
 
-      if (firstCell === "SUBCATEGORIA") {
-        afterHeaders = true;
+      if (firstCell === "SUBCATEGORIA") continue;
+
+      if (firstCell === "CATEGORIA") {
+        const nextRow = jsonData[i + 1];
+        if (nextRow && nextRow[0]) {
+          currentCategoria = String(nextRow[0]).trim().toUpperCase();
+          currentSubcategoria = null;
+        }
+        i += 2;
         continue;
       }
 
-      if (!firstCell) {
-        if (!currentMarca || !currentCategoria) {
-          continue;
-        }
+      const sku = String(row[1] || "").trim();
 
-        if (afterHeaders && currentSubcategoria === null) {
-          currentSubcategoria = "";
-        }
+      if (firstCell.startsWith("*") && !sku) {
+        currentSubcategoria = firstCell.substring(1).trim().toUpperCase();
+        continue;
+      }
 
-        if (currentSubcategoria === null) {
-          continue;
-        }
+      if (!currentCategoria && firstCell) {
+        currentMarca = firstCell.toUpperCase();
+        continue;
+      }
 
-        const sku = String(row[1] || "").trim();
+      if (currentMarca && currentCategoria) {
+        let subcategoriaCell = firstCell;
         const name = String(row[2] || "").trim();
-        const col3 = String(row[3] || "").trim();
-        const col4 = String(row[4] || "").trim();
-        const col5 = String(row[5] || "").trim();
+        const color = String(row[3] || "").trim();
+        const talle = String(row[4] || "").trim();
+        const priceStr = String(row[5] || "").trim();
+
+        if (subcategoriaCell.startsWith("*")) {
+          const extractedSubcat = subcategoriaCell
+            .substring(1)
+            .trim()
+            .toUpperCase();
+          if (extractedSubcat) {
+            currentSubcategoria = extractedSubcat;
+          }
+        }
+
+        if (!sku && !name && !color && !talle && !priceStr) {
+          continue;
+        }
 
         if (!sku || !name) {
           continue;
-        }
-
-        let color = "";
-        let talle = "";
-        let priceStr = "";
-
-        if (col5 && isNumeric(col5)) {
-          color = col3;
-          talle = col4;
-          priceStr = col5;
-        } else if (col4 && isNumeric(col4)) {
-          if (isNumeric(col3)) {
-            priceStr = col3;
-          } else {
-            color = col3;
-            priceStr = col4;
-          }
-        } else if (col3 && isNumeric(col3)) {
-          priceStr = col3;
         }
 
         const price = parsePrice(priceStr);
 
         let colorTalle = "";
         if (color && talle) {
-          colorTalle = `${color}-${talle}`;
+          const talleNum = talle.toLowerCase().replace(/[^0-9]/g, "");
+          colorTalle = talleNum ? `${color}-talle ${talleNum}` : color;
         } else if (color) {
           colorTalle = color;
         } else if (talle) {
@@ -136,88 +122,6 @@ export const excelParserService = {
           colorTalle,
           price,
         });
-
-        continue;
-      }
-
-      if (firstCell === "CATEGORIA") {
-        const nextRow = jsonData[i + 1];
-        if (nextRow && nextRow[0]) {
-          currentCategoria = String(nextRow[0]).trim().toUpperCase();
-          currentSubcategoria = null;
-          afterHeaders = false;
-        }
-        i++;
-        continue;
-      }
-
-      if (firstCell.startsWith("*")) {
-        const hasSku = row[1] && String(row[1]).trim();
-        const hasName = row[2] && String(row[2]).trim();
-
-        if (!hasSku || !hasName || hasSku === "SKU" || hasName === "NOMBRE") {
-          currentSubcategoria = firstCell.substring(1).trim().toUpperCase();
-          continue;
-        }
-
-        currentSubcategoria = firstCell.substring(1).trim().toUpperCase();
-
-        const sku = String(row[1]).trim();
-        const name = String(row[2]).trim();
-        const col3 = String(row[3] || "").trim();
-        const col4 = String(row[4] || "").trim();
-        const col5 = String(row[5] || "").trim();
-
-        if (!currentMarca || !currentCategoria) {
-          continue;
-        }
-
-        let color = "";
-        let talle = "";
-        let priceStr = "";
-
-        if (col5 && isNumeric(col5)) {
-          color = col3;
-          talle = col4;
-          priceStr = col5;
-        } else if (col4 && isNumeric(col4)) {
-          if (isNumeric(col3)) {
-            priceStr = col3;
-          } else {
-            color = col3;
-            priceStr = col4;
-          }
-        } else if (col3 && isNumeric(col3)) {
-          priceStr = col3;
-        }
-
-        const price = parsePrice(priceStr);
-
-        let colorTalle = "";
-        if (color && talle) {
-          colorTalle = `${color}-${talle}`;
-        } else if (color) {
-          colorTalle = color;
-        } else if (talle) {
-          colorTalle = talle;
-        }
-
-        products.push({
-          marca: currentMarca,
-          categoria: currentCategoria,
-          subcategoria: currentSubcategoria,
-          sku,
-          name,
-          colorTalle,
-          price,
-        });
-
-        continue;
-      }
-
-      if (!currentCategoria) {
-        currentMarca = firstCell.toUpperCase();
-        continue;
       }
     }
 
@@ -267,10 +171,15 @@ export const excelParserService = {
     }
 
     for (const code of colorCodes) {
-      const cleanCode = code.toLowerCase();
-      if (COLOR_LETTER_MAP[cleanCode]) {
+      const normalizedCode = code.toLowerCase();
+      if (COLOR_LETTER_MAP[normalizedCode]) {
         result.push({
-          color: COLOR_LETTER_MAP[cleanCode],
+          color: COLOR_LETTER_MAP[normalizedCode],
+          talle,
+        });
+      } else if (COLOR_LETTER_MAP[code]) {
+        result.push({
+          color: COLOR_LETTER_MAP[code],
           talle,
         });
       }

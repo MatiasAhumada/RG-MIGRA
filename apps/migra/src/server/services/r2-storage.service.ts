@@ -103,7 +103,13 @@ export const r2StorageService = {
     return url.replace(`${CONFIG.R2_PUBLIC_URL}/`, "");
   },
 
-  generateProductKey(id: number, sku: string): string {
-    return `productos/${id}-${sku}.webp`;
+  generateProductKey(sku: string, colorLetter?: string): string {
+    const baseKey = colorLetter ? `${sku}-${colorLetter}` : sku;
+    return `productos/${baseKey}.webp`;
+  },
+
+  async deleteImageBySku(sku: string, colorLetter?: string): Promise<void> {
+    const key = this.generateProductKey(sku, colorLetter);
+    await this.deleteImage(key);
   },
 };

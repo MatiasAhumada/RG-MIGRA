@@ -176,10 +176,10 @@ model ProductoVariante {
   id         Int            @id @default(autoincrement())
   color      ColorProducto?
   talle      Int?
+  imgUrl     String?
   sinStock   Boolean        @default(false)
   productoId Int
   producto   Producto       @relation(fields: [productoId], references: [id], onDelete: Cascade)
-  deletedAt  DateTime?
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 
