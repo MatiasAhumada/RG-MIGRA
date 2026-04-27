@@ -54,6 +54,13 @@ export const productoVarianteRepository = {
     });
   },
 
+  async updateImage(id: number, imgUrl: string) {
+    return prisma.productoVariante.update({
+      where: { id },
+      data: { imgUrl },
+    });
+  },
+
   async delete(id: number) {
     return prisma.productoVariante.update({
       where: { id },
