@@ -2,6 +2,8 @@ export { DataTable } from "./DataTable";
 export { GenericModal, ConfirmModal } from "./GenericModal";
 export { ProductCard } from "./product-card";
 export { ProductImageCarousel } from "./ProductImageCarousel";
+export { ProductForm } from "./ProductForm";
+export { ImageUpload } from "./ImageUpload";
 export { StatusBadge } from "./status-badge";
 export { PageHeader } from "./page-header";
 export { NurtureBar } from "./nurture-bar";

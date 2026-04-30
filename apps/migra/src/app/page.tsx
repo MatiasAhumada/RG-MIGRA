@@ -48,25 +48,49 @@ const itemVariants = {
 export default function HomePage() {
   const { query, setQuery } = useSearch();
   const { isAuthenticated, isClient } = useAuth();
-  const isSearching = query.trim().length > 0;
   const [bgPos, setBgPos] = useState({ x: 50, y: 50 });
   const heroRef = useRef<HTMLDivElement>(null);
   const [productos, setProductos] = useState<ProductoWithRelations[]>([]);
+  const [searchResults, setSearchResults] = useState<ProductoWithRelations[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(true);
+
+  const isSearching = query.trim().length > 0;
 
   useEffect(() => {
     loadProductos();
   }, []);
 
+  useEffect(() => {
+    if (query.trim().length > 0) {
+      const timeout = setTimeout(() => {
+        searchProductos(query);
+      }, 500);
+      return () => clearTimeout(timeout);
+    } else {
+      setSearchResults([]);
+    }
+  }, [query]);
+
   const loadProductos = async () => {
     try {
       setIsLoading(true);
-      const data = await productoService.findAll();
+      const data = await productoService.findAllActive();
       setProductos(data);
     } catch (error) {
       clientErrorHandler(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const searchProductos = async (searchQuery: string) => {
+    try {
+      const data = await productoService.findAllActive(searchQuery);
+      setSearchResults(data);
+    } catch (error) {
+      clientErrorHandler(error);
     }
   };
 
@@ -81,16 +105,7 @@ export default function HomePage() {
     setBgPos({ x: 50, y: 50 });
   };
 
-  const filteredProducts = productos.filter(
-    (p) =>
-      p.name.toLowerCase().includes(query.toLowerCase()) ||
-      p.categoria.name.toLowerCase().includes(query.toLowerCase()) ||
-      p.sku.toLowerCase().includes(query.toLowerCase()),
-  );
-
-  const displayProducts = isSearching
-    ? filteredProducts
-    : productos.slice(0, 8);
+  const displayProducts = isSearching ? searchResults : productos.slice(0, 8);
 
   return (
     <PublicLayout>
@@ -344,6 +359,7 @@ export default function HomePage() {
                   sku={product.sku}
                   price={product.price}
                   imgUrl={product.imgUrl || ""}
+                  variantes={product.variantes}
                   sinStock={product.sinStock}
                 />
               ))}
@@ -373,8 +389,8 @@ export default function HomePage() {
                         letterSpacing: "-0.02em",
                       }}
                     >
-                      {filteredProducts.length > 0
-                        ? `${filteredProducts.length} producto${filteredProducts.length > 1 ? "s" : ""} encontrado${filteredProducts.length > 1 ? "s" : ""}`
+                      {searchResults.length > 0
+                        ? `${searchResults.length} producto${searchResults.length > 1 ? "s" : ""} encontrado${searchResults.length > 1 ? "s" : ""}`
                         : "Sin resultados"}
                     </h2>
                   </div>
@@ -387,14 +403,14 @@ export default function HomePage() {
                   </Button>
                 </div>
 
-                {filteredProducts.length > 0 ? (
+                {searchResults.length > 0 ? (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                     className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
                   >
-                    {filteredProducts.map((product) => (
+                    {searchResults.map((product) => (
                       <ProductCard
                         key={product.id}
                         id={product.id}
@@ -403,6 +419,7 @@ export default function HomePage() {
                         sku={product.sku}
                         price={product.price}
                         imgUrl={product.imgUrl || ""}
+                        variantes={product.variantes}
                         sinStock={product.sinStock}
                       />
                     ))}

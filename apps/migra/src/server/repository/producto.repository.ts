@@ -159,14 +159,24 @@ export const productoRepository = {
     };
   },
 
-  async findAllActive(search?: string, empresaId?: number) {
+  async findAllActive(
+    search?: string,
+    empresaId?: number,
+    categoriaId?: number,
+  ) {
     const where = {
       deletedAt: null,
       ...(empresaId && { empresaId }),
+      ...(categoriaId && { categoriaId }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: "insensitive" as const } },
           { sku: { contains: search, mode: "insensitive" as const } },
+          {
+            categoria: {
+              name: { contains: search, mode: "insensitive" as const },
+            },
+          },
         ],
       }),
     };

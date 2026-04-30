@@ -49,13 +49,6 @@ export function ProductCard({
   const hasVariantImages = variantImages.length > 0;
   const imageSrc = imgUrl || PLACEHOLDER_IMAGE;
 
-  console.log(`Producto ${sku}:`, {
-    imgUrl,
-    variantes: variantes.length,
-    variantImages: variantImages.length,
-    hasVariantImages,
-  });
-
   return (
     <motion.div
       whileHover={sinStock ? {} : { y: -4, scale: 1.02 }}
@@ -75,6 +68,7 @@ export function ProductCard({
         <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-br from-cerulean-400 to-cerulean-600">
           {hasVariantImages ? (
             <ProductImageCarousel
+              key={`${id}-${variantImages.join("-")}`}
               images={variantImages}
               alt={name}
               sinStock={sinStock}

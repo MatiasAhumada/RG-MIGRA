@@ -12,4 +12,5 @@ export interface ProductFormData {
 export interface ProductoVarianteFormData {
   color: string;
   talle: string;
+  imgUrl?: string;
 }

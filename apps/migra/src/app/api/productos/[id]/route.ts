@@ -23,6 +23,28 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
+    const contentType = request.headers.get("content-type");
+
+    if (contentType?.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const imageFile = formData.get("image") as File | null;
+
+      if (!imageFile) {
+        throw new ApiError({
+          status: httpStatus.BAD_REQUEST,
+          message: "No se proporcionó ninguna imagen",
+        });
+      }
+
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      const base64 = buffer.toString("base64");
+      const producto = await productoService.updateImage(Number(id), base64);
+      return NextResponse.json(
+        { url: producto.imgUrl },
+        { status: httpStatus.OK },
+      );
+    }
+
     const body = await request.json();
 
     if (body.action === "restore") {

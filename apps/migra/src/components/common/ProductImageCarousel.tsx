@@ -27,6 +27,10 @@ export function ProductImageCarousel({
   const hasMultipleImages = validImages.length > 1;
 
   useEffect(() => {
+    setCurrentIndex(0);
+  }, [images]);
+
+  useEffect(() => {
     if (!hasMultipleImages) return;
 
     const timer = setInterval(() => {

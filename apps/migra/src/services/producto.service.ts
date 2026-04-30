@@ -52,10 +52,30 @@ export const productoService = {
     return data;
   },
 
-  async findAll(search?: string, empresaId?: number) {
+  async findAllActive(
+    search?: string,
+    empresaId?: number,
+    categoriaId?: number,
+  ) {
     const params: Record<string, string> = {};
     if (search) params.search = search;
     if (empresaId) params.empresaId = String(empresaId);
+    if (categoriaId) params.categoriaId = String(categoriaId);
+
+    const { data } = await clientAxios.get<ProductoWithRelations[]>(
+      API_ROUTES.PRODUCTOS,
+      {
+        params,
+      },
+    );
+    return data;
+  },
+
+  async findAll(search?: string, empresaId?: number, categoriaId?: number) {
+    const params: Record<string, string> = {};
+    if (search) params.search = search;
+    if (empresaId) params.empresaId = String(empresaId);
+    if (categoriaId) params.categoriaId = String(categoriaId);
 
     const { data } = await clientAxios.get<ProductoWithRelations[]>(
       API_ROUTES.PRODUCTOS,
@@ -193,5 +213,21 @@ export const productoService = {
       timeout: 300000,
     });
     return data;
+  },
+
+  async uploadImage(id: number, file: File) {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const { data } = await clientAxios.patch<{ url: string }>(
+      `${API_ROUTES.PRODUCTOS}/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return data.url;
   },
 };

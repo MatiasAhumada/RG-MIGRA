@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     const result = await productoService.findAllActive(
       search,
       empresaId ? Number(empresaId) : undefined,
+      categoriaId ? Number(categoriaId) : undefined,
     );
 
     return NextResponse.json(result, { status: httpStatus.OK });
