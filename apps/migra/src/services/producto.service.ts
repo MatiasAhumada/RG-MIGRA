@@ -52,10 +52,30 @@ export const productoService = {
     return data;
   },
 
-  async findAll(search?: string, empresaId?: number) {
+  async findAllActive(
+    search?: string,
+    empresaId?: number,
+    categoriaId?: number,
+  ) {
     const params: Record<string, string> = {};
     if (search) params.search = search;
     if (empresaId) params.empresaId = String(empresaId);
+    if (categoriaId) params.categoriaId = String(categoriaId);
+
+    const { data } = await clientAxios.get<ProductoWithRelations[]>(
+      API_ROUTES.PRODUCTOS,
+      {
+        params,
+      },
+    );
+    return data;
+  },
+
+  async findAll(search?: string, empresaId?: number, categoriaId?: number) {
+    const params: Record<string, string> = {};
+    if (search) params.search = search;
+    if (empresaId) params.empresaId = String(empresaId);
+    if (categoriaId) params.categoriaId = String(categoriaId);
 
     const { data } = await clientAxios.get<ProductoWithRelations[]>(
       API_ROUTES.PRODUCTOS,

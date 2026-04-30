@@ -14,10 +14,16 @@ import type { ProductoWithRelations } from "@/types/producto.types";
 export default function CatalogPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState("Todos");
+  const [activeCategoryId, setActiveCategoryId] = useState<number>();
 
   const { data: productos, isLoading } = useDataQuery<ProductoWithRelations[]>({
-    fetcher: () => productoService.findAll(debouncedSearch),
+    fetcher: () =>
+      productoService.findAllActive(
+        debouncedSearch,
+        undefined,
+        activeCategoryId,
+      ),
+    deps: [debouncedSearch, activeCategoryId],
   });
 
   const handleSearchChange = (value: string) => {
@@ -29,22 +35,16 @@ export default function CatalogPage() {
     return () => clearTimeout(timeout);
   };
 
+  const allCategories = Array.from(
+    new Map(
+      (productos || []).map((p) => [p.categoria.id, p.categoria]),
+    ).values(),
+  );
+
   const categories = [
-    "Todos",
-    ...new Set((productos || []).map((p) => p.categoria.name)),
+    { id: undefined, name: "Todos" },
+    ...allCategories.map((c) => ({ id: c.id, name: c.name })),
   ];
-
-  const filteredProducts = (productos || []).filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.categoria.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.sku.toLowerCase().includes(search.toLowerCase());
-
-    const matchesCategory =
-      activeCategory === "Todos" || product.categoria.name === activeCategory;
-
-    return matchesSearch && matchesCategory;
-  });
 
   return (
     <PublicLayout>
@@ -91,10 +91,10 @@ export default function CatalogPage() {
         >
           {categories.map((category) => (
             <button
-              key={category}
-              onClick={() => setActiveCategory(category)}
+              key={category.id ?? "todos"}
+              onClick={() => setActiveCategoryId(category.id)}
               className={`shrink-0 cursor-pointer rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] ${
-                activeCategory === category
+                activeCategoryId === category.id
                   ? "bg-[#2b6485] text-white shadow-lg"
                   : "bg-[#f3fcf0]/60 text-[#3d4a3d] hover:bg-[#f3fcf0]"
               }`}
@@ -102,13 +102,13 @@ export default function CatalogPage() {
                 fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
               }}
             >
-              {category}
+              {category.name}
             </button>
           ))}
         </motion.div>
 
         <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {filteredProducts.map((product, index) => (
+          {(productos || []).map((product, index) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 20 }}
@@ -129,7 +129,7 @@ export default function CatalogPage() {
           ))}
         </div>
 
-        {filteredProducts.length === 0 && !isLoading && (
+        {(productos || []).length === 0 && !isLoading && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 interface UseDataQueryOptions<T> {
   fetcher: () => Promise<T>;
   enabled?: boolean;
+  deps?: unknown[];
 }
 
 interface UseDataQueryResult<T> {
@@ -15,6 +16,7 @@ interface UseDataQueryResult<T> {
 export function useDataQuery<T>({
   fetcher,
   enabled = true,
+  deps = [],
 }: UseDataQueryOptions<T>): UseDataQueryResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +42,7 @@ export function useDataQuery<T>({
     if (enabled) {
       execute();
     }
-  }, [enabled, execute]);
+  }, [enabled, execute, ...deps]);
 
   return { data, isLoading, error, refetch: execute };
 }

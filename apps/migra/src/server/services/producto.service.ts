@@ -147,8 +147,12 @@ export const productoService = {
     );
   },
 
-  async findAllActive(search?: string, empresaId?: number) {
-    return productoRepository.findAllActive(search, empresaId);
+  async findAllActive(
+    search?: string,
+    empresaId?: number,
+    categoriaId?: number,
+  ) {
+    return productoRepository.findAllActive(search, empresaId, categoriaId);
   },
 
   async toggleSinStock(id: number) {
