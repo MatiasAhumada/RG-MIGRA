@@ -359,6 +359,7 @@ export default function HomePage() {
                   sku={product.sku}
                   price={product.price}
                   imgUrl={product.imgUrl || ""}
+                  variantes={product.variantes}
                   sinStock={product.sinStock}
                 />
               ))}
@@ -418,6 +419,7 @@ export default function HomePage() {
                         sku={product.sku}
                         price={product.price}
                         imgUrl={product.imgUrl || ""}
+                        variantes={product.variantes}
                         sinStock={product.sinStock}
                       />
                     ))}
