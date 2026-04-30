@@ -11,10 +11,10 @@ import {
   TableSkeleton,
   PdfUpload,
   ImageBulkUpload,
+  ProductForm,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -30,6 +30,7 @@ import {
   ViewOffSlashIcon,
   Delete01Icon,
   CheckmarkCircle01Icon,
+  FileViewIcon,
 } from "hugeicons-react";
 import { productoService, categoriaService, marcaService } from "@/services";
 import {
@@ -45,10 +46,8 @@ import type {
 import type {
   MarcaWithCategorias,
   ProductFormData,
-  ProductoVarianteFormData,
   ColorProducto,
 } from "@/types";
-import { COLORES_PRODUCTO } from "@/constants/producto.constant";
 import { getMarcaColor } from "@/constants/marca-colors.constant";
 
 const INITIAL_FORM_DATA: ProductFormData = {
@@ -69,6 +68,7 @@ export default function AdminProductosPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] =
     useState<ProductoWithRelations | null>(null);
@@ -145,6 +145,26 @@ export default function AdminProductosPage() {
       })),
     });
     setIsEditModalOpen(true);
+  };
+
+  const handleOpenViewModal = (product: ProductoWithRelations) => {
+    setSelectedProduct(product);
+    setFormData({
+      name: product.name,
+      sku: product.sku,
+      price: String(product.price),
+      imgUrl: product.imgUrl || "",
+      marcaId: String(product.marcaId),
+      categoriaId: String(product.categoriaId),
+      subcategoriaId: product.subcategoriaId
+        ? String(product.subcategoriaId)
+        : "",
+      variantes: product.variantes.map((v) => ({
+        color: v.color || "",
+        talle: v.talle ? String(v.talle) : "",
+      })),
+    });
+    setIsViewModalOpen(true);
   };
 
   const handleOpenDeleteModal = (product: ProductoWithRelations) => {
@@ -293,245 +313,12 @@ export default function AdminProductosPage() {
     }
   };
 
-  const handleAddVariante = () => {
-    setFormData({
-      ...formData,
-      variantes: [...formData.variantes, { color: "", talle: "" }],
-    });
-  };
-
-  const handleRemoveVariante = (index: number) => {
-    setFormData({
-      ...formData,
-      variantes: formData.variantes.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleVarianteChange = (
-    index: number,
-    field: keyof ProductoVarianteFormData,
-    value: string,
-  ) => {
-    const newVariantes = [...formData.variantes];
-    newVariantes[index] = { ...newVariantes[index], [field]: value };
-    setFormData({ ...formData, variantes: newVariantes });
-  };
-
-  const selectedMarca = marcas.find((m) => m.id === Number(formData.marcaId));
-  const categorias = selectedMarca?.categorias || [];
-  const selectedCategoria = categorias.find(
-    (c) => c.id === Number(formData.categoriaId),
-  );
-  const subcategorias = selectedCategoria?.subcategorias || [];
-
   const filterMarca = marcas.find((m) => m.id === Number(filterMarcaId));
   const filterCategorias = filterMarca?.categorias || [];
   const filterCategoria = filterCategorias.find(
     (c) => c.id === Number(filterCategoriaId),
   );
   const filterSubcategorias = filterCategoria?.subcategorias || [];
-
-  const renderForm = () => (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <Label>Nombre</Label>
-          <Input
-            placeholder="Nombre del producto"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full"
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label>SKU</Label>
-          <Input
-            placeholder="Código SKU"
-            value={formData.sku}
-            onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-            className="w-full"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label>Precio</Label>
-        <Input
-          type="number"
-          placeholder="0.00"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-          className="w-full"
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label>Marca</Label>
-        <Select
-          value={formData.marcaId}
-          onValueChange={(value) =>
-            setFormData({
-              ...formData,
-              marcaId: value,
-              categoriaId: "",
-              subcategoriaId: "",
-            })
-          }
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Seleccionar marca" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            {marcas.map((marca) => (
-              <SelectItem key={marca.id} value={String(marca.id)}>
-                {marca.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label>Categoría</Label>
-        <Select
-          value={formData.categoriaId}
-          onValueChange={(value) =>
-            setFormData({ ...formData, categoriaId: value, subcategoriaId: "" })
-          }
-          disabled={!formData.marcaId}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Seleccionar categoría" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            {categorias.map((categoria) => (
-              <SelectItem key={categoria.id} value={String(categoria.id)}>
-                {categoria.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label>
-          Subcategoría {subcategorias.length === 0 && "(No disponible)"}
-        </Label>
-        <Select
-          value={formData.subcategoriaId}
-          onValueChange={(value) =>
-            setFormData({ ...formData, subcategoriaId: value })
-          }
-          disabled={!formData.categoriaId || subcategorias.length === 0}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue
-              placeholder={
-                subcategorias.length === 0
-                  ? "Sin subcategorías"
-                  : "Seleccionar subcategoría"
-              }
-            />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            {subcategorias.map((subcategoria) => (
-              <SelectItem key={subcategoria.id} value={String(subcategoria.id)}>
-                {subcategoria.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label>URL de Imagen (opcional)</Label>
-        <Input
-          placeholder="https://..."
-          value={formData.imgUrl}
-          onChange={(e) => setFormData({ ...formData, imgUrl: e.target.value })}
-          className="w-full"
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <Label>Variantes (Color y Talle) - Opcional</Label>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={handleAddVariante}
-            className="gap-2"
-          >
-            <Add01Icon className="size-4" />
-            Agregar Variante
-          </Button>
-        </div>
-
-        {formData.variantes.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No hay variantes agregadas
-          </p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {formData.variantes.map((variante, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-1 gap-3 rounded-lg border p-3 sm:grid-cols-[1fr_1fr_auto]"
-              >
-                <div className="flex flex-col gap-1">
-                  <Label className="text-xs">Color (opcional)</Label>
-                  <Select
-                    value={variante.color}
-                    onValueChange={(value) =>
-                      handleVarianteChange(index, "color", value)
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar color" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      {COLORES_PRODUCTO.map((color) => (
-                        <SelectItem key={color.value} value={color.value}>
-                          {color.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <Label className="text-xs">Talle (opcional)</Label>
-                  <Input
-                    type="number"
-                    placeholder="Ej: 1, 2, 3..."
-                    value={variante.talle}
-                    onChange={(e) =>
-                      handleVarianteChange(index, "talle", e.target.value)
-                    }
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="flex items-end">
-                  <Button
-                    type="button"
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={() => handleRemoveVariante(index)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Delete01Icon className="size-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
 
   return (
     <AppLayout variant="admin">
@@ -786,6 +573,14 @@ export default function AdminProductosPage() {
                     <Button
                       variant="ghost"
                       size="icon-sm"
+                      onClick={() => handleOpenViewModal(item)}
+                      title="Ver detalles"
+                    >
+                      <FileViewIcon className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => handleToggleSinStock(item)}
                       title={
                         item.sinStock ? "Marcar disponible" : "Marcar sin stock"
@@ -874,7 +669,31 @@ export default function AdminProductosPage() {
           </>
         }
       >
-        {renderForm()}
+        <ProductForm
+          formData={formData}
+          marcas={marcas}
+          onFormDataChange={setFormData}
+        />
+      </GenericModal>
+
+      <GenericModal
+        open={isViewModalOpen}
+        onOpenChange={setIsViewModalOpen}
+        title="Detalles del Producto"
+        description="Información completa del producto"
+        size="lg"
+        footer={
+          <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
+            Cerrar
+          </Button>
+        }
+      >
+        <ProductForm
+          formData={formData}
+          marcas={marcas}
+          onFormDataChange={setFormData}
+          disabled
+        />
       </GenericModal>
 
       <GenericModal
@@ -898,7 +717,11 @@ export default function AdminProductosPage() {
           </>
         }
       >
-        {renderForm()}
+        <ProductForm
+          formData={formData}
+          marcas={marcas}
+          onFormDataChange={setFormData}
+        />
       </GenericModal>
 
       <ConfirmModal
