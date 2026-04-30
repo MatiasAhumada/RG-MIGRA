@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Add01Icon, Delete01Icon } from "hugeicons-react";
 import { COLORES_PRODUCTO } from "@/constants/producto.constant";
+import { ImageUpload } from "@/components/common/ImageUpload";
 import type {
   MarcaWithCategorias,
   ProductFormData,
@@ -22,6 +23,8 @@ interface ProductFormProps {
   formData: ProductFormData;
   marcas: MarcaWithCategorias[];
   onFormDataChange: (data: ProductFormData) => void;
+  onImageChange?: (file: File | null) => void;
+  onVariantImageChange?: (index: number, file: File | null) => void;
   disabled?: boolean;
 }
 
@@ -29,6 +32,8 @@ export function ProductForm({
   formData,
   marcas,
   onFormDataChange,
+  onImageChange,
+  onVariantImageChange,
   disabled = false,
 }: ProductFormProps) {
   const selectedMarca = marcas.find((m) => m.id === Number(formData.marcaId));
@@ -195,16 +200,27 @@ export function ProductForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label>URL de Imagen (opcional)</Label>
-        <Input
-          placeholder="https://..."
-          value={formData.imgUrl}
-          onChange={(e) =>
-            onFormDataChange({ ...formData, imgUrl: e.target.value })
-          }
-          disabled={disabled}
-          className="w-full"
-        />
+        <Label>Imagen del Producto (opcional)</Label>
+        {disabled ? (
+          formData.imgUrl ? (
+            <div className="relative h-32 w-32 overflow-hidden rounded-lg border">
+              <img
+                src={formData.imgUrl}
+                alt="Producto"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Sin imagen</p>
+          )
+        ) : (
+          <ImageUpload
+            value={formData.imgUrl}
+            onChange={(file) => onImageChange?.(file)}
+            disabled={disabled}
+            label="Imagen"
+          />
+        )}
       </div>
 
       <div className="flex flex-col gap-2">
@@ -233,57 +249,87 @@ export function ProductForm({
             {formData.variantes.map((variante, index) => (
               <div
                 key={index}
-                className="grid grid-cols-1 gap-3 rounded-lg border p-3 sm:grid-cols-[1fr_1fr_auto]"
+                className="flex flex-col gap-3 rounded-lg border p-3"
               >
-                <div className="flex flex-col gap-1">
-                  <Label className="text-xs">Color (opcional)</Label>
-                  <Select
-                    value={variante.color}
-                    onValueChange={(value) =>
-                      handleVarianteChange(index, "color", value)
-                    }
-                    disabled={disabled}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccionar color" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      {COLORES_PRODUCTO.map((color) => (
-                        <SelectItem key={color.value} value={color.value}>
-                          {color.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <Label className="text-xs">Talle (opcional)</Label>
-                  <Input
-                    type="number"
-                    placeholder="Ej: 1, 2, 3..."
-                    value={variante.talle}
-                    onChange={(e) =>
-                      handleVarianteChange(index, "talle", e.target.value)
-                    }
-                    disabled={disabled}
-                    className="w-full"
-                  />
-                </div>
-
-                {!disabled && (
-                  <div className="flex items-end">
-                    <Button
-                      type="button"
-                      size="icon-sm"
-                      variant="ghost"
-                      onClick={() => handleRemoveVariante(index)}
-                      className="text-destructive hover:text-destructive"
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs">Color (opcional)</Label>
+                    <Select
+                      value={variante.color}
+                      onValueChange={(value) =>
+                        handleVarianteChange(index, "color", value)
+                      }
+                      disabled={disabled}
                     >
-                      <Delete01Icon className="size-4" />
-                    </Button>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar color" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        {COLORES_PRODUCTO.map((color) => (
+                          <SelectItem key={color.value} value={color.value}>
+                            {color.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
+
+                  <div className="flex flex-col gap-1">
+                    <Label className="text-xs">Talle (opcional)</Label>
+                    <Input
+                      type="number"
+                      placeholder="Ej: 1, 2, 3..."
+                      value={variante.talle}
+                      onChange={(e) =>
+                        handleVarianteChange(index, "talle", e.target.value)
+                      }
+                      disabled={disabled}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {!disabled && (
+                    <div className="flex items-end">
+                      <Button
+                        type="button"
+                        size="icon-sm"
+                        variant="ghost"
+                        onClick={() => handleRemoveVariante(index)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Delete01Icon className="size-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <Label className="text-xs">
+                    Imagen de Variante (opcional)
+                  </Label>
+                  {disabled ? (
+                    variante.imgUrl ? (
+                      <div className="relative h-24 w-24 overflow-hidden rounded-lg border">
+                        <img
+                          src={variante.imgUrl}
+                          alt={`Variante ${index + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">
+                        Sin imagen
+                      </p>
+                    )
+                  ) : (
+                    <ImageUpload
+                      value={variante.imgUrl}
+                      onChange={(file) => onVariantImageChange?.(index, file)}
+                      disabled={disabled}
+                      label="Variante"
+                    />
+                  )}
+                </div>
               </div>
             ))}
           </div>

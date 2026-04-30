@@ -214,4 +214,20 @@ export const productoService = {
     });
     return data;
   },
+
+  async uploadImage(id: number, file: File) {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const { data } = await clientAxios.patch<{ url: string }>(
+      `${API_ROUTES.PRODUCTOS}/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
+    );
+    return data.url;
+  },
 };

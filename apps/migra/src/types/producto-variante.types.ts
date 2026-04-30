@@ -13,6 +13,7 @@ export interface CreateProductoVarianteDto {
   talle?: number;
   sinStock?: boolean;
   productoId: number;
+  imgUrl?: string;
 }
 
 export interface UpdateProductoVarianteDto extends Partial<CreateProductoVarianteDto> {}

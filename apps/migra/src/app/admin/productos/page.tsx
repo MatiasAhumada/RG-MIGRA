@@ -33,6 +33,7 @@ import {
   FileViewIcon,
 } from "hugeicons-react";
 import { productoService, categoriaService, marcaService } from "@/services";
+import { productoVarianteService } from "@/services/producto-variante.service";
 import {
   clientSuccessHandler,
   clientErrorHandler,
@@ -74,6 +75,10 @@ export default function AdminProductosPage() {
     useState<ProductoWithRelations | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(INITIAL_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [productImage, setProductImage] = useState<File | null>(null);
+  const [variantImages, setVariantImages] = useState<Map<number, File>>(
+    new Map(),
+  );
 
   const [search, setSearch] = useState("");
   const [filterMarcaId, setFilterMarcaId] = useState("all");
@@ -120,6 +125,8 @@ export default function AdminProductosPage() {
 
   const handleOpenCreateModal = () => {
     setFormData(INITIAL_FORM_DATA);
+    setProductImage(null);
+    setVariantImages(new Map());
     setIsCreateModalOpen(true);
   };
 
@@ -142,8 +149,11 @@ export default function AdminProductosPage() {
       variantes: product.variantes.map((v) => ({
         color: v.color || "",
         talle: v.talle ? String(v.talle) : "",
+        imgUrl: v.imgUrl || "",
       })),
     });
+    setProductImage(null);
+    setVariantImages(new Map());
     setIsEditModalOpen(true);
   };
 
@@ -162,6 +172,7 @@ export default function AdminProductosPage() {
       variantes: product.variantes.map((v) => ({
         color: v.color || "",
         talle: v.talle ? String(v.talle) : "",
+        imgUrl: v.imgUrl || "",
       })),
     });
     setIsViewModalOpen(true);
@@ -217,7 +228,24 @@ export default function AdminProductosPage() {
             : undefined,
       };
 
-      await productoService.create(dto);
+      const createdProduct = await productoService.create(dto);
+
+      if (productImage) {
+        await productoService.uploadImage(createdProduct.id, productImage);
+      }
+
+      if (variantImages.size > 0) {
+        const fullProduct = await productoService.findById(createdProduct.id);
+        if (fullProduct.variantes) {
+          for (const [index, file] of variantImages.entries()) {
+            const variante = fullProduct.variantes[index];
+            if (variante) {
+              await productoVarianteService.uploadImage(variante.id, file);
+            }
+          }
+        }
+      }
+
       clientSuccessHandler("Producto creado exitosamente");
       setIsCreateModalOpen(false);
       await loadData();
@@ -257,6 +285,20 @@ export default function AdminProductosPage() {
       };
 
       await productoService.update(selectedProduct.id, dto);
+
+      if (productImage) {
+        await productoService.uploadImage(selectedProduct.id, productImage);
+      }
+
+      if (variantImages.size > 0 && selectedProduct.variantes) {
+        for (const [index, file] of variantImages.entries()) {
+          const variante = selectedProduct.variantes[index];
+          if (variante) {
+            await productoVarianteService.uploadImage(variante.id, file);
+          }
+        }
+      }
+
       clientSuccessHandler("Producto actualizado exitosamente");
       setIsEditModalOpen(false);
       await loadData();
@@ -673,6 +715,16 @@ export default function AdminProductosPage() {
           formData={formData}
           marcas={marcas}
           onFormDataChange={setFormData}
+          onImageChange={(file) => setProductImage(file)}
+          onVariantImageChange={(index, file) => {
+            const newMap = new Map(variantImages);
+            if (file) {
+              newMap.set(index, file);
+            } else {
+              newMap.delete(index);
+            }
+            setVariantImages(newMap);
+          }}
         />
       </GenericModal>
 
@@ -721,6 +773,16 @@ export default function AdminProductosPage() {
           formData={formData}
           marcas={marcas}
           onFormDataChange={setFormData}
+          onImageChange={(file) => setProductImage(file)}
+          onVariantImageChange={(index, file) => {
+            const newMap = new Map(variantImages);
+            if (file) {
+              newMap.set(index, file);
+            } else {
+              newMap.delete(index);
+            }
+            setVariantImages(newMap);
+          }}
         />
       </GenericModal>
 

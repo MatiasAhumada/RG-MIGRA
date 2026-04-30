@@ -1,58 +1,20 @@
 import clientAxios from "@/utils/clientAxios.util";
 import { API_ROUTES } from "@/constants/routes";
-import type {
-  ProductoVarianteWithProducto,
-  CreateProductoVarianteDto,
-  UpdateProductoVarianteDto,
-} from "@/types/producto-variante.types";
 
 export const productoVarianteService = {
-  async findAll(productoId?: number) {
-    const params: Record<string, string> = {};
-    if (productoId) params.productoId = String(productoId);
+  async uploadImage(id: number, file: File) {
+    const formData = new FormData();
+    formData.append("image", file);
 
-    const { data } = await clientAxios.get<ProductoVarianteWithProducto[]>(
-      API_ROUTES.PRODUCTO_VARIANTES,
-      { params },
+    const { data } = await clientAxios.patch<{ url: string }>(
+      `${API_ROUTES.PRODUCTOS}/variantes/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      },
     );
-    return data;
-  },
-
-  async findById(id: number) {
-    const { data } = await clientAxios.get<ProductoVarianteWithProducto>(
-      `${API_ROUTES.PRODUCTO_VARIANTES}/${id}`,
-    );
-    return data;
-  },
-
-  async create(dto: CreateProductoVarianteDto) {
-    const { data } = await clientAxios.post<ProductoVarianteWithProducto>(
-      API_ROUTES.PRODUCTO_VARIANTES,
-      dto,
-    );
-    return data;
-  },
-
-  async update(id: number, dto: UpdateProductoVarianteDto) {
-    const { data } = await clientAxios.patch<ProductoVarianteWithProducto>(
-      `${API_ROUTES.PRODUCTO_VARIANTES}/${id}`,
-      dto,
-    );
-    return data;
-  },
-
-  async delete(id: number) {
-    const { data } = await clientAxios.delete(
-      `${API_ROUTES.PRODUCTO_VARIANTES}/${id}`,
-    );
-    return data;
-  },
-
-  async toggleSinStock(id: number, sinStock: boolean) {
-    const { data } = await clientAxios.patch<ProductoVarianteWithProducto>(
-      `${API_ROUTES.PRODUCTO_VARIANTES}/${id}`,
-      { sinStock },
-    );
-    return data;
+    return data.url;
   },
 };
