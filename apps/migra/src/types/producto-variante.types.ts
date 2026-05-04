@@ -9,6 +9,7 @@ export type ProductoVariante = PrismaProductoVariante;
 export type ColorProducto = PrismaColorProducto;
 
 export interface CreateProductoVarianteDto {
+  sku?: string;
   color?: ColorProducto;
   talle?: number;
   sinStock?: boolean;
