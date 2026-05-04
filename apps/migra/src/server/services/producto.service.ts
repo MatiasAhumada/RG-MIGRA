@@ -9,6 +9,7 @@ import { subcategoriaService } from "@/server/services/subcategoria.service";
 import { ApiError } from "@/utils/handlers/apiError.handler";
 import { ERROR_MESSAGES } from "@/constants/error-messages.constant";
 import { COLOR_LETTER_MAP } from "@/constants/producto.constant";
+import { ColorProducto } from "@/types/producto-variante.types";
 import httpStatus from "http-status";
 import {
   CreateProductoDto,
@@ -310,7 +311,7 @@ export const productoService = {
 
         const variantMap = new Map<
           string,
-          { color?: string; talle?: number; skus: string[] }
+          { color?: ColorProducto; talle?: number; skus: string[] }
         >();
 
         for (const variant of groupedProduct.variants) {
