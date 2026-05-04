@@ -122,4 +122,33 @@ export const productoVarianteRepository = {
       },
     });
   },
+
+  async findByColorTalleAndSku(
+    productoId: number,
+    color?: string,
+    talle?: number,
+    sku?: string,
+  ) {
+    return prisma.productoVariante.findFirst({
+      where: {
+        productoId,
+        color: color as never,
+        talle,
+        sku,
+      },
+    });
+  },
+
+  async findBySku(sku: string) {
+    return prisma.productoVariante.findFirst({
+      where: {
+        sku: {
+          contains: sku,
+        },
+      },
+      include: {
+        producto: true,
+      },
+    });
+  },
 };

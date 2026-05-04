@@ -212,28 +212,75 @@ export const productoService = {
       dto.excelBuffer!,
     );
 
+    const productsByName = new Map<
+      string,
+      {
+        marca: string;
+        categoria: string;
+        subcategoria: string | null;
+        name: string;
+        price: number;
+        variants: Array<{
+          sku: string;
+          colorTalle: string;
+        }>;
+      }
+    >();
+
+    for (const parsed of parsedProducts) {
+      const key = `${parsed.marca}-${parsed.categoria}-${parsed.subcategoria || ""}-${parsed.name}`;
+
+      if (productsByName.has(key)) {
+        const existing = productsByName.get(key)!;
+        existing.variants.push({
+          sku: parsed.sku,
+          colorTalle: parsed.colorTalle,
+        });
+      } else {
+        productsByName.set(key, {
+          marca: parsed.marca,
+          categoria: parsed.categoria,
+          subcategoria: parsed.subcategoria,
+          name: parsed.name,
+          price: parsed.price,
+          variants: [
+            {
+              sku: parsed.sku,
+              colorTalle: parsed.colorTalle,
+            },
+          ],
+        });
+      }
+    }
+
     const created = [];
     const errors = [];
     const updated = [];
     const empresaId = dto.empresaId;
 
-    for (const parsed of parsedProducts) {
+    for (const [, groupedProduct] of productsByName) {
       try {
-        const marca = await marcaService.findByName(parsed.marca, empresaId);
+        const marca = await marcaService.findByName(
+          groupedProduct.marca,
+          empresaId,
+        );
         const categoria = await categoriaService.findByName(
-          parsed.categoria,
+          groupedProduct.categoria,
           empresaId,
           marca.id,
         );
-        const subcategoria = parsed.subcategoria
+        const subcategoria = groupedProduct.subcategoria
           ? await subcategoriaService.findByName(
-              parsed.subcategoria,
+              groupedProduct.subcategoria,
               categoria.id,
               empresaId,
             )
           : null;
 
-        const existing = await productoRepository.findBySku(parsed.sku);
+        const firstVariant = groupedProduct.variants[0];
+        const mainSku = firstVariant.sku;
+
+        const existing = await productoRepository.findBySku(mainSku);
 
         let producto;
 
@@ -241,8 +288,8 @@ export const productoService = {
           await productoVarianteRepository.deleteAllByProductoId(existing.id);
 
           producto = await productoRepository.update(existing.id, {
-            name: parsed.name,
-            price: parsed.price,
+            name: groupedProduct.name,
+            price: groupedProduct.price,
             categoriaId: categoria.id,
             subcategoriaId: subcategoria?.id,
             marcaId: marca.id,
@@ -250,9 +297,9 @@ export const productoService = {
           updated.push(producto);
         } else {
           producto = await productoRepository.create({
-            sku: parsed.sku,
-            name: parsed.name,
-            price: parsed.price,
+            sku: mainSku,
+            name: groupedProduct.name,
+            price: groupedProduct.price,
             empresaId,
             categoriaId: categoria.id,
             subcategoriaId: subcategoria?.id,
@@ -261,39 +308,52 @@ export const productoService = {
           created.push(producto);
         }
 
-        if (parsed.colorTalle) {
-          const variantesData = excelParserService.parseColorTalle(
-            parsed.colorTalle,
-          );
+        const variantMap = new Map<
+          string,
+          { color?: string; talle?: number; skus: string[] }
+        >();
 
-          for (const vd of variantesData) {
-            if (vd.color || vd.talle) {
-              const existingVariante =
-                await productoVarianteRepository.findByColorAndTalleIfExists(
-                  producto.id,
-                  vd.color,
-                  vd.talle,
-                );
+        for (const variant of groupedProduct.variants) {
+          if (variant.colorTalle) {
+            const variantesData = excelParserService.parseColorTalle(
+              variant.colorTalle,
+            );
 
-              if (!existingVariante) {
-                await productoVarianteRepository.create({
-                  color: vd.color,
-                  talle: vd.talle,
-                  productoId: producto.id,
-                });
+            for (const vd of variantesData) {
+              if (vd.color || vd.talle) {
+                const variantKey = `${vd.color || ""}-${vd.talle || ""}`;
+                if (variantMap.has(variantKey)) {
+                  variantMap.get(variantKey)!.skus.push(variant.sku);
+                } else {
+                  variantMap.set(variantKey, {
+                    color: vd.color,
+                    talle: vd.talle,
+                    skus: [variant.sku],
+                  });
+                }
               }
             }
           }
         }
+
+        for (const [, variantData] of variantMap) {
+          const skuToStore = variantData.skus.join(",");
+
+          await productoVarianteRepository.create({
+            color: variantData.color,
+            talle: variantData.talle,
+            sku: skuToStore,
+            productoId: producto.id,
+          });
+        }
       } catch (error) {
         const errorMessage = (error as Error).message;
         console.error(
-          `Error procesando producto SKU ${parsed.sku} (${parsed.name}):`,
+          `Error procesando producto ${groupedProduct.name}:`,
           errorMessage,
         );
         errors.push({
-          sku: parsed.sku,
-          name: parsed.name,
+          name: groupedProduct.name,
           error: errorMessage,
         });
       }
@@ -303,7 +363,7 @@ export const productoService = {
       created: created.length,
       updated: updated.length,
       errors,
-      total: parsedProducts.length,
+      total: productsByName.size,
     };
   },
 
@@ -314,95 +374,22 @@ export const productoService = {
     let success = 0;
     let failed = 0;
 
-    const validations: Array<{
-      image: (typeof dto.images)[0];
-      producto: Awaited<ReturnType<typeof productoRepository.findBySku>>;
-      variante?: Awaited<
-        ReturnType<typeof productoVarianteRepository.findByColor>
-      >;
-      sku: string;
-      colorLetter?: string;
-      error?: string;
-    }> = [];
-
     for (const image of dto.images) {
       const fileNameWithoutExt = image.fileName.replace(/\.[^/.]+$/, "");
       const parts = fileNameWithoutExt.split(/[\s-]+/).filter(Boolean);
       const sku = parts[0];
       const colorLetter = parts[1];
 
-      const producto = await productoRepository.findBySku(sku);
-
-      if (!producto) {
-        validations.push({
-          image,
-          producto: null as never,
-          sku: fileNameWithoutExt,
-          error: `${ERROR_MESSAGES.PRODUCTO_NOT_FOUND} (SKU: ${sku})`,
-        });
-        continue;
-      }
-
-      if (colorLetter && COLOR_LETTER_MAP[colorLetter]) {
-        const color = COLOR_LETTER_MAP[colorLetter];
-        const variante = await productoVarianteRepository.findByColor(
-          producto.id,
-          color,
-        );
-
-        if (!variante) {
-          validations.push({
-            image,
-            producto,
-            sku: fileNameWithoutExt,
-            colorLetter,
-            error: `Variante con color ${colorLetter} no encontrada`,
-          });
-          continue;
-        }
-
-        validations.push({
-          image,
-          producto,
-          variante,
-          sku: fileNameWithoutExt,
-          colorLetter,
-        });
-      } else {
-        validations.push({
-          image,
-          producto,
-          sku: fileNameWithoutExt,
-        });
-      }
-    }
-
-    for (const validation of validations) {
-      if (validation.error) {
-        results.push({
-          sku: validation.sku,
-          success: false,
-          error: validation.error,
-        });
-        failed++;
-        continue;
-      }
-
       try {
-        const { image, producto, variante, sku, colorLetter } = validation;
+        const variante = await productoVarianteRepository.findBySku(sku);
 
-        if (!producto) {
-          throw new Error(ERROR_MESSAGES.PRODUCTO_NOT_FOUND);
-        }
-
-        let url: string;
-
-        if (colorLetter && variante) {
+        if (variante) {
           const key = r2StorageService.generateProductKey(
-            producto.sku,
-            colorLetter.toLowerCase(),
+            sku,
+            colorLetter?.toLowerCase(),
           );
 
+          let url: string;
           if (variante.imgUrl) {
             const uploadResult = await r2StorageService.replaceImage(
               image.file,
@@ -419,29 +406,50 @@ export const productoService = {
           }
 
           await productoVarianteRepository.updateImage(variante.id, url);
-        } else {
-          const key = r2StorageService.generateProductKey(producto.sku);
 
-          if (producto.imgUrl) {
-            const uploadResult = await r2StorageService.replaceImage(
-              image.file,
-              producto.imgUrl,
-              key,
-            );
-            url = uploadResult.url;
-          } else {
-            const uploadResult = await r2StorageService.uploadImage(
-              image.file,
-              key,
-            );
-            url = uploadResult.url;
-          }
-
-          await productoRepository.update(producto.id, { imgUrl: url });
+          results.push({
+            sku: fileNameWithoutExt,
+            success: true,
+            url,
+          });
+          success++;
+          continue;
         }
 
+        const producto = await productoRepository.findBySku(sku);
+
+        if (!producto) {
+          results.push({
+            sku: fileNameWithoutExt,
+            success: false,
+            error: `${ERROR_MESSAGES.PRODUCTO_NOT_FOUND} (SKU: ${sku})`,
+          });
+          failed++;
+          continue;
+        }
+
+        const key = r2StorageService.generateProductKey(sku);
+
+        let url: string;
+        if (producto.imgUrl) {
+          const uploadResult = await r2StorageService.replaceImage(
+            image.file,
+            producto.imgUrl,
+            key,
+          );
+          url = uploadResult.url;
+        } else {
+          const uploadResult = await r2StorageService.uploadImage(
+            image.file,
+            key,
+          );
+          url = uploadResult.url;
+        }
+
+        await productoRepository.update(producto.id, { imgUrl: url });
+
         results.push({
-          sku,
+          sku: fileNameWithoutExt,
           success: true,
           url,
         });
@@ -453,14 +461,14 @@ export const productoService = {
             : ERROR_MESSAGES.IMAGE_UPLOAD_FAILED;
 
         results.push({
-          sku: validation.sku,
+          sku: fileNameWithoutExt,
           success: false,
           error: errorMessage,
         });
         failed++;
 
         console.error(
-          `Error uploading ${validation.image.fileName}:`,
+          `Error uploading ${image.fileName}:`,
           errorMessage,
         );
       }
