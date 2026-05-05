@@ -207,16 +207,19 @@ model Pedido {
 }
 
 model DetallePedido {
-  id         Int       @id @default(autoincrement())
-  cantidad   Int
-  total      Float
-  pedidoId   Int
-  pedido     Pedido    @relation(fields: [pedidoId], references: [id])
-  productoId Int
-  producto   Producto  @relation(fields: [productoId], references: [id], onDelete: Restrict)
-  deletedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id          Int            @id @default(autoincrement())
+  cantidad    Int
+  total       Float
+  color       ColorProducto?
+  talle       Int?
+  varianteSku String?
+  pedidoId    Int
+  pedido      Pedido         @relation(fields: [pedidoId], references: [id])
+  productoId  Int
+  producto    Producto       @relation(fields: [productoId], references: [id], onDelete: Restrict)
+  deletedAt   DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@map("detalle_pedidos")
 }
