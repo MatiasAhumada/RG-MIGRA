@@ -457,6 +457,18 @@ export const productoService = {
 
         await productoRepository.update(producto.id, { imgUrl: url });
 
+        const productoConVariantes = await productoRepository.findById(
+          producto.id,
+        );
+
+        if (productoConVariantes?.variantes) {
+          for (const variante of productoConVariantes.variantes) {
+            if (!variante.imgUrl) {
+              await productoVarianteRepository.updateImage(variante.id, url);
+            }
+          }
+        }
+
         results.push({
           sku: fileNameWithoutExt,
           success: true,
