@@ -2,14 +2,21 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { GenericModal } from "@/components/common/GenericModal";
 import { ColorButton } from "@/components/common/ColorButton";
 import { TalleButton } from "@/components/common/TalleButton";
 import { Button } from "@/components/ui/button";
 import { ProductImageCarousel } from "@/components/common/ProductImageCarousel";
-import { ShoppingCart01Icon, Add01Icon, Remove01Icon } from "hugeicons-react";
+import {
+  ShoppingCart01Icon,
+  Add01Icon,
+  Remove01Icon,
+  Login02Icon,
+} from "hugeicons-react";
 import { formatCurrency } from "@/utils/formatters";
 import { useAuth } from "@/context/auth-context";
+import { ROUTES } from "@/constants/routes";
 import type { ProductoWithRelations } from "@/types/producto.types";
 import type { ColorProducto } from "@/types/producto-variante.types";
 
@@ -118,9 +125,40 @@ export function ProductDetailModal({
                 {formatCurrency(producto.price)}
               </p>
             ) : (
-              <p className="text-sm text-on-surface-variant">
-                Inicia sesión para ver el precio
-              </p>
+              <div className="rounded-xl border-2 border-dashed border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 p-6">
+                <div className="flex items-center gap-4">
+                  <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
+                    <Login02Icon className="size-6 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-on-surface">
+                      Inicia sesión para ver precios
+                    </p>
+                    <p className="text-xs text-on-surface-variant">
+                      Accede a precios exclusivos y realiza pedidos
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <Link href={ROUTES.LOGIN} className="flex-1">
+                    <Button
+                      size="lg"
+                      className="w-full gradient-primary text-white shadow-ambient"
+                    >
+                      Iniciar Sesión
+                    </Button>
+                  </Link>
+                  <Link href={ROUTES.REGISTER} className="flex-1">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full border-primary text-primary hover:bg-primary/5"
+                    >
+                      Registrarse
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             )}
           </div>
 
