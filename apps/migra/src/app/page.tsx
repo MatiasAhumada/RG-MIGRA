@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, type MouseEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PublicLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/common";
@@ -17,9 +18,10 @@ import {
   GridIcon,
 } from "hugeicons-react";
 import { ROUTES } from "@/constants/routes";
-import { productoService } from "@/services";
+import { productoService, marcaService } from "@/services";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
 import type { ProductoWithRelations } from "@/types/producto.types";
+import type { MarcaWithCategorias } from "@/types";
 
 const brands = [
   { name: "babelito", label: "Babelito" },
@@ -46,6 +48,7 @@ const itemVariants = {
 };
 
 export default function HomePage() {
+  const router = useRouter();
   const { query, setQuery } = useSearch();
   const { isAuthenticated, isClient } = useAuth();
   const [bgPos, setBgPos] = useState({ x: 50, y: 50 });
@@ -55,11 +58,13 @@ export default function HomePage() {
     [],
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [marcas, setMarcas] = useState<MarcaWithCategorias[]>([]);
 
   const isSearching = query.trim().length > 0;
 
   useEffect(() => {
     loadProductos();
+    loadMarcas();
   }, []);
 
   useEffect(() => {
@@ -82,6 +87,24 @@ export default function HomePage() {
       clientErrorHandler(error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadMarcas = async () => {
+    try {
+      const data = await marcaService.findAll(1);
+      setMarcas(data);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
+
+  const handleBrandClick = (brandName: string) => {
+    const marca = marcas.find(
+      (m) => m.name.toLowerCase() === brandName.toLowerCase(),
+    );
+    if (marca) {
+      router.push(`${ROUTES.CATALOG}?marca=${marca.id}`);
     }
   };
 
@@ -282,6 +305,7 @@ export default function HomePage() {
                   whileHover={{ y: -6, scale: 1.05 }}
                   whileTap={{ scale: 0.96 }}
                   transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  onClick={() => handleBrandClick(brand.name)}
                   className="flex cursor-pointer flex-col items-center gap-3"
                 >
                   <div

@@ -55,12 +55,16 @@ export const productoService = {
   async findAllActive(
     search?: string,
     empresaId?: number,
+    marcaId?: number,
     categoriaId?: number,
+    subcategoriaId?: number,
   ) {
     const params: Record<string, string> = {};
     if (search) params.search = search;
     if (empresaId) params.empresaId = String(empresaId);
+    if (marcaId) params.marcaId = String(marcaId);
     if (categoriaId) params.categoriaId = String(categoriaId);
+    if (subcategoriaId) params.subcategoriaId = String(subcategoriaId);
 
     const { data } = await clientAxios.get<ProductoWithRelations[]>(
       API_ROUTES.PRODUCTOS,

@@ -162,12 +162,16 @@ export const productoRepository = {
   async findAllActive(
     search?: string,
     empresaId?: number,
+    marcaId?: number,
     categoriaId?: number,
+    subcategoriaId?: number,
   ) {
     const where = {
       deletedAt: null,
       ...(empresaId && { empresaId }),
+      ...(marcaId && { marcaId }),
       ...(categoriaId && { categoriaId }),
+      ...(subcategoriaId && { subcategoriaId }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: "insensitive" as const } },

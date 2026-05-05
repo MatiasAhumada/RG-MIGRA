@@ -151,9 +151,17 @@ export const productoService = {
   async findAllActive(
     search?: string,
     empresaId?: number,
+    marcaId?: number,
     categoriaId?: number,
+    subcategoriaId?: number,
   ) {
-    return productoRepository.findAllActive(search, empresaId, categoriaId);
+    return productoRepository.findAllActive(
+      search,
+      empresaId,
+      marcaId,
+      categoriaId,
+      subcategoriaId,
+    );
   },
 
   async toggleSinStock(id: number) {
