@@ -1,29 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { PublicLayout } from "@/components/layout";
-import { ProductCard } from "@/components/common";
+import { ProductCard, ProductDetailModal } from "@/components/common";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search01Icon } from "hugeicons-react";
-import { productoService } from "@/services";
+import { productoService, marcaService } from "@/services";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import type { ProductoWithRelations } from "@/types/producto.types";
+import type { MarcaWithCategorias } from "@/types";
 
-export default function CatalogPage() {
+function CatalogContent() {
+  const searchParams = useSearchParams();
+  const marcaParam = searchParams.get("marca");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [activeCategoryId, setActiveCategoryId] = useState<number>();
+  const [filterMarcaId, setFilterMarcaId] = useState(marcaParam || "all");
+  const [filterCategoriaId, setFilterCategoriaId] = useState("all");
+  const [filterSubcategoriaId, setFilterSubcategoriaId] = useState("all");
+  const [marcas, setMarcas] = useState<MarcaWithCategorias[]>([]);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductoWithRelations | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [carouselIndexes, setCarouselIndexes] = useState<
+    Record<number, number>
+  >({});
+
+  useEffect(() => {
+    if (marcaParam) {
+      setFilterMarcaId(marcaParam);
+      setFilterCategoriaId("all");
+      setFilterSubcategoriaId("all");
+    }
+  }, [marcaParam]);
+
+  useEffect(() => {
+    loadMarcas();
+  }, []);
+
+  const loadMarcas = async () => {
+    try {
+      const data = await marcaService.findAll(1);
+      setMarcas(data);
+    } catch (error) {
+      clientErrorHandler(error);
+    }
+  };
 
   const { data: productos, isLoading } = useDataQuery<ProductoWithRelations[]>({
     fetcher: () =>
       productoService.findAllActive(
         debouncedSearch,
-        undefined,
-        activeCategoryId,
+        1,
+        filterMarcaId !== "all" ? Number(filterMarcaId) : undefined,
+        filterCategoriaId !== "all" ? Number(filterCategoriaId) : undefined,
+        filterSubcategoriaId !== "all"
+          ? Number(filterSubcategoriaId)
+          : undefined,
       ),
-    deps: [debouncedSearch, activeCategoryId],
+    deps: [
+      debouncedSearch,
+      filterMarcaId,
+      filterCategoriaId,
+      filterSubcategoriaId,
+    ],
   });
 
   const handleSearchChange = (value: string) => {
@@ -35,16 +85,21 @@ export default function CatalogPage() {
     return () => clearTimeout(timeout);
   };
 
-  const allCategories = Array.from(
-    new Map(
-      (productos || []).map((p) => [p.categoria.id, p.categoria]),
-    ).values(),
-  );
+  const handleProductClick = (product: ProductoWithRelations) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
 
-  const categories = [
-    { id: undefined, name: "Todos" },
-    ...allCategories.map((c) => ({ id: c.id, name: c.name })),
-  ];
+  const handleCarouselIndexChange = (productId: number, index: number) => {
+    setCarouselIndexes((prev) => ({ ...prev, [productId]: index }));
+  };
+
+  const filterMarca = marcas.find((m) => m.id === Number(filterMarcaId));
+  const filterCategorias = filterMarca?.categorias || [];
+  const filterCategoria = filterCategorias.find(
+    (c) => c.id === Number(filterCategoriaId),
+  );
+  const filterSubcategorias = filterCategoria?.subcategorias || [];
 
   return (
     <PublicLayout>
@@ -87,24 +142,67 @@ export default function CatalogPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="mb-10 flex gap-3 overflow-x-auto pb-2"
+          className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center"
         >
-          {categories.map((category) => (
-            <button
-              key={category.id ?? "todos"}
-              onClick={() => setActiveCategoryId(category.id)}
-              className={`shrink-0 cursor-pointer rounded-full px-6 py-2.5 text-sm font-semibold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] ${
-                activeCategoryId === category.id
-                  ? "bg-[#2b6485] text-white shadow-lg"
-                  : "bg-[#f3fcf0]/60 text-[#3d4a3d] hover:bg-[#f3fcf0]"
-              }`}
-              style={{
-                fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-              }}
-            >
-              {category.name}
-            </button>
-          ))}
+          <Select
+            value={filterMarcaId}
+            onValueChange={(value) => {
+              setFilterMarcaId(value);
+              setFilterCategoriaId("all");
+              setFilterSubcategoriaId("all");
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Todas las marcas" />
+            </SelectTrigger>
+            <SelectContent position="popper" side="bottom" align="start">
+              <SelectItem value="all">Todas las marcas</SelectItem>
+              {marcas.map((marca) => (
+                <SelectItem key={marca.id} value={String(marca.id)}>
+                  {marca.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filterCategoriaId}
+            onValueChange={(value) => {
+              setFilterCategoriaId(value);
+              setFilterSubcategoriaId("all");
+            }}
+            disabled={filterMarcaId === "all"}
+          >
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Todas las categorías" />
+            </SelectTrigger>
+            <SelectContent position="popper" side="bottom" align="start">
+              <SelectItem value="all">Todas las categorías</SelectItem>
+              {filterCategorias.map((cat) => (
+                <SelectItem key={cat.id} value={String(cat.id)}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filterSubcategoriaId}
+            onValueChange={(value) => setFilterSubcategoriaId(value)}
+            disabled={filterCategoriaId === "all"}
+          >
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Todas las subcategorías" />
+            </SelectTrigger>
+            <SelectContent position="popper" side="bottom" align="start">
+              <SelectItem value="all">Todas las subcategorías</SelectItem>
+              {filterSubcategorias.map((sub) => (
+                <SelectItem key={sub.id} value={String(sub.id)}>
+                  {sub.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </motion.div>
 
         <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -124,6 +222,11 @@ export default function CatalogPage() {
                 imgUrl={product.imgUrl}
                 variantes={product.variantes}
                 sinStock={product.sinStock}
+                onClick={() => handleProductClick(product)}
+                carouselIndex={carouselIndexes[product.id] || 0}
+                onCarouselIndexChange={(index) =>
+                  handleCarouselIndexChange(product.id, index)
+                }
               />
             </motion.div>
           ))}
@@ -151,7 +254,35 @@ export default function CatalogPage() {
             <span className="size-6 animate-spin rounded-full border-2 border-[#2b6485]/30 border-t-[#2b6485]" />
           </div>
         )}
+
+        {selectedProduct && (
+          <ProductDetailModal
+            open={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            producto={selectedProduct}
+            carouselIndex={carouselIndexes[selectedProduct.id] || 0}
+            onCarouselIndexChange={(index) =>
+              handleCarouselIndexChange(selectedProduct.id, index)
+            }
+          />
+        )}
       </div>
     </PublicLayout>
+  );
+}
+
+export default function CatalogPage() {
+  return (
+    <Suspense
+      fallback={
+        <PublicLayout>
+          <div className="flex min-h-screen items-center justify-center">
+            <span className="size-8 animate-spin rounded-full border-2 border-[#2b6485]/30 border-t-[#2b6485]" />
+          </div>
+        </PublicLayout>
+      }
+    >
+      <CatalogContent />
+    </Suspense>
   );
 }

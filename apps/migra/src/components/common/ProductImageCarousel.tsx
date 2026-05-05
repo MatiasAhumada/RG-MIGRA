@@ -13,6 +13,8 @@ interface ProductImageCarouselProps {
   className?: string;
   interval?: number;
   sinStock?: boolean;
+  currentIndex?: number;
+  onIndexChange?: (index: number) => void;
 }
 
 const PLACEHOLDER_IMAGE = "/assets/images/placeholder-product.png";
@@ -23,8 +25,11 @@ export function ProductImageCarousel({
   className,
   interval = 3000,
   sinStock = false,
+  currentIndex: externalIndex,
+  onIndexChange,
 }: ProductImageCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [internalIndex, setInternalIndex] = useState(0);
+  const currentIndex = externalIndex ?? internalIndex;
   const validImages = images.filter(Boolean);
   const hasMultipleImages = validImages.length > 1;
   const currentImage = validImages[currentIndex] || PLACEHOLDER_IMAGE;
@@ -32,12 +37,19 @@ export function ProductImageCarousel({
   useImagePreloader(validImages);
 
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [images]);
+    if (!externalIndex) {
+      setInternalIndex(0);
+    }
+  }, [images, externalIndex]);
 
   const handleRotate = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % validImages.length);
-  }, [validImages.length]);
+    const nextIndex = (currentIndex + 1) % validImages.length;
+    if (onIndexChange) {
+      onIndexChange(nextIndex);
+    } else {
+      setInternalIndex(nextIndex);
+    }
+  }, [currentIndex, validImages.length, onIndexChange]);
 
   useCarouselAutoRotate(
     hasMultipleImages,
@@ -50,9 +62,13 @@ export function ProductImageCarousel({
     (e: React.MouseEvent, index: number) => {
       e.preventDefault();
       e.stopPropagation();
-      setCurrentIndex(index);
+      if (onIndexChange) {
+        onIndexChange(index);
+      } else {
+        setInternalIndex(index);
+      }
     },
-    [],
+    [onIndexChange],
   );
 
   return (
