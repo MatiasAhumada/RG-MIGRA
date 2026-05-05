@@ -468,10 +468,7 @@ export const productoService = {
         });
         failed++;
 
-        console.error(
-          `Error uploading ${image.fileName}:`,
-          errorMessage,
-        );
+        console.error(`Error uploading ${image.fileName}:`, errorMessage);
       }
     }
 
