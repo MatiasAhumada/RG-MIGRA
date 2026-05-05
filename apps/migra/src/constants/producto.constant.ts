@@ -38,3 +38,21 @@ export const TALLES_PRODUCTO = [
   { value: 9, label: "9" },
   { value: 10, label: "10" },
 ] as const;
+
+export const COLOR_NAMES: Record<ColorProducto, string> = {
+  BLANCO: "Blanco",
+  CELESTE: "Celeste",
+  ROSA: "Rosa",
+  VERDE: "Verde",
+  NEGRO: "Negro",
+  GRIS: "Gris",
+};
+
+export const COLOR_CLASSES: Record<ColorProducto, string> = {
+  BLANCO: "bg-white border-2 border-gray-300",
+  CELESTE: "bg-sky-400",
+  ROSA: "bg-pink-400",
+  VERDE: "bg-green-600",
+  NEGRO: "bg-gray-900",
+  GRIS: "bg-gray-500",
+};

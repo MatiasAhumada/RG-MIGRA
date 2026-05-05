@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { PublicLayout } from "@/components/layout";
-import { ProductCard } from "@/components/common";
+import { ProductCard, ProductDetailModal } from "@/components/common";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -29,6 +29,12 @@ function CatalogContent() {
   const [filterCategoriaId, setFilterCategoriaId] = useState("all");
   const [filterSubcategoriaId, setFilterSubcategoriaId] = useState("all");
   const [marcas, setMarcas] = useState<MarcaWithCategorias[]>([]);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductoWithRelations | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [carouselIndexes, setCarouselIndexes] = useState<
+    Record<number, number>
+  >({});
 
   useEffect(() => {
     if (marcaParam) {
@@ -77,6 +83,15 @@ function CatalogContent() {
     }, 500);
 
     return () => clearTimeout(timeout);
+  };
+
+  const handleProductClick = (product: ProductoWithRelations) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleCarouselIndexChange = (productId: number, index: number) => {
+    setCarouselIndexes((prev) => ({ ...prev, [productId]: index }));
   };
 
   const filterMarca = marcas.find((m) => m.id === Number(filterMarcaId));
@@ -207,6 +222,11 @@ function CatalogContent() {
                 imgUrl={product.imgUrl}
                 variantes={product.variantes}
                 sinStock={product.sinStock}
+                onClick={() => handleProductClick(product)}
+                carouselIndex={carouselIndexes[product.id] || 0}
+                onCarouselIndexChange={(index) =>
+                  handleCarouselIndexChange(product.id, index)
+                }
               />
             </motion.div>
           ))}
@@ -233,6 +253,18 @@ function CatalogContent() {
           <div className="flex items-center justify-center py-20">
             <span className="size-6 animate-spin rounded-full border-2 border-[#2b6485]/30 border-t-[#2b6485]" />
           </div>
+        )}
+
+        {selectedProduct && (
+          <ProductDetailModal
+            open={isModalOpen}
+            onOpenChange={setIsModalOpen}
+            producto={selectedProduct}
+            carouselIndex={carouselIndexes[selectedProduct.id] || 0}
+            onCarouselIndexChange={(index) =>
+              handleCarouselIndexChange(selectedProduct.id, index)
+            }
+          />
         )}
       </div>
     </PublicLayout>

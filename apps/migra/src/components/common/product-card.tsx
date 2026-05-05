@@ -21,6 +21,9 @@ interface ProductCardProps {
   className?: string;
   showPrice?: boolean;
   sinStock?: boolean;
+  onClick?: () => void;
+  carouselIndex?: number;
+  onCarouselIndexChange?: (index: number) => void;
 }
 
 const PLACEHOLDER_IMAGE = "/assets/images/placeholder-product.png";
@@ -36,6 +39,9 @@ export function ProductCard({
   className,
   showPrice: showPriceProp,
   sinStock = false,
+  onClick,
+  carouselIndex,
+  onCarouselIndexChange,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
 
@@ -58,11 +64,13 @@ export function ProductCard({
         sinStock && "pointer-events-none",
         className,
       )}
+      onClick={onClick}
     >
       <Card
         className={cn(
           "relative flex h-full w-full flex-col overflow-hidden p-0 transition-all duration-300 hover:shadow-[0_12px_48px_rgba(29,53,87,0.12)]",
           sinStock && "opacity-60",
+          onClick && "cursor-pointer",
         )}
       >
         <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-br from-cerulean-400 to-cerulean-600">
@@ -73,6 +81,8 @@ export function ProductCard({
               alt={name}
               sinStock={sinStock}
               interval={4000}
+              currentIndex={carouselIndex}
+              onIndexChange={onCarouselIndexChange}
             />
           ) : (
             <Image
