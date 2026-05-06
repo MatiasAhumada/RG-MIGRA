@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { GenericModal } from "@/components/common/GenericModal";
@@ -16,6 +16,7 @@ import {
 } from "hugeicons-react";
 import { formatCurrency } from "@/utils/formatters";
 import { useAuth } from "@/context/auth-context";
+import { useCart } from "@/context/cart-context";
 import { ROUTES } from "@/constants/routes";
 import type { ProductoWithRelations } from "@/types/producto.types";
 import type { ColorProducto } from "@/types/producto-variante.types";
@@ -38,12 +39,21 @@ export function ProductDetailModal({
   onCarouselIndexChange,
 }: ProductDetailModalProps) {
   const { isAuthenticated } = useAuth();
+  const { addItem } = useCart();
   const [selectedColor, setSelectedColor] = useState<ColorProducto | null>(
     null,
   );
   const [selectedTalle, setSelectedTalle] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const carouselIndex = externalCarouselIndex ?? 0;
+
+  useEffect(() => {
+    if (open) {
+      setSelectedColor(null);
+      setSelectedTalle(null);
+      setQuantity(1);
+    }
+  }, [open, producto.id]);
 
   const variantImages = producto.variantes
     .filter((v) => v.imgUrl)
@@ -69,12 +79,23 @@ export function ProductDetailModal({
   ).sort((a, b) => a - b);
 
   const handleAddToCart = () => {
-    console.log({
+    const selectedVariant = producto.variantes.find(
+      (v) => v.color === selectedColor && v.talle === selectedTalle,
+    );
+
+    addItem({
       productoId: producto.id,
-      color: selectedColor,
-      talle: selectedTalle,
-      quantity,
+      productoName: producto.name,
+      productoSku: producto.sku,
+      price: producto.price,
+      imgUrl: selectedVariant?.imgUrl || producto.imgUrl || undefined,
+      color: selectedColor || undefined,
+      talle: selectedTalle || undefined,
+      varianteSku: selectedVariant?.sku || undefined,
+      cantidad: quantity,
     });
+
+    onOpenChange(false);
   };
 
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
