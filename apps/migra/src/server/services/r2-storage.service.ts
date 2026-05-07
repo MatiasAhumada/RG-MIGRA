@@ -4,6 +4,7 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { CONFIG } from "@/constants/config.constant";
+import { IMAGE_UPLOAD_CONFIG } from "@/constants/image-upload.constant";
 import { ApiError } from "@/utils/handlers/apiError.handler";
 import httpStatus from "http-status";
 import sharp from "sharp";
@@ -23,8 +24,25 @@ interface UploadImageResult {
 }
 
 export const r2StorageService = {
+  isWebP(buffer: Buffer): boolean {
+    return (
+      buffer[0] === 0x52 &&
+      buffer[1] === 0x49 &&
+      buffer[2] === 0x46 &&
+      buffer[3] === 0x46
+    );
+  },
+
   async optimizeImage(buffer: Buffer): Promise<Buffer> {
-    return sharp(buffer).webp({ quality: 85, effort: 6 }).toBuffer();
+    if (this.isWebP(buffer)) {
+      return buffer;
+    }
+    return sharp(buffer)
+      .webp({
+        quality: IMAGE_UPLOAD_CONFIG.QUALITY,
+        effort: IMAGE_UPLOAD_CONFIG.EFFORT,
+      })
+      .toBuffer();
   },
 
   async uploadImage(file: Buffer, key: string): Promise<UploadImageResult> {
