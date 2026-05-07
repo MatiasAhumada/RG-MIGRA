@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Image02Icon, Upload01Icon, Cancel01Icon } from "hugeicons-react";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import { IMAGE_UPLOAD_CONFIG, IMAGE_UPLOAD_MESSAGES } from "@/constants/image-upload.constant";
 
 interface ImageUploadProps {
   value?: string;
@@ -13,7 +14,13 @@ interface ImageUploadProps {
   label?: string;
 }
 
-const IMAGE_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/jfif",
+];
 
 export function ImageUpload({
   value,
@@ -33,8 +40,15 @@ export function ImageUpload({
       return;
     }
 
-    if (!IMAGE_MIME_TYPES.includes(file.type.toLowerCase())) {
-      clientErrorHandler(new Error("Formato de imagen no válido"));
+    const fileExtension = `.${file.name.split(".").pop()?.toLowerCase()}`;
+    
+    if (!IMAGE_UPLOAD_CONFIG.SUPPORTED_EXTENSIONS.includes(fileExtension)) {
+      clientErrorHandler(new Error(IMAGE_UPLOAD_MESSAGES.UNSUPPORTED_FORMAT));
+      return;
+    }
+
+    if (file.size > IMAGE_UPLOAD_CONFIG.MAX_FILE_SIZE) {
+      clientErrorHandler(new Error(IMAGE_UPLOAD_MESSAGES.FILE_TOO_LARGE));
       return;
     }
 
@@ -62,7 +76,7 @@ export function ImageUpload({
         <Input
           ref={fileInputRef}
           type="file"
-          accept="image/jpeg,image/jpg,image/png,image/webp"
+          accept=".jfif,.jpg,.jpeg,.png,.webp"
           onChange={handleInputChange}
           disabled={disabled}
           className="hidden"
