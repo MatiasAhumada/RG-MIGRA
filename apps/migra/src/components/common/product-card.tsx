@@ -24,6 +24,7 @@ interface ProductCardProps {
   onClick?: () => void;
   carouselIndex?: number;
   onCarouselIndexChange?: (index: number) => void;
+  pauseCarousel?: boolean;
 }
 
 const PLACEHOLDER_IMAGE = "/assets/images/placeholder-product.png";
@@ -42,6 +43,7 @@ export function ProductCard({
   onClick,
   carouselIndex,
   onCarouselIndexChange,
+  pauseCarousel = false,
 }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
 
@@ -83,6 +85,7 @@ export function ProductCard({
               interval={4000}
               currentIndex={carouselIndex}
               onIndexChange={onCarouselIndexChange}
+              pauseAutoRotate={pauseCarousel}
             />
           ) : (
             <Image

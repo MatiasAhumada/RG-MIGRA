@@ -50,9 +50,9 @@ export const COLOR_NAMES: Record<ColorProducto, string> = {
 
 export const COLOR_CLASSES: Record<ColorProducto, string> = {
   BLANCO: "bg-white border-2 border-gray-300",
-  CELESTE: "bg-sky-400",
-  ROSA: "bg-pink-400",
-  VERDE: "bg-green-600",
-  NEGRO: "bg-gray-900",
-  GRIS: "bg-gray-500",
+  CELESTE: "bg-[#B9D7E1]",
+  ROSA: "bg-[#E1B9D7]",
+  VERDE: "bg-[#CFE1B9]",
+  NEGRO: "bg-[#6B6B6B]",
+  GRIS: "bg-[#D1D1D1]",
 };

@@ -35,6 +35,7 @@ function CatalogContent() {
   const [carouselIndexes, setCarouselIndexes] = useState<
     Record<number, number>
   >({});
+  const [pauseCarousels, setPauseCarousels] = useState(false);
 
   useEffect(() => {
     if (marcaParam) {
@@ -88,6 +89,7 @@ function CatalogContent() {
   const handleProductClick = (product: ProductoWithRelations) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
+    setPauseCarousels(true);
   };
 
   const handleCarouselIndexChange = (productId: number, index: number) => {
@@ -227,6 +229,7 @@ function CatalogContent() {
                 onCarouselIndexChange={(index) =>
                   handleCarouselIndexChange(product.id, index)
                 }
+                pauseCarousel={pauseCarousels}
               />
             </motion.div>
           ))}
@@ -258,7 +261,10 @@ function CatalogContent() {
         {selectedProduct && (
           <ProductDetailModal
             open={isModalOpen}
-            onOpenChange={setIsModalOpen}
+            onOpenChange={(open) => {
+              setIsModalOpen(open);
+              if (!open) setPauseCarousels(false);
+            }}
             producto={selectedProduct}
             carouselIndex={carouselIndexes[selectedProduct.id] || 0}
             onCarouselIndexChange={(index) =>

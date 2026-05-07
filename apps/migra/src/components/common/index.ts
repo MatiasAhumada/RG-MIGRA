@@ -13,6 +13,7 @@ export { FloatingCartButton } from "./FloatingCartButton";
 export { CheckoutModal } from "./CheckoutModal";
 export { AddressModal } from "./AddressModal";
 export { ImageUpload } from "./ImageUpload";
+export { ImageZoom } from "./ImageZoom";
 export { StatusBadge } from "./status-badge";
 export { PageHeader } from "./page-header";
 export { NurtureBar } from "./nurture-bar";
