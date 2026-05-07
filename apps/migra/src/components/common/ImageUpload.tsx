@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Image02Icon, Upload01Icon, Cancel01Icon } from "hugeicons-react";
 import { clientErrorHandler } from "@/utils/handlers/clientHandler";
-import { IMAGE_UPLOAD_CONFIG, IMAGE_UPLOAD_MESSAGES } from "@/constants/image-upload.constant";
+import {
+  IMAGE_UPLOAD_CONFIG,
+  IMAGE_UPLOAD_MESSAGES,
+} from "@/constants/image-upload.constant";
 
 interface ImageUploadProps {
   value?: string;
@@ -40,9 +43,14 @@ export function ImageUpload({
       return;
     }
 
-    const fileExtension = `.${file.name.split(".").pop()?.toLowerCase()}`;
-    
-    if (!IMAGE_UPLOAD_CONFIG.SUPPORTED_EXTENSIONS.includes(fileExtension)) {
+    const fileExtension =
+      `.${file.name.split(".").pop()?.toLowerCase()}` as string;
+
+    if (
+      !IMAGE_UPLOAD_CONFIG.SUPPORTED_EXTENSIONS.includes(
+        fileExtension as (typeof IMAGE_UPLOAD_CONFIG.SUPPORTED_EXTENSIONS)[number],
+      )
+    ) {
       clientErrorHandler(new Error(IMAGE_UPLOAD_MESSAGES.UNSUPPORTED_FORMAT));
       return;
     }

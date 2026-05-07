@@ -7,7 +7,8 @@ export const IMAGE_UPLOAD_CONFIG = {
 } as const;
 
 export const IMAGE_UPLOAD_MESSAGES = {
-  UNSUPPORTED_FORMAT: "Formato de imagen no soportado. Use: JFIF, JPG, JPEG, PNG o WEBP",
+  UNSUPPORTED_FORMAT:
+    "Formato de imagen no soportado. Use: JFIF, JPG, JPEG, PNG o WEBP",
   FILE_TOO_LARGE: "El archivo es demasiado grande. Máximo 10MB",
   UPLOAD_SUCCESS: "Imagen subida exitosamente",
   UPLOAD_ERROR: "Error al subir la imagen",

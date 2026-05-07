@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { productoService } from "@/server/services/producto.service";
 import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
-import { IMAGE_UPLOAD_CONFIG, IMAGE_UPLOAD_MESSAGES } from "@/constants/image-upload.constant";
+import {
+  IMAGE_UPLOAD_CONFIG,
+  IMAGE_UPLOAD_MESSAGES,
+} from "@/constants/image-upload.constant";
 import httpStatus from "http-status";
 
 export async function POST(request: NextRequest) {
@@ -18,9 +21,14 @@ export async function POST(request: NextRequest) {
 
     const images = await Promise.all(
       files.map(async (file) => {
-        const fileExtension = `.${file.name.split(".").pop()?.toLowerCase()}`;
-        
-        if (!IMAGE_UPLOAD_CONFIG.SUPPORTED_EXTENSIONS.includes(fileExtension)) {
+        const fileExtension =
+          `.${file.name.split(".").pop()?.toLowerCase()}` as string;
+
+        if (
+          !IMAGE_UPLOAD_CONFIG.SUPPORTED_EXTENSIONS.includes(
+            fileExtension as (typeof IMAGE_UPLOAD_CONFIG.SUPPORTED_EXTENSIONS)[number],
+          )
+        ) {
           throw new ApiError({
             status: httpStatus.BAD_REQUEST,
             message: `${IMAGE_UPLOAD_MESSAGES.UNSUPPORTED_FORMAT}: ${file.name}`,
