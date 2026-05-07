@@ -95,7 +95,8 @@ export function GenericModal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className={`rounded-[2rem] bg-white shadow-[0_16px_64px_rgba(29,53,87,0.12)] ${SIZE_CLASSES[size]} w-full max-h-[90vh] overflow-y-auto pointer-events-auto`}
+              className={`rounded-[2rem] bg-white shadow-[0_16px_64px_rgba(29,53,87,0.12)] ${SIZE_CLASSES[size]} w-full max-h-[90vh] pointer-events-auto`}
+              style={{ overflow: "visible" }}
             >
               <div className="flex items-center justify-between border-b border-[#161d16]/5 p-6">
                 <div>
@@ -121,7 +122,12 @@ export function GenericModal({
                   <Cancel01Icon className="size-5" />
                 </Button>
               </div>
-              <div className="p-6">{children}</div>
+              <div
+                className="p-6 overflow-y-auto"
+                style={{ maxHeight: "calc(90vh - 120px)" }}
+              >
+                {children}
+              </div>
               {footer && (
                 <div className="flex justify-end gap-3 border-t border-[#161d16]/5 p-6">
                   {footer}

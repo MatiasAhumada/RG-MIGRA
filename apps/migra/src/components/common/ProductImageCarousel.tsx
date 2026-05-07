@@ -15,6 +15,8 @@ interface ProductImageCarouselProps {
   sinStock?: boolean;
   currentIndex?: number;
   onIndexChange?: (index: number) => void;
+  enableZoom?: boolean;
+  pauseAutoRotate?: boolean;
 }
 
 const PLACEHOLDER_IMAGE = "/assets/images/placeholder-product.png";
@@ -27,8 +29,12 @@ export function ProductImageCarousel({
   sinStock = false,
   currentIndex: externalIndex,
   onIndexChange,
+  enableZoom = false,
+  pauseAutoRotate = false,
 }: ProductImageCarouselProps) {
   const [internalIndex, setInternalIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const currentIndex = externalIndex ?? internalIndex;
   const validImages = images.filter(Boolean);
   const hasMultipleImages = validImages.length > 1;
@@ -52,7 +58,7 @@ export function ProductImageCarousel({
   }, [currentIndex, validImages.length, onIndexChange]);
 
   useCarouselAutoRotate(
-    hasMultipleImages,
+    hasMultipleImages && !pauseAutoRotate,
     validImages.length,
     interval,
     handleRotate,
@@ -100,35 +106,68 @@ export function ProductImageCarousel({
     [currentIndex, validImages.length, onIndexChange],
   );
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!enableZoom || !isZoomed) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    setZoomPosition({ x, y });
+  };
+
   return (
     <div
-      className={cn(
-        "relative aspect-square w-full overflow-hidden bg-white",
-        className,
-      )}
+      className={cn("relative aspect-square w-full bg-white", className)}
+      style={{ overflow: "visible" }}
     >
-      <AnimatePresence initial={false} mode="popLayout">
-        <motion.div
-          key={currentIndex}
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "-100%" }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="absolute inset-0 bg-white"
+      <div className="absolute inset-0 overflow-hidden rounded-lg">
+        <AnimatePresence initial={false} mode="popLayout">
+          <motion.div
+            key={currentIndex}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="absolute inset-0 bg-white"
+            onMouseEnter={() => enableZoom && setIsZoomed(true)}
+            onMouseLeave={() => enableZoom && setIsZoomed(false)}
+            onMouseMove={handleMouseMove}
+          >
+            <div className="relative h-full w-full">
+              <Image
+                src={currentImage}
+                alt={alt}
+                fill
+                priority={currentIndex === 0}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                className={cn(
+                  "object-cover transition-transform duration-500 group-hover:scale-105",
+                  sinStock && "grayscale",
+                  enableZoom && "cursor-zoom-in",
+                )}
+              />
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {enableZoom && isZoomed && (
+        <div
+          className="pointer-events-none absolute left-full top-0 ml-4 h-full overflow-hidden rounded-lg border-2 border-primary/20 bg-white shadow-2xl "
+          style={{ zIndex: 9999, width: "425px" }}
         >
-          <Image
-            src={currentImage}
-            alt={alt}
-            fill
-            priority={currentIndex === 0}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className={cn(
-              "object-cover transition-transform duration-500 group-hover:scale-105",
-              sinStock && "grayscale",
-            )}
+          <div
+            className="h-full w-full"
+            style={{
+              backgroundImage: `url(${currentImage})`,
+              backgroundSize: "250%",
+              backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+              backgroundRepeat: "no-repeat",
+            }}
           />
-        </motion.div>
-      </AnimatePresence>
+        </div>
+      )}
 
       {hasMultipleImages && (
         <>

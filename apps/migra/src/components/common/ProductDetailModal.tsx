@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { GenericModal } from "@/components/common/GenericModal";
 import { ColorButton } from "@/components/common/ColorButton";
 import { TalleButton } from "@/components/common/TalleButton";
 import { Button } from "@/components/ui/button";
 import { ProductImageCarousel } from "@/components/common/ProductImageCarousel";
+import { ImageZoom } from "@/components/common/ImageZoom";
 import {
   ShoppingCart01Icon,
   Add01Icon,
@@ -113,7 +113,10 @@ export function ProductDetailModal({
       size="4xl"
     >
       <div className="grid gap-8 md:grid-cols-2">
-        <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-white">
+        <div
+          className="relative aspect-square w-full rounded-lg bg-white"
+          style={{ overflow: "visible" }}
+        >
           {hasVariantImages ? (
             <ProductImageCarousel
               images={variantImages}
@@ -122,15 +125,13 @@ export function ProductDetailModal({
               interval={4000}
               currentIndex={carouselIndex}
               onIndexChange={onCarouselIndexChange}
+              enableZoom={true}
+              pauseAutoRotate={true}
             />
           ) : (
-            <Image
-              src={imageSrc}
-              alt={producto.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover"
-            />
+            <div className="relative h-full w-full">
+              <ImageZoom src={imageSrc} alt={producto.name} zoomLevel={2} />
+            </div>
           )}
           {producto.sinStock && (
             <span className="absolute right-3 top-3 z-10 rounded-full bg-[#b7102a] px-3 py-1 text-xs font-bold text-white shadow-lg">
