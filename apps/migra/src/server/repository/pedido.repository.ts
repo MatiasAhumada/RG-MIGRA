@@ -1,12 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import {
-  CreatePedidoDto,
-  UpdatePedidoDto,
-  PedidoStatus,
-} from "@/types/pedido.types";
+import type { CreatePedidoDto } from "@/types/pedido.types";
+import type { PedidoStatus } from "@prisma/client";
 
 export const pedidoRepository = {
-  async create(dto: CreatePedidoDto) {
+  async create(dto: Omit<CreatePedidoDto, "detalles">) {
     return prisma.pedido.create({
       data: dto,
     });
@@ -17,14 +14,27 @@ export const pedidoRepository = {
       where: { id },
       include: {
         cliente: {
-          include: {
-            empresa: true,
+          select: {
+            razonSocial: true,
+            titular: true,
           },
         },
-        direccion: true,
+        direccion: {
+          select: {
+            direccion: true,
+            localidad: true,
+            provincia: true,
+          },
+        },
         detalles: {
           include: {
-            producto: true,
+            producto: {
+              select: {
+                name: true,
+                sku: true,
+                price: true,
+              },
+            },
           },
         },
       },
@@ -33,67 +43,96 @@ export const pedidoRepository = {
 
   async findByClienteId(clienteId: number) {
     return prisma.pedido.findMany({
-      where: { clienteId, deletedAt: null },
+      where: {
+        clienteId,
+        deletedAt: null,
+      },
       include: {
-        direccion: true,
+        cliente: {
+          select: {
+            razonSocial: true,
+            titular: true,
+          },
+        },
+        direccion: {
+          select: {
+            direccion: true,
+            localidad: true,
+            provincia: true,
+          },
+        },
         detalles: {
           include: {
-            producto: true,
+            producto: {
+              select: {
+                name: true,
+                sku: true,
+                price: true,
+              },
+            },
           },
         },
       },
-      orderBy: { fecha: "desc" },
+      orderBy: { createdAt: "desc" },
     });
   },
 
-  async findByStatus(status: PedidoStatus) {
+  async findAll() {
     return prisma.pedido.findMany({
-      where: { status, deletedAt: null },
+      where: {
+        deletedAt: null,
+      },
       include: {
-        cliente: true,
-        direccion: true,
+        cliente: {
+          select: {
+            razonSocial: true,
+            titular: true,
+          },
+        },
+        direccion: {
+          select: {
+            direccion: true,
+            localidad: true,
+            provincia: true,
+          },
+        },
         detalles: {
           include: {
-            producto: true,
+            producto: {
+              select: {
+                name: true,
+                sku: true,
+                price: true,
+              },
+            },
           },
         },
       },
-      orderBy: { fecha: "desc" },
+      orderBy: { createdAt: "desc" },
     });
   },
 
-  async update(id: number, dto: UpdatePedidoDto) {
+  async updateStatus(id: number, status: PedidoStatus) {
     return prisma.pedido.update({
       where: { id },
-      data: dto,
+      data: { status },
     });
   },
 
-  async softDelete(id: number) {
+  async update(
+    id: number,
+    data: { status?: PedidoStatus; codSeguimiento?: string },
+  ) {
+    return prisma.pedido.update({
+      where: { id },
+      data,
+    });
+  },
+
+  async delete(id: number) {
     return prisma.pedido.update({
       where: { id },
       data: { deletedAt: new Date() },
-    });
-  },
-
-  async findAll(clienteId?: number) {
-    const where = {
-      deletedAt: null,
-      ...(clienteId && { clienteId }),
-    };
-
-    return prisma.pedido.findMany({
-      where,
-      include: {
-        cliente: true,
-        direccion: true,
-        detalles: {
-          include: {
-            producto: true,
-          },
-        },
-      },
-      orderBy: { fecha: "desc" },
     });
   },
 };

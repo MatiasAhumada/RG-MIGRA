@@ -194,6 +194,7 @@ model Pedido {
   totalPedido    Float
   status         PedidoStatus    @default(PENDING)
   codSeguimiento String?
+  observaciones  String?
   clienteId      Int
   cliente        Cliente         @relation(fields: [clienteId], references: [id])
   direccionId    Int

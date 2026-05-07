@@ -6,60 +6,37 @@ import { AppLayout } from "@/components/layout";
 import { PageHeader, NurtureBar, DataTable } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { GenericModal } from "@/components/common";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { EyeIcon, FilterIcon, Refresh01Icon } from "hugeicons-react";
 import { pedidoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
-import { clientErrorHandler } from "@/utils/handlers/clientHandler";
+import {
+  clientErrorHandler,
+  clientSuccessHandler,
+} from "@/utils/handlers/clientHandler";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import type { PedidoWithRelations } from "@/types/pedido.types";
-import type { NurtureBarStep } from "@/components/common";
-
-const statusStyles: Record<string, string> = {
-  PENDING: "bg-[#2b6485]/15 text-[#2b6485]",
-  CONFIRMED: "bg-[#7cb56e]/15 text-[#5a9a4e]",
-  DOWNLOADED: "bg-[#336366]/20 text-[#4c7c7f]",
-  SHIPPED: "bg-[#336366]/20 text-[#4c7c7f]",
-};
-
-const statusLabels: Record<string, string> = {
-  PENDING: "Pendiente",
-  CONFIRMED: "Confirmado",
-  DOWNLOADED: "Descargado",
-  SHIPPED: "Enviado",
-};
-
-const orderStepsMap: Record<string, NurtureBarStep[]> = {
-  PENDING: [
-    { key: "pending", label: "Pendiente", completed: false, current: true },
-    { key: "confirmed", label: "Confirmado", completed: false },
-    { key: "downloaded", label: "Descargado", completed: false },
-    { key: "shipped", label: "Enviado", completed: false },
-  ],
-  CONFIRMED: [
-    { key: "pending", label: "Pendiente", completed: true },
-    { key: "confirmed", label: "Confirmado", completed: false, current: true },
-    { key: "downloaded", label: "Descargado", completed: false },
-    { key: "shipped", label: "Enviado", completed: false },
-  ],
-  DOWNLOADED: [
-    { key: "pending", label: "Pendiente", completed: true },
-    { key: "confirmed", label: "Confirmado", completed: true },
-    { key: "downloaded", label: "Descargado", completed: false, current: true },
-    { key: "shipped", label: "Enviado", completed: false },
-  ],
-  SHIPPED: [
-    { key: "pending", label: "Pendiente", completed: true },
-    { key: "confirmed", label: "Confirmado", completed: true },
-    { key: "downloaded", label: "Descargado", completed: true },
-    { key: "shipped", label: "Enviado", completed: false, current: true },
-  ],
-};
+import type { PedidoStatus } from "@prisma/client";
+import {
+  PEDIDO_STATUS_LABELS,
+  PEDIDO_STATUS_STYLES,
+  PEDIDO_NURTURE_STEPS,
+  PEDIDO_STATUS_OPTIONS,
+  PEDIDO_MESSAGES,
+} from "@/constants/pedido.constant";
 
 export default function AdminPedidosPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedPedido, setSelectedPedido] =
     useState<PedidoWithRelations | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const {
     data: pedidos,
@@ -76,6 +53,24 @@ export default function AdminPedidosPage() {
     }, 500);
 
     return () => clearTimeout(timeout);
+  };
+
+  const handleStatusChange = async (status: PedidoStatus) => {
+    if (!selectedPedido) return;
+
+    setIsUpdating(true);
+    try {
+      await pedidoService.updateStatus(selectedPedido.id, status);
+      clientSuccessHandler(PEDIDO_MESSAGES.UPDATE_SUCCESS);
+      await refetch();
+      setSelectedPedido({ ...selectedPedido, status });
+    } catch (error) {
+      clientErrorHandler(error, undefined, {
+        messagePrefix: PEDIDO_MESSAGES.UPDATE_ERROR,
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const filteredOrders = (pedidos || []).filter(
@@ -149,9 +144,9 @@ export default function AdminPedidosPage() {
               label: "Estado",
               render: (item) => (
                 <span
-                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[item.status]}`}
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${PEDIDO_STATUS_STYLES[item.status]}`}
                 >
-                  {statusLabels[item.status]}
+                  {PEDIDO_STATUS_LABELS[item.status]}
                 </span>
               ),
             },
@@ -223,7 +218,38 @@ export default function AdminPedidosPage() {
               >
                 Seguimiento
               </h3>
-              <NurtureBar steps={orderStepsMap[selectedPedido.status] || []} />
+              <NurtureBar
+                steps={PEDIDO_NURTURE_STEPS[selectedPedido.status] || []}
+              />
+            </div>
+
+            <div>
+              <h3
+                className="mb-3 text-sm font-bold text-[#161d16]"
+                style={{
+                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                }}
+              >
+                Cambiar Estado
+              </h3>
+              <Select
+                value={selectedPedido.status}
+                onValueChange={(value) =>
+                  handleStatusChange(value as PedidoStatus)
+                }
+                disabled={isUpdating}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PEDIDO_STATUS_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -253,6 +279,8 @@ export default function AdminPedidosPage() {
                       </p>
                       <p className="text-xs text-[#3d4a3d]">
                         SKU: {detalle.producto.sku}
+                        {detalle.color && ` • ${detalle.color}`}
+                        {detalle.talle && ` • Talle ${detalle.talle}`}
                       </p>
                     </div>
                     <div className="text-right">

@@ -487,8 +487,6 @@ export const productoService = {
           error: errorMessage,
         });
         failed++;
-
-        console.error(`Error uploading ${image.fileName}:`, errorMessage);
       }
     }
 

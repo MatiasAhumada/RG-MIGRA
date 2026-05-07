@@ -1,19 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import {
-  CreateDetallePedidoDto,
-  UpdateDetallePedidoDto,
-} from "@/types/detalle-pedido.types";
+import type { CreateDetallePedidoDto } from "@/types/pedido.types";
 
 export const detallePedidoRepository = {
-  async create(dto: CreateDetallePedidoDto) {
+  async create(dto: CreateDetallePedidoDto & { pedidoId: number }) {
     return prisma.detallePedido.create({
       data: dto,
-    });
-  },
-
-  async createMany(dtos: CreateDetallePedidoDto[]) {
-    return prisma.detallePedido.createMany({
-      data: dtos,
     });
   },
 
@@ -21,7 +12,17 @@ export const detallePedidoRepository = {
     return prisma.detallePedido.findUnique({
       where: { id },
       include: {
-        pedido: true,
+        producto: true,
+      },
+    });
+  },
+
+  async findAll() {
+    return prisma.detallePedido.findMany({
+      where: {
+        deletedAt: null,
+      },
+      include: {
         producto: true,
       },
     });
@@ -29,41 +30,24 @@ export const detallePedidoRepository = {
 
   async findByPedidoId(pedidoId: number) {
     return prisma.detallePedido.findMany({
-      where: { pedidoId, deletedAt: null },
+      where: { pedidoId },
       include: {
         producto: true,
       },
-      orderBy: { createdAt: "desc" },
     });
   },
 
-  async update(id: number, dto: UpdateDetallePedidoDto) {
+  async update(id: number, dto: Partial<CreateDetallePedidoDto>) {
     return prisma.detallePedido.update({
       where: { id },
       data: dto,
     });
   },
 
-  async softDelete(id: number) {
+  async delete(id: number) {
     return prisma.detallePedido.update({
       where: { id },
       data: { deletedAt: new Date() },
-    });
-  },
-
-  async findAll(pedidoId?: number) {
-    const where = {
-      deletedAt: null,
-      ...(pedidoId && { pedidoId }),
-    };
-
-    return prisma.detallePedido.findMany({
-      where,
-      include: {
-        pedido: true,
-        producto: true,
-      },
-      orderBy: { createdAt: "desc" },
     });
   },
 };

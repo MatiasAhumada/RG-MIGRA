@@ -1,0 +1,18 @@
+export const ADDRESS_FORM = {
+  TITLE: "Agregar Dirección",
+  EDIT_TITLE: "Editar Dirección",
+  PROVINCIA_LABEL: "Provincia",
+  PROVINCIA_PLACEHOLDER: "Ej: Buenos Aires",
+  LOCALIDAD_LABEL: "Localidad",
+  LOCALIDAD_PLACEHOLDER: "Ej: La Plata",
+  DIRECCION_LABEL: "Dirección",
+  DIRECCION_PLACEHOLDER: "Ej: Calle 7 N° 1234",
+  COD_POSTAL_LABEL: "Código Postal",
+  COD_POSTAL_PLACEHOLDER: "Ej: 1900",
+  CANCEL_BUTTON: "Cancelar",
+  SAVE_BUTTON: "Guardar Dirección",
+  SAVING_BUTTON: "Guardando...",
+  SUCCESS_MESSAGE: "Dirección guardada exitosamente",
+  ERROR_MESSAGE: "Error al guardar la dirección",
+  REQUIRED_FIELD: "Este campo es requerido",
+} as const;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addressService } from "@/server/services";
+import { addressService } from "@/server/services/address.service";
 import { apiErrorHandler, ApiError } from "@/utils/handlers/apiError.handler";
 import httpStatus from "http-status";
 
@@ -8,14 +8,14 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const clienteId = searchParams.get("clienteId");
 
-    if (clienteId) {
-      const addresses = await addressService.findByClienteId(Number(clienteId));
-      return NextResponse.json(addresses, { status: httpStatus.OK });
+    if (!clienteId) {
+      throw new ApiError({
+        status: httpStatus.BAD_REQUEST,
+        message: "clienteId es requerido",
+      });
     }
 
-    const addresses = await addressService.findAll(
-      clienteId ? Number(clienteId) : undefined,
-    );
+    const addresses = await addressService.findByClienteId(Number(clienteId));
 
     return NextResponse.json(addresses, { status: httpStatus.OK });
   } catch (error) {
