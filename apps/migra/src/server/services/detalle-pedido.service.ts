@@ -89,10 +89,13 @@ export const detallePedidoService = {
   async delete(id: number) {
     await this.findById(id);
 
-    return detallePedidoRepository.softDelete(id);
+    return detallePedidoRepository.delete(id);
   },
 
   async findAll(pedidoId?: number) {
-    return detallePedidoRepository.findAll(pedidoId);
+    if (pedidoId) {
+      return detallePedidoRepository.findByPedidoId(pedidoId);
+    }
+    return detallePedidoRepository.findAll();
   },
 };

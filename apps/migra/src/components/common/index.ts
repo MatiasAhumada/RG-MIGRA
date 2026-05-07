@@ -10,6 +10,8 @@ export { CartSidebar } from "./CartSidebar";
 export { CartItem } from "./CartItem";
 export { CartEmptyState } from "./CartEmptyState";
 export { FloatingCartButton } from "./FloatingCartButton";
+export { CheckoutModal } from "./CheckoutModal";
+export { AddressModal } from "./AddressModal";
 export { ImageUpload } from "./ImageUpload";
 export { StatusBadge } from "./status-badge";
 export { PageHeader } from "./page-header";

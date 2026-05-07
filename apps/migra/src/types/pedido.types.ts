@@ -1,33 +1,48 @@
-import {
-  Pedido as PrismaPedido,
-  PedidoStatus as PrismaPedidoStatus,
-} from "@prisma/client";
+import { Pedido as PrismaPedido, PedidoStatus } from "@prisma/client";
+import type { ColorProducto } from "./producto-variante.types";
 
 export type Pedido = PrismaPedido;
 
-export type PedidoStatus = PrismaPedidoStatus;
+export { PedidoStatus };
 
 export interface CreatePedidoDto {
-  totalPedido: number;
   clienteId: number;
   direccionId: number;
-  status?: PedidoStatus;
-  codSeguimiento?: string;
+  totalPedido: number;
+  detalles: CreateDetallePedidoDto[];
+  observaciones?: string;
 }
 
-export interface UpdatePedidoDto extends Partial<CreatePedidoDto> {}
-
-export interface UpdatePedidoStatusDto {
-  status: PedidoStatus;
-  codSeguimiento?: string;
+export interface CreateDetallePedidoDto {
+  productoId: number;
+  cantidad: number;
+  total: number;
+  color?: ColorProducto;
+  talle?: number;
+  varianteSku?: string;
 }
 
 export interface PedidoWithRelations extends Pedido {
-  cliente: Cliente;
-  direccion: Address;
-  detalles: DetallePedidoWithRelations[];
+  cliente: {
+    razonSocial: string;
+    titular: string;
+  };
+  direccion: {
+    direccion: string;
+    localidad: string;
+    provincia: string;
+  };
+  detalles: Array<{
+    id: number;
+    cantidad: number;
+    total: number;
+    color?: ColorProducto;
+    talle?: number;
+    varianteSku?: string;
+    producto: {
+      name: string;
+      sku: string;
+      price: number;
+    };
+  }>;
 }
-
-import { Cliente } from "./cliente.types";
-import { Address } from "./address.types";
-import { DetallePedidoWithRelations } from "./detalle-pedido.types";

@@ -10,51 +10,13 @@ import { GenericModal } from "@/components/common";
 import { ArrowLeft01Icon, EyeIcon, Refresh01Icon } from "hugeicons-react";
 import { pedidoService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
-import { clientErrorHandler } from "@/utils/handlers/clientHandler";
 import { useDataQuery } from "@/hooks/useDataQuery";
 import type { PedidoWithRelations } from "@/types/pedido.types";
-import type { NurtureBarStep } from "@/components/common";
-
-const statusStyles: Record<string, string> = {
-  PENDING: "bg-[#2b6485]/15 text-[#2b6485]",
-  CONFIRMED: "bg-[#7cb56e]/15 text-[#5a9a4e]",
-  DOWNLOADED: "bg-[#336366]/20 text-[#4c7c7f]",
-  SHIPPED: "bg-[#336366]/20 text-[#4c7c7f]",
-};
-
-const statusLabels: Record<string, string> = {
-  PENDING: "Pendiente",
-  CONFIRMED: "Confirmado",
-  DOWNLOADED: "Descargado",
-  SHIPPED: "Enviado",
-};
-
-const orderStepsMap: Record<string, NurtureBarStep[]> = {
-  PENDING: [
-    { key: "pending", label: "Pendiente", completed: false, current: true },
-    { key: "confirmed", label: "Confirmado", completed: false },
-    { key: "downloaded", label: "Descargado", completed: false },
-    { key: "shipped", label: "Enviado", completed: false },
-  ],
-  CONFIRMED: [
-    { key: "pending", label: "Pendiente", completed: true },
-    { key: "confirmed", label: "Confirmado", completed: false, current: true },
-    { key: "downloaded", label: "Descargado", completed: false },
-    { key: "shipped", label: "Enviado", completed: false },
-  ],
-  DOWNLOADED: [
-    { key: "pending", label: "Pendiente", completed: true },
-    { key: "confirmed", label: "Confirmado", completed: true },
-    { key: "downloaded", label: "Descargado", completed: false, current: true },
-    { key: "shipped", label: "Enviado", completed: false },
-  ],
-  SHIPPED: [
-    { key: "pending", label: "Pendiente", completed: true },
-    { key: "confirmed", label: "Confirmado", completed: true },
-    { key: "downloaded", label: "Descargado", completed: true },
-    { key: "shipped", label: "Enviado", completed: false, current: true },
-  ],
-};
+import {
+  PEDIDO_STATUS_LABELS,
+  PEDIDO_STATUS_STYLES,
+  PEDIDO_NURTURE_STEPS,
+} from "@/constants/pedido.constant";
 
 export default function DashboardOrdenesPage() {
   const [selectedPedido, setSelectedPedido] =
@@ -157,9 +119,9 @@ export default function DashboardOrdenesPage() {
               label: "Estado",
               render: (item) => (
                 <span
-                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[item.status]}`}
+                  className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${PEDIDO_STATUS_STYLES[item.status]}`}
                 >
-                  {statusLabels[item.status]}
+                  {PEDIDO_STATUS_LABELS[item.status]}
                 </span>
               ),
             },
@@ -203,7 +165,9 @@ export default function DashboardOrdenesPage() {
               >
                 Seguimiento
               </h3>
-              <NurtureBar steps={orderStepsMap[selectedPedido.status] || []} />
+              <NurtureBar
+                steps={PEDIDO_NURTURE_STEPS[selectedPedido.status] || []}
+              />
             </div>
 
             <div>
@@ -233,6 +197,8 @@ export default function DashboardOrdenesPage() {
                       </p>
                       <p className="text-xs text-[#3d4a3d]">
                         SKU: {detalle.producto.sku}
+                        {detalle.color && ` • ${detalle.color}`}
+                        {detalle.talle && ` • Talle ${detalle.talle}`}
                       </p>
                     </div>
                     <div className="text-right">
@@ -259,9 +225,9 @@ export default function DashboardOrdenesPage() {
               <div>
                 <p className="text-sm text-[#3d4a3d]">Estado</p>
                 <span
-                  className={`mt-1 inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusStyles[selectedPedido.status]}`}
+                  className={`mt-1 inline-flex rounded-full px-3 py-1 text-xs font-medium ${PEDIDO_STATUS_STYLES[selectedPedido.status]}`}
                 >
-                  {statusLabels[selectedPedido.status]}
+                  {PEDIDO_STATUS_LABELS[selectedPedido.status]}
                 </span>
               </div>
               <div className="text-right">

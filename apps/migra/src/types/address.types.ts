@@ -11,9 +11,3 @@ export interface CreateAddressDto {
 }
 
 export interface UpdateAddressDto extends Partial<CreateAddressDto> {}
-
-export interface AddressWithCliente extends Address {
-  cliente: Cliente;
-}
-
-import { Cliente } from "./cliente.types";

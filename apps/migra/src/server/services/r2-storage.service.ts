@@ -65,8 +65,12 @@ export const r2StorageService = {
   ): Promise<UploadImageResult> {
     const oldKey = this.extractKeyFromUrl(oldUrl);
 
-    if (oldKey) {
-      await this.deleteImage(oldKey);
+    if (oldKey && oldKey !== newKey) {
+      try {
+        await this.deleteImage(oldKey);
+      } catch (error) {
+        // Ignore deletion errors
+      }
     }
 
     return this.uploadImage(file, newKey);
