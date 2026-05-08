@@ -15,7 +15,7 @@ import type { PedidoWithRelations } from "@/types/pedido.types";
 import {
   PEDIDO_STATUS_LABELS,
   PEDIDO_STATUS_STYLES,
-  PEDIDO_NURTURE_STEPS,
+  PEDIDO_NURTURE_STEPS_CLIENT,
 } from "@/constants/pedido.constant";
 
 export default function DashboardOrdenesPage() {
@@ -166,7 +166,7 @@ export default function DashboardOrdenesPage() {
                 Seguimiento
               </h3>
               <NurtureBar
-                steps={PEDIDO_NURTURE_STEPS[selectedPedido.status] || []}
+                steps={PEDIDO_NURTURE_STEPS_CLIENT[selectedPedido.status] || []}
               />
             </div>
 
