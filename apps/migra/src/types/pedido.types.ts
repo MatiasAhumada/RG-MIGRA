@@ -26,6 +26,8 @@ export interface PedidoWithRelations extends Pedido {
   cliente: {
     razonSocial: string;
     titular: string;
+    correo: string;
+    cuit: string;
   };
   direccion: {
     direccion: string;
@@ -36,9 +38,9 @@ export interface PedidoWithRelations extends Pedido {
     id: number;
     cantidad: number;
     total: number;
-    color?: ColorProducto;
-    talle?: number;
-    varianteSku?: string;
+    color: ColorProducto | null;
+    talle: number | null;
+    varianteSku: string | null;
     producto: {
       name: string;
       sku: string;

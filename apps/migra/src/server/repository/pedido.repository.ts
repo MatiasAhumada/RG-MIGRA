@@ -17,6 +17,8 @@ export const pedidoRepository = {
           select: {
             razonSocial: true,
             titular: true,
+            correo: true,
+            cuit: true,
           },
         },
         direccion: {
@@ -52,6 +54,8 @@ export const pedidoRepository = {
           select: {
             razonSocial: true,
             titular: true,
+            correo: true,
+            cuit: true,
           },
         },
         direccion: {
@@ -87,6 +91,8 @@ export const pedidoRepository = {
           select: {
             razonSocial: true,
             titular: true,
+            correo: true,
+            cuit: true,
           },
         },
         direccion: {

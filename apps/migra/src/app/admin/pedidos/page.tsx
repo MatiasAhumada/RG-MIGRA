@@ -13,8 +13,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { EyeIcon, FilterIcon, Refresh01Icon } from "hugeicons-react";
+import {
+  EyeIcon,
+  FilterIcon,
+  Refresh01Icon,
+  Download02Icon,
+  AttachmentIcon,
+} from "hugeicons-react";
 import { pedidoService } from "@/services";
+import { pedidoDownloadService } from "@/services/pedido-download.service";
 import { formatCurrency } from "@/utils/formatters";
 import {
   clientErrorHandler,
@@ -37,6 +44,8 @@ export default function AdminPedidosPage() {
   const [selectedPedido, setSelectedPedido] =
     useState<PedidoWithRelations | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     data: pedidos,
@@ -71,6 +80,75 @@ export default function AdminPedidosPage() {
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleDownload = async (format: "excel" | "pdf" | "word") => {
+    if (!selectedPedido) return;
+
+    setIsDownloading(true);
+    try {
+      await pedidoDownloadService.downloadOrder(selectedPedido.id, format);
+      clientSuccessHandler(PEDIDO_MESSAGES.DOWNLOAD_SUCCESS);
+    } catch (error) {
+      clientErrorHandler(error, undefined, {
+        messagePrefix: PEDIDO_MESSAGES.DOWNLOAD_ERROR,
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleUploadInvoice = async () => {
+    if (!selectedPedido) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".pdf";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      setIsUploading(true);
+      try {
+        await pedidoDownloadService.uploadInvoice(selectedPedido.id, file);
+        clientSuccessHandler(PEDIDO_MESSAGES.UPLOAD_SUCCESS);
+      } catch (error) {
+        clientErrorHandler(error, undefined, {
+          messagePrefix: PEDIDO_MESSAGES.UPLOAD_ERROR,
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    };
+    input.click();
+  };
+
+  const handleUploadShipping = async () => {
+    if (!selectedPedido) return;
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".pdf";
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      setIsUploading(true);
+      try {
+        await pedidoDownloadService.uploadShippingDocument(
+          selectedPedido.id,
+          file,
+        );
+        clientSuccessHandler(PEDIDO_MESSAGES.UPLOAD_SUCCESS);
+      } catch (error) {
+        clientErrorHandler(error, undefined, {
+          messagePrefix: PEDIDO_MESSAGES.UPLOAD_ERROR,
+        });
+      } finally {
+        setIsUploading(false);
+      }
+    };
+    input.click();
   };
 
   const filteredOrders = (pedidos || []).filter(
@@ -251,6 +329,86 @@ export default function AdminPedidosPage() {
                 </SelectContent>
               </Select>
             </div>
+
+            {selectedPedido.status === "DOWNLOADED" && (
+              <div>
+                <h3
+                  className="mb-3 text-sm font-bold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Descargar Orden
+                </h3>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() => handleDownload("excel")}
+                    disabled={isDownloading}
+                  >
+                    <Download02Icon className="size-4" />
+                    Excel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() => handleDownload("pdf")}
+                    disabled={isDownloading}
+                  >
+                    <Download02Icon className="size-4" />
+                    PDF
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() => handleDownload("word")}
+                    disabled={isDownloading}
+                  >
+                    <Download02Icon className="size-4" />
+                    Word
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {selectedPedido.status === "SHIPPED" && (
+              <div>
+                <h3
+                  className="mb-3 text-sm font-bold text-[#161d16]"
+                  style={{
+                    fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
+                  }}
+                >
+                  Adjuntar Documentos
+                </h3>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start gap-2"
+                    onClick={handleUploadInvoice}
+                    disabled={isUploading}
+                  >
+                    <AttachmentIcon className="size-4" />
+                    Adjuntar Factura
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-start gap-2"
+                    onClick={handleUploadShipping}
+                    disabled={isUploading}
+                  >
+                    <AttachmentIcon className="size-4" />
+                    Adjuntar Documentación de Envío
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <div>
               <h3

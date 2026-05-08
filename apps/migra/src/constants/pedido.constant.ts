@@ -29,13 +29,11 @@ export const PEDIDO_NURTURE_STEPS: Record<PedidoStatus, NurtureBarStep[]> = {
   PENDING: [
     { key: "pending", label: "Pendiente", completed: false, current: true },
     { key: "confirmed", label: "Confirmado", completed: false },
-    { key: "downloaded", label: "Descargado", completed: false },
     { key: "shipped", label: "Enviado", completed: false },
   ],
   CONFIRMED: [
     { key: "pending", label: "Pendiente", completed: true },
     { key: "confirmed", label: "Confirmado", completed: false, current: true },
-    { key: "downloaded", label: "Descargado", completed: false },
     { key: "shipped", label: "Enviado", completed: false },
   ],
   DOWNLOADED: [
@@ -52,8 +50,38 @@ export const PEDIDO_NURTURE_STEPS: Record<PedidoStatus, NurtureBarStep[]> = {
   ],
 };
 
+export const PEDIDO_NURTURE_STEPS_CLIENT: Record<
+  PedidoStatus,
+  NurtureBarStep[]
+> = {
+  PENDING: [
+    { key: "pending", label: "Pendiente", completed: false, current: true },
+    { key: "confirmed", label: "Confirmado", completed: false },
+    { key: "shipped", label: "Enviado", completed: false },
+  ],
+  CONFIRMED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: false, current: true },
+    { key: "shipped", label: "Enviado", completed: false },
+  ],
+  DOWNLOADED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: true },
+    { key: "shipped", label: "Enviado", completed: false },
+  ],
+  SHIPPED: [
+    { key: "pending", label: "Pendiente", completed: true },
+    { key: "confirmed", label: "Confirmado", completed: true },
+    { key: "shipped", label: "Enviado", completed: false, current: true },
+  ],
+};
+
 export const PEDIDO_MESSAGES = {
   UPDATE_SUCCESS: "Estado del pedido actualizado",
   UPDATE_ERROR: "Error al actualizar el estado",
   LOAD_ERROR: "Error al cargar los pedidos",
+  DOWNLOAD_SUCCESS: "Orden descargada exitosamente",
+  DOWNLOAD_ERROR: "Error al descargar la orden",
+  UPLOAD_SUCCESS: "Documento adjuntado y enviado al cliente",
+  UPLOAD_ERROR: "Error al adjuntar el documento",
 };
