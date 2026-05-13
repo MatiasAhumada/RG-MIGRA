@@ -17,6 +17,15 @@ export const clienteService = {
     const existingCuit = await clienteRepository.findByCuit(dto.cuit);
 
     if (existingCuit) {
+      if (existingCuit.deletedAt) {
+        return clienteRepository.update(existingCuit.id, {
+          ...dto,
+          status: "PENDING",
+          userId: null,
+          deletedAt: null,
+        });
+      }
+
       if (
         existingCuit.status === "PENDING" ||
         existingCuit.status === "APPROVED"
@@ -37,6 +46,15 @@ export const clienteService = {
     const existingCorreo = await clienteRepository.findByCorreo(dto.correo);
 
     if (existingCorreo) {
+      if (existingCorreo.deletedAt) {
+        return clienteRepository.update(existingCorreo.id, {
+          ...dto,
+          status: "PENDING",
+          userId: null,
+          deletedAt: null,
+        });
+      }
+
       if (
         existingCorreo.status === "PENDING" ||
         existingCorreo.status === "APPROVED"
@@ -107,15 +125,10 @@ export const clienteService = {
   },
 
   async delete(id: number) {
-    await this.findById(id);
+    const cliente = await this.findById(id);
 
-    const pedidos = await pedidoRepository.findByClienteId(id);
-
-    if (pedidos.length > 0) {
-      throw new ApiError({
-        status: httpStatus.CONFLICT,
-        message: ERROR_MESSAGES.CLIENTE_HAS_PEDIDOS,
-      });
+    if (cliente.userId) {
+      await userRepository.delete(cliente.userId);
     }
 
     return clienteRepository.softDelete(id);

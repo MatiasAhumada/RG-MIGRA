@@ -128,7 +128,7 @@ export default function AdminPedidosPage() {
 
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".pdf";
+    input.accept = ".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png";
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
@@ -383,30 +383,21 @@ export default function AdminPedidosPage() {
                     fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
                   }}
                 >
-                  Adjuntar Documentos
+                  Enviar Documento al Cliente
                 </h3>
-                <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start gap-2"
-                    onClick={handleUploadInvoice}
-                    disabled={isUploading}
-                  >
-                    <AttachmentIcon className="size-4" />
-                    Adjuntar Factura
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full justify-start gap-2"
-                    onClick={handleUploadShipping}
-                    disabled={isUploading}
-                  >
-                    <AttachmentIcon className="size-4" />
-                    Adjuntar Documentación de Envío
-                  </Button>
-                </div>
+                <p className="mb-3 text-xs text-[#3d4a3d]">
+                  Adjunta un archivo (PDF, Word, Excel o Imagen) para enviarlo por email al cliente
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start gap-2"
+                  onClick={handleUploadShipping}
+                  disabled={isUploading}
+                >
+                  <AttachmentIcon className="size-4" />
+                  {isUploading ? "Enviando..." : "Adjuntar y Enviar Documento"}
+                </Button>
               </div>
             )}
 

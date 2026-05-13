@@ -58,26 +58,83 @@ export const emailService = {
     to: string,
     pedidoId: number,
     documentBuffer: Buffer,
+    filename: string,
   ) {
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2b6485;">Documentación de Envío - Pedido PED-${pedidoId}</h2>
-        <p>Estimado cliente,</p>
-        <p>Su pedido PED-${pedidoId} ha sido enviado.</p>
-        <p>Adjuntamos la documentación de envío correspondiente.</p>
-        <p>Gracias por su compra.</p>
-        <hr style="border: 1px solid #e0e0e0; margin: 20px 0;">
-        <p style="color: #666; font-size: 12px;">Este es un correo automático, por favor no responder.</p>
-      </div>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f3fcf0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3fcf0; padding: 40px 20px;">
+          <tr>
+            <td align="center">
+              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 12px rgba(43, 100, 133, 0.1); overflow: hidden;">
+                <tr>
+                  <td style="background: linear-gradient(135deg, #2b6485 0%, #336366 100%); padding: 40px 30px; text-align: center;">
+                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 700;">
+                      Documentación de Pedido
+                    </h1>
+                    <p style="margin: 10px 0 0 0; color: #e0f2f1; font-size: 14px;">
+                      Pedido PED-${pedidoId}
+                    </p>
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td style="padding: 40px 30px;">
+                    <p style="margin: 0 0 20px 0; color: #161d16; font-size: 16px; line-height: 1.6;">
+                      Estimado cliente,
+                    </p>
+                    
+                    <p style="margin: 0 0 30px 0; color: #3d4a3d; font-size: 15px; line-height: 1.6;">
+                      Adjuntamos la documentación correspondiente a su pedido <strong style="color: #2b6485;">PED-${pedidoId}</strong>.
+                    </p>
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #f3fcf0 0%, #e8f5e9 100%); border-left: 4px solid #7cb56e; border-radius: 8px; margin: 30px 0;">
+                      <tr>
+                        <td style="padding: 25px;">
+                          <p style="margin: 0; color: #3d4a3d; font-size: 14px; line-height: 1.6;">
+                            📎 <strong>Archivo adjunto:</strong> ${filename}
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <p style="margin: 30px 0 0 0; color: #3d4a3d; font-size: 14px; line-height: 1.6;">
+                      Si tiene alguna consulta, no dude en contactarnos.
+                    </p>
+                  </td>
+                </tr>
+                
+                <tr>
+                  <td style="background-color: #f3fcf0; padding: 30px; text-align: center; border-top: 1px solid #e0e0e0;">
+                    <p style="margin: 0 0 10px 0; color: #2b6485; font-size: 16px; font-weight: 600;">
+                      MIGRA Distribuciones S.R.L
+                    </p>
+                    <p style="margin: 0; color: #3d4a3d; font-size: 12px; line-height: 1.5;">
+                      Este es un correo automático, por favor no responder.<br>
+                      C.U.I.T: 33-70903990-9
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
     `;
 
     return this.sendEmail({
       to,
-      subject: `Envío Confirmado - Pedido PED-${pedidoId}`,
+      subject: `Documentación - Pedido PED-${pedidoId}`,
       html,
       attachments: [
         {
-          filename: `envio-PED-${pedidoId}.pdf`,
+          filename,
           content: documentBuffer,
         },
       ],

@@ -18,7 +18,9 @@ export interface CreateClienteDto {
   userId?: string | null;
 }
 
-export interface UpdateClienteDto extends Partial<CreateClienteDto> {}
+export interface UpdateClienteDto extends Partial<CreateClienteDto> {
+  deletedAt?: Date | null;
+}
 
 export interface ClienteWithRelations extends Cliente {
   empresa: Empresa;

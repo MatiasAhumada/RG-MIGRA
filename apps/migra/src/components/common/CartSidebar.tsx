@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Cancel01Icon, ShoppingCart01Icon } from "hugeicons-react";
 import { useCart } from "@/context/cart-context";
 import { useAuth } from "@/context/auth-context";
+import { clienteService } from "@/services";
 import { formatCurrency } from "@/utils/formatters";
 import { cartUtils } from "@/utils/cart.util";
 import { CartItem } from "@/components/common/CartItem";
@@ -31,14 +32,31 @@ export function CartSidebar() {
   } = useCart();
   const { user } = useAuth();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [clienteId, setClienteId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const loadClienteId = async () => {
+      if (user?.id) {
+        try {
+          const clientes = await clienteService.findAll();
+          const cliente = clientes.find((c) => c.userId === user.id);
+          if (cliente) {
+            setClienteId(cliente.id);
+          }
+        } catch (error) {
+          console.error("Error loading cliente:", error);
+        }
+      }
+    };
+
+    loadClienteId();
+  }, [user]);
 
   const itemCountText = `${itemCount} ${itemCount === 1 ? CART_MESSAGES.PRODUCT_SINGULAR : CART_MESSAGES.PRODUCT_PLURAL}`;
 
   const handleCheckout = () => {
     setIsCheckoutOpen(true);
   };
-
-  const clienteId = 1;
 
   return (
     <>
@@ -138,7 +156,7 @@ export function CartSidebar() {
       <CheckoutModal
         open={isCheckoutOpen}
         onOpenChange={setIsCheckoutOpen}
-        clienteId={clienteId}
+        clienteId={clienteId || 0}
       />
     </>
   );
