@@ -59,17 +59,15 @@ export const clienteService = {
   },
 
   async approve(id: number) {
-    const { data } = await clientAxios.patch<{ message: string }>(
-      `${API_ROUTES.CLIENTES}/${id}/approve`,
-      { action: "APPROVE" },
+    const { data } = await clientAxios.patch<Cliente>(
+      `${API_ROUTES.CLIENTES}/${id}?action=approve`,
     );
     return data;
   },
 
   async reject(id: number) {
-    const { data } = await clientAxios.patch<{ message: string }>(
-      `${API_ROUTES.CLIENTES}/${id}/approve`,
-      { action: "REJECT" },
+    const { data } = await clientAxios.patch<Cliente>(
+      `${API_ROUTES.CLIENTES}/${id}?action=reject`,
     );
     return data;
   },

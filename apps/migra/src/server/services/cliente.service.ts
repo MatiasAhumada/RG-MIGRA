@@ -1,8 +1,11 @@
 import { clienteRepository } from "@/server/repository/cliente.repository";
+import { userRepository } from "@/server/repository/user.repository";
 import { pedidoRepository } from "@/server/repository/pedido.repository";
+import { emailService } from "@/server/services/email.service";
 import { ApiError } from "@/utils/handlers/apiError.handler";
 import { ERROR_MESSAGES } from "@/constants/error-messages.constant";
 import httpStatus from "http-status";
+import bcrypt from "bcryptjs";
 import {
   CreateClienteDto,
   UpdateClienteDto,
@@ -14,18 +17,40 @@ export const clienteService = {
     const existingCuit = await clienteRepository.findByCuit(dto.cuit);
 
     if (existingCuit) {
-      throw new ApiError({
-        status: httpStatus.CONFLICT,
-        message: ERROR_MESSAGES.CLIENTE_CUIT_EXISTS,
+      if (
+        existingCuit.status === "PENDING" ||
+        existingCuit.status === "APPROVED"
+      ) {
+        throw new ApiError({
+          status: httpStatus.CONFLICT,
+          message: ERROR_MESSAGES.CLIENTE_CUIT_EXISTS,
+        });
+      }
+
+      return clienteRepository.update(existingCuit.id, {
+        ...dto,
+        status: "PENDING",
+        userId: null,
       });
     }
 
     const existingCorreo = await clienteRepository.findByCorreo(dto.correo);
 
     if (existingCorreo) {
-      throw new ApiError({
-        status: httpStatus.CONFLICT,
-        message: ERROR_MESSAGES.CLIENTE_CORREO_EXISTS,
+      if (
+        existingCorreo.status === "PENDING" ||
+        existingCorreo.status === "APPROVED"
+      ) {
+        throw new ApiError({
+          status: httpStatus.CONFLICT,
+          message: ERROR_MESSAGES.CLIENTE_CORREO_EXISTS,
+        });
+      }
+
+      return clienteRepository.update(existingCorreo.id, {
+        ...dto,
+        status: "PENDING",
+        userId: null,
       });
     }
 
@@ -98,5 +123,79 @@ export const clienteService = {
 
   async findAll(search?: string, empresaId?: number) {
     return clienteRepository.findAll(search, empresaId);
+  },
+
+  async approve(id: number) {
+    const cliente = await this.findById(id);
+
+    if (cliente.status !== "PENDING") {
+      throw new ApiError({
+        status: httpStatus.BAD_REQUEST,
+        message: "El cliente ya fue procesado",
+      });
+    }
+
+    if (cliente.userId) {
+      return clienteRepository.update(id, { status: "APPROVED" });
+    }
+
+    const existingUser = await userRepository.findByEmail(cliente.correo);
+
+    if (existingUser) {
+      await clienteRepository.update(id, {
+        status: "APPROVED",
+        userId: existingUser.id,
+      });
+      return clienteRepository.findById(id);
+    }
+
+    const tempPassword = this.generatePassword();
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    const user = await userRepository.create({
+      email: cliente.correo,
+      password: hashedPassword,
+      name: cliente.titular,
+      role: "CLIENT",
+      empresaId: cliente.empresaId,
+    });
+
+    await clienteRepository.update(id, {
+      status: "APPROVED",
+      userId: user.id,
+    });
+
+    await emailService.sendClientCredentials(
+      cliente.correo,
+      cliente.razonSocial,
+      cliente.correo,
+      tempPassword,
+    );
+
+    return clienteRepository.findById(id);
+  },
+
+  async reject(id: number) {
+    const cliente = await this.findById(id);
+
+    if (cliente.status !== "PENDING") {
+      throw new ApiError({
+        status: httpStatus.BAD_REQUEST,
+        message: "El cliente ya fue procesado",
+      });
+    }
+
+    return clienteRepository.update(id, { status: "REJECTED" });
+  },
+
+  generatePassword(): string {
+    const length = 12;
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return password;
   },
 };
