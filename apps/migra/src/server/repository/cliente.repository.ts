@@ -12,6 +12,12 @@ export const clienteRepository = {
     });
   },
 
+  async findByUserId(userId: string) {
+    return prisma.cliente.findUnique({
+      where: { userId },
+    });
+  },
+
   async findById(id: number) {
     return prisma.cliente.findUnique({
       where: { id },
@@ -69,6 +75,12 @@ export const clienteRepository = {
     return prisma.cliente.update({
       where: { id },
       data: { deletedAt: new Date() },
+    });
+  },
+
+  async hardDelete(id: number) {
+    return prisma.cliente.delete({
+      where: { id },
     });
   },
 

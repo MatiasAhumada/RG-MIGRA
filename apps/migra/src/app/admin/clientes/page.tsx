@@ -11,6 +11,7 @@ import {
   CheckmarkCircle01Icon,
   CancelCircleIcon,
   Refresh01Icon,
+  Delete02Icon,
 } from "hugeicons-react";
 import { clienteService } from "@/services";
 import {
@@ -38,6 +39,10 @@ export default function AdminClientesPage() {
   const [viewCliente, setViewCliente] = useState<Cliente | null>(null);
   const [approveCliente, setApproveCliente] = useState<Cliente | null>(null);
   const [rejectCliente, setRejectCliente] = useState<Cliente | null>(null);
+  const [deleteCliente, setDeleteCliente] = useState<Cliente | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   const {
     data: clientes,
@@ -58,6 +63,7 @@ export default function AdminClientesPage() {
 
   const handleApprove = async () => {
     if (!approveCliente) return;
+    setIsApproving(true);
     try {
       await clienteService.approve(approveCliente.id);
 
@@ -69,11 +75,14 @@ export default function AdminClientesPage() {
       refetch();
     } catch (error) {
       clientErrorHandler(error);
+    } finally {
+      setIsApproving(false);
     }
   };
 
   const handleReject = async () => {
     if (!rejectCliente) return;
+    setIsRejecting(true);
     try {
       await clienteService.reject(rejectCliente.id);
 
@@ -83,6 +92,27 @@ export default function AdminClientesPage() {
       refetch();
     } catch (error) {
       clientErrorHandler(error);
+    } finally {
+      setIsRejecting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteCliente) return;
+    setIsDeleting(true);
+    try {
+      await clienteService.delete(deleteCliente.id);
+
+      clientSuccessHandler(
+        `Cliente "${deleteCliente.razonSocial}" eliminado. Sus pedidos se mantienen en el sistema.`,
+      );
+
+      setDeleteCliente(null);
+      refetch();
+    } catch (error) {
+      clientErrorHandler(error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -180,6 +210,7 @@ export default function AdminClientesPage() {
                         className="bg-[#7cb56e] text-white hover:bg-[#5a9a4e]"
                         onClick={() => setApproveCliente(item)}
                         title="Aprobar"
+                        disabled={isApproving}
                       >
                         <CheckmarkCircle01Icon className="size-3" />
                       </Button>
@@ -189,10 +220,21 @@ export default function AdminClientesPage() {
                         className="text-[#db313f] hover:bg-[#db313f]/10"
                         onClick={() => setRejectCliente(item)}
                         title="Rechazar"
+                        disabled={isRejecting}
                       >
                         <CancelCircleIcon className="size-3" />
                       </Button>
                     </>
+                  )}
+                  {item.status === "APPROVED" && (
+                    <Button
+                      size="icon-xs"
+                      className="bg-[#db313f] text-white hover:bg-[#db313f]/90"
+                      onClick={() => setDeleteCliente(item)}
+                      title="Eliminar cliente"
+                    >
+                      <Delete02Icon className="size-3" />
+                    </Button>
                   )}
                 </div>
               ),
@@ -273,20 +315,30 @@ export default function AdminClientesPage() {
 
       <ConfirmModal
         open={!!approveCliente}
-        onOpenChange={() => setApproveCliente(null)}
+        onOpenChange={() => !isApproving && setApproveCliente(null)}
         title="Aprobar Cliente"
         description={`¿Estás seguro de que deseas aprobar a ${approveCliente?.razonSocial}? Se creará un usuario con contraseña temporal.`}
         onConfirm={handleApprove}
-        confirmText="Aprobar"
+        confirmText={isApproving ? "Aprobando..." : "Aprobar"}
       />
 
       <ConfirmModal
         open={!!rejectCliente}
-        onOpenChange={() => setRejectCliente(null)}
+        onOpenChange={() => !isRejecting && setRejectCliente(null)}
         title="Rechazar Cliente"
         description={`¿Estás seguro de que deseas rechazar a ${rejectCliente?.razonSocial}? Esta acción no se puede deshacer.`}
         onConfirm={handleReject}
-        confirmText="Rechazar"
+        confirmText={isRejecting ? "Rechazando..." : "Rechazar"}
+        variant="destructive"
+      />
+
+      <ConfirmModal
+        open={!!deleteCliente}
+        onOpenChange={() => setDeleteCliente(null)}
+        title="Eliminar Cliente"
+        description={`¿Estás seguro de que deseas eliminar a ${deleteCliente?.razonSocial}? Se eliminará el cliente y su usuario, pero sus pedidos se mantendrán en el sistema.`}
+        onConfirm={handleDelete}
+        confirmText={isDeleting ? "Eliminando..." : "Eliminar"}
         variant="destructive"
       />
     </AppLayout>

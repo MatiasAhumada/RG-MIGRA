@@ -53,7 +53,10 @@ export async function DELETE(
     const { id } = await params;
     await clienteService.delete(Number(id));
 
-    return NextResponse.json(null, { status: httpStatus.NO_CONTENT });
+    return NextResponse.json(
+      { message: "Cliente eliminado exitosamente" },
+      { status: httpStatus.OK },
+    );
   } catch (error) {
     return apiErrorHandler({ error: error as ApiError, request });
   }

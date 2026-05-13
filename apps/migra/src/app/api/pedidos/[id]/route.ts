@@ -103,6 +103,7 @@ export async function PATCH(
           pedidoData.cliente.correo,
           pedidoData.id,
           fileBuffer,
+          file.name,
         );
       } else {
         throw new ApiError({
