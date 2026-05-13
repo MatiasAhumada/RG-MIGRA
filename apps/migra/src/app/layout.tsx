@@ -32,6 +32,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { CartProvider } from "@/context/cart-context";
 import { CartSidebar } from "@/components/common/CartSidebar";
 import { FloatingCartButton } from "@/components/common/FloatingCartButton";
+import { ChangePasswordModal } from "@/components/common";
 
 export default function RootLayout({
   children,
@@ -54,6 +55,7 @@ export default function RootLayout({
               {children}
               <FloatingCartButton />
               <CartSidebar />
+              <ChangePasswordModal />
               <Toaster />
             </SearchProvider>
           </CartProvider>

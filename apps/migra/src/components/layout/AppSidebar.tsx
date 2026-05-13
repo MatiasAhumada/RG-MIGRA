@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/auth-context";
 import {
   Home01Icon,
   Package01Icon,
@@ -49,6 +50,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({ variant = "admin" }: AppSidebarProps) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const navItems = variant === "admin" ? adminNavItems : clientNavItems;
 
@@ -134,7 +136,7 @@ export function AppSidebar({ variant = "admin" }: AppSidebarProps) {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-base font-semibold text-white">
-                    Juan Pérez
+                    {user?.name || "Usuario"}
                   </span>
                   <span className="text-sm text-white/50">
                     {variant === "admin" ? "Administrador" : "Cliente"}
@@ -148,6 +150,7 @@ export function AppSidebar({ variant = "admin" }: AppSidebarProps) {
                 <Button
                   variant="ghost"
                   size="icon-sm"
+                  onClick={logout}
                   className="text-white/60 hover:bg-white/10 hover:text-white"
                 >
                   <Logout01Icon className="size-5" />

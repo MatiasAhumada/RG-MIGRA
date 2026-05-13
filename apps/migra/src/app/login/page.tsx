@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ROUTES } from "@/constants/routes";
-import { Login01Icon, Mail01Icon, LockIcon } from "hugeicons-react";
+import {
+  Login01Icon,
+  Mail01Icon,
+  LockIcon,
+  UserAdd01Icon,
+} from "hugeicons-react";
 import { useAuth } from "@/context/auth-context";
 
 export default function LoginPage() {
@@ -127,22 +132,28 @@ export default function LoginPage() {
                   </>
                 )}
               </Button>
-            </form>
 
-            <div className="mt-6 rounded-2xl bg-[#f3fcf0]/60 p-4">
-              <p
-                className="text-sm text-[#3d4a3d]"
-                style={{
-                  fontFamily: "'Manrope', 'Inter', system-ui, sans-serif",
-                }}
-              >
-                <strong>Demo:</strong> Usá{" "}
-                <code className="rounded bg-[#161d16]/5 px-1.5 py-0.5 font-mono text-[#b7102a]">
-                  admin@example.com
-                </code>{" "}
-                para el panel de administración.
-              </p>
-            </div>
+              <div className="relative my-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#3d4a3d]/20" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-[#3d4a3d]/60">o</span>
+                </div>
+              </div>
+
+              <Link href={ROUTES.REGISTER} className="w-full">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  className="w-full gap-2 rounded-[2rem] text-base"
+                >
+                  Hacerme Cliente
+                  <UserAdd01Icon className="size-5" />
+                </Button>
+              </Link>
+            </form>
           </Card>
         </motion.div>
       </div>

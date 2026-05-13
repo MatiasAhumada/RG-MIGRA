@@ -1,15 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { Role } from "@prisma/client";
-
-interface CreateUserDto {
-  name: string;
-  email: string;
-  password: string;
-  role?: Role;
-  empresaId?: number;
-}
-
-interface UpdateUserDto extends Partial<CreateUserDto> {}
+import type { CreateUserDto, UpdateUserDto } from "@/types/user.types";
 
 export const userRepository = {
   async create(dto: CreateUserDto) {

@@ -35,17 +35,18 @@ enum ColorProducto {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  password  String
-  name      String
-  role      Role      @default(CLIENT)
-  empresaId Int?
-  empresa   Empresa?  @relation(fields: [empresaId], references: [id])
-  cliente   Cliente?
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  password           String
+  name               String
+  role               Role      @default(CLIENT)
+  mustChangePassword Boolean   @default(false)
+  empresaId          Int?
+  empresa            Empresa?  @relation(fields: [empresaId], references: [id])
+  cliente            Cliente?
+  deletedAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@map("usuarios")
 }

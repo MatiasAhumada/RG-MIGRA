@@ -22,3 +22,4 @@ export { PdfUpload } from "./PdfUpload";
 export { ImageBulkUpload } from "./ImageBulkUpload";
 export { WhatsAppButton } from "./WhatsAppButton";
 export { TableSkeleton } from "./table-skeleton";
+export { ChangePasswordModal } from "./ChangePasswordModal";

@@ -158,6 +158,7 @@ export const clienteService = {
       name: cliente.titular,
       role: "CLIENT",
       empresaId: cliente.empresaId,
+      mustChangePassword: true,
     });
 
     await clienteRepository.update(id, {
