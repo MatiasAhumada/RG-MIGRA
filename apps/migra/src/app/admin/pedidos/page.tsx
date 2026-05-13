@@ -386,7 +386,8 @@ export default function AdminPedidosPage() {
                   Enviar Documento al Cliente
                 </h3>
                 <p className="mb-3 text-xs text-[#3d4a3d]">
-                  Adjunta un archivo (PDF, Word, Excel o Imagen) para enviarlo por email al cliente
+                  Adjunta un archivo (PDF, Word, Excel o Imagen) para enviarlo
+                  por email al cliente
                 </p>
                 <Button
                   variant="outline"

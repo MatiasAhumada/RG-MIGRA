@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     if (userRole === "CLIENT" && userId) {
       const cliente = await clienteRepository.findByUserId(userId);
-      
+
       if (cliente) {
         const pedidos = await pedidoService.findByClienteId(cliente.id);
         return NextResponse.json(pedidos, { status: httpStatus.OK });

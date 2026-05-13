@@ -103,7 +103,9 @@ export default function AdminClientesPage() {
     try {
       await clienteService.delete(deleteCliente.id);
 
-      clientSuccessHandler(`Cliente "${deleteCliente.razonSocial}" eliminado. Sus pedidos se mantienen en el sistema.`);
+      clientSuccessHandler(
+        `Cliente "${deleteCliente.razonSocial}" eliminado. Sus pedidos se mantienen en el sistema.`,
+      );
 
       setDeleteCliente(null);
       refetch();
