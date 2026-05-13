@@ -18,6 +18,7 @@ interface AuthUser {
   name: string;
   role: Role;
   empresaId: number | null;
+  mustChangePassword: boolean;
 }
 
 interface AuthContextType {
@@ -70,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clientErrorHandler(error);
     } finally {
       setUser(null);
-      router.push("/login");
+      router.push("/");
     }
   };
 

@@ -10,6 +10,7 @@ export interface CreateUserDto {
   name: string;
   role?: Role;
   empresaId?: number;
+  mustChangePassword?: boolean;
 }
 
 export interface UpdateUserDto extends Partial<CreateUserDto> {}

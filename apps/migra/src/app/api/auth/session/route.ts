@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
         name: user.name,
         role: user.role,
         empresaId: user.empresaId,
+        mustChangePassword: user.mustChangePassword,
       },
     });
   } catch (error) {

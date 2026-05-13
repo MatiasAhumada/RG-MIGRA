@@ -106,7 +106,7 @@ export default function RegisterPage() {
             </p>
             <Link href={ROUTES.LOGIN}>
               <Button size="lg" className="mt-8 gap-2 rounded-[2rem]">
-                Ir al Login
+                Iniciar sesión
               </Button>
             </Link>
           </motion.div>

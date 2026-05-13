@@ -16,6 +16,11 @@ export interface RegisterClienteDto {
   empresaId: number;
 }
 
+export interface ChangePasswordDto {
+  currentPassword: string;
+  newPassword: string;
+}
+
 interface AuthResponse {
   user: {
     id: string;
@@ -23,6 +28,7 @@ interface AuthResponse {
     name: string;
     role: Role;
     empresaId: number | null;
+    mustChangePassword: boolean;
   };
 }
 
@@ -60,6 +66,14 @@ export const authService = {
   async registerCliente(dto: RegisterClienteDto) {
     const { data } = await clientAxios.post<RegisterResponse>(
       API_ROUTES.AUTH.REGISTER,
+      dto,
+    );
+    return data;
+  },
+
+  async changePassword(dto: ChangePasswordDto) {
+    const { data } = await clientAxios.post<{ message: string }>(
+      API_ROUTES.AUTH.CHANGE_PASSWORD,
       dto,
     );
     return data;

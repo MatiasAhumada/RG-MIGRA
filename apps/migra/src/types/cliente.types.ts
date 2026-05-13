@@ -15,6 +15,7 @@ export interface CreateClienteDto {
   telefono: string;
   empresaId: number;
   status?: ClienteStatus;
+  userId?: string | null;
 }
 
 export interface UpdateClienteDto extends Partial<CreateClienteDto> {}
